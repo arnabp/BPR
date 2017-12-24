@@ -105,6 +105,28 @@ namespace BPR
             await Context.Channel.SendMessageAsync("", embed: embed);
         }
 
+        [Command("leave")]
+        [Summary("Leaves the current queue")]
+        public async Task QueueLeaveAsync()
+        {
+            var userInfo = Context.User;
+            Console.WriteLine($"{userInfo.Username} is attempting to leave queue");
+            bool isInQueue = false;
+            if (Globals.liveQueue.Count > 0)
+            {
+                if (Globals.liveQueue.Peek().username == userInfo.Username) isInQueue = true;
+            }
+            if (isInQueue)
+            {
+                Globals.liveQueue.Dequeue();
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync($"You are not in queue");
+                Console.WriteLine($"{userInfo.Username} tried to leave an empty queue");
+            }
+        }
+
         private async Task NewMatch(Player p1, Player p2)
         {
             Match thisMatch = new Match(p1, p2);
@@ -227,6 +249,7 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
                 throw;
             }
             Globals.conn.Close();
@@ -245,6 +268,7 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
                 throw;
             }
             Globals.conn.Close();
@@ -281,6 +305,7 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
                 throw;
             }
             Globals.conn.Close();
@@ -295,6 +320,7 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
                 throw;
             }
             Globals.conn.Close();
@@ -341,6 +367,7 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
                 throw;
             }
             Globals.conn.Close();
@@ -381,6 +408,7 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
                 throw;
             }
             Globals.conn.Close();
