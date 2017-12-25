@@ -72,7 +72,7 @@ namespace BPR
             else
             {
                 Globals.liveQueue.Enqueue(new Player(userInfo.Id, userInfo.Username, userInfo.Discriminator));
-                await Context.Channel.SendMessageAsync($"{userInfo.Username}#{userInfo.Discriminator} added to queue");
+                await Context.Channel.SendMessageAsync($"{userInfo.Username} added to queue");
                 Console.WriteLine($"{userInfo} has joined queue");
                 if (Globals.liveQueue.Count > 1)
                 {
@@ -119,6 +119,7 @@ namespace BPR
             if (isInQueue)
             {
                 Globals.liveQueue.Dequeue();
+                await Context.Channel.SendMessageAsync($"{userInfo.Username} left the queue");
             }
             else
             {
@@ -339,8 +340,8 @@ namespace BPR
             double expected1 = 1 / (1 + System.Math.Pow(10, ((p2 - p1) / 400)));
             double expected2 = 1 / (1 + System.Math.Pow(10, ((p1 - p2) / 400)));
 
-            double change1 = 16 * (Convert.ToDouble(isP1) - expected1);
-            double change2 = 16 * (Convert.ToDouble(!isP1) - expected2);
+            double change1 = 32 * (Convert.ToDouble(isP1) - expected1);
+            double change2 = 32 * (Convert.ToDouble(!isP1) - expected2);
 
             var allChange = Tuple.Create(change1, change2);
 

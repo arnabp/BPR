@@ -1,0 +1,5 @@
+Use BHP;
+CREATE TABLE leaderboard(
+	id BIGINT PRIMARY KEY,
+	username VARCHAR(20),
+    elo DECIMAL(6,2) DEFAULT 2500.00);
