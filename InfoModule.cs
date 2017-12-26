@@ -26,17 +26,6 @@ namespace BPR
         }
     }
 
-    public struct Match
-    {
-        public Player p1;
-        public Player p2;
-        public Match(Player P1, Player P2)
-        {
-            p1 = P1;
-            p2 = P2;
-        }
-    }
-
     public class InfoModule : ModuleBase<SocketCommandContext>
     {
         [Command("echo")]
@@ -60,7 +49,7 @@ namespace BPR
             Console.WriteLine($"{userInfo.Username} is attempting to join queue");
 
             bool isInQueue = false;
-            if(Globals.liveQueue.Count > 0)
+            if (Globals.liveQueue.Count > 0)
             {
                 if (Globals.liveQueue.Peek().username == userInfo.Username) isInQueue = true;
             }
@@ -81,7 +70,7 @@ namespace BPR
             }
 
         }
-        
+
         [Command("list")]
         [Summary("List current people in queue")]
         public async Task QueueListAsync()
@@ -95,10 +84,12 @@ namespace BPR
                 Title = "Queue List",
                 Description = $"{Globals.liveQueue.Count} {pluralizer} in queue"
             };
-            if(Globals.liveQueue.Count == 1)
+            if (Globals.liveQueue.Count == 1)
             {
-                embed.AddField(x => {
+                embed.AddField(x =>
+                {
                     x.Name = $"{Globals.liveQueue.Peek().username}";
+                    x.Value = $"In queue for X minutes (WIP)";
                 });
             }
 
@@ -130,12 +121,25 @@ namespace BPR
 
         private async Task NewMatch(Player p1, Player p2)
         {
-            Match thisMatch = new Match(p1, p2);
-            Globals.matches.Add(thisMatch);
-            Globals.matchCount++;
+            var userInfo = Context.User;
+            string query = $"INSERT INTO matches(number, id1, id2, username1, username2) VALUES({Globals.matchCount}, {p1.id}, {p2.id}, '{p1.username}', '{p2.username}');";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
 
             await Context.Channel.SendMessageAsync($"New match has started between <@{p1.id}> and <@{p2.id}>");
             Console.WriteLine($"Match #{Globals.matchCount} has started.");
+
         }
     }
 
@@ -151,18 +155,35 @@ namespace BPR
             string pluralizer;
             if (Globals.matchCount == 1) pluralizer = "es";
             else pluralizer = "";
+            Console.WriteLine($"Pluralization checked");
             var embed = new EmbedBuilder
             {
                 Title = "Ongoing Matches",
                 Description = $"{Globals.matchCount} match{pluralizer} ongoing"
             };
-            for (int i = 0; i < Globals.matchCount; i++)
+            string query = $"SELECT number, username1, username2 FROM matches;";
+            Globals.conn.Open();
+            try
             {
-                embed.AddField(x =>
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
                 {
-                    x.Name = $"{Globals.matches[i].p1.username} vs {Globals.matches[i].p2.username}";
-                });
+                    embed.AddField(x =>
+                    {
+                        x.Name = $"Match #{reader.GetInt32(0)}";
+                        x.Value = $"{reader.GetString(1)} vs {reader.GetString(2)}";
+                    });
+                }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
 
             await Context.Channel.SendMessageAsync("", embed: embed);
         }
@@ -174,19 +195,36 @@ namespace BPR
         {
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is requesting match info");
-            for (int i = 0; i < Globals.matchCount; i++)
+            string query = $"SELECT id1, id2, username1, username2 FROM matches;";
+            Globals.conn.Open();
+            try
             {
-                if(userInfo.Id == Globals.matches[i].p1.id)
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
                 {
-                    await Context.Channel.SendMessageAsync($"You are currently in a match against {Globals.matches[i].p2.username}");
-                    return;
-                }
-                else if (userInfo.Id == Globals.matches[i].p2.id)
-                {
-                    await Context.Channel.SendMessageAsync($"You are currently in a match against {Globals.matches[i].p2.username}");
-                    return;
+                    if (userInfo.Id == reader.GetUInt32(0))
+                    {
+                        await Context.Channel.SendMessageAsync($"You are currently in a match against {reader.GetString(3)}");
+                        Globals.conn.Close();
+                        return;
+                    }
+                    else if (userInfo.Id == reader.GetUInt32(1))
+                    {
+                        await Context.Channel.SendMessageAsync($"You are currently in a match against {reader.GetString(4)}");
+                        Globals.conn.Close();
+                        return;
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
             await Context.Channel.SendMessageAsync($"You are currently not in a match against anyone");
             Console.WriteLine($"{userInfo.Username} has requested bad info");
         }
@@ -199,20 +237,49 @@ namespace BPR
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is reporting a result");
             bool? isP1 = null;
-            int i;
-            for (i = 0; i < Globals.matchCount; i++)
+            ulong p1ID = 0;
+            ulong p2ID = 0;
+            string p1Username = "";
+            string p2Username = "";
+            int thisMatchNum;
+            string query = $"SELECT * FROM matches;";
+            Globals.conn.Open();
+            try
             {
-                if (userInfo.Id == Globals.matches[i].p1.id)
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
                 {
-                    isP1 = true;
-                    break;
-                }
-                else if (userInfo.Id == Globals.matches[i].p2.id)
-                {
-                    isP1 = false;
-                    break;
+                    if (userInfo.Id == reader.GetUInt32(0))
+                    {
+                        isP1 = true;
+                        thisMatchNum = reader.GetInt32(0);
+                        p1ID = reader.GetUInt32(1);
+                        p2ID = reader.GetUInt32(2);
+                        p1Username = reader.GetString(3);
+                        p2Username = reader.GetString(4);
+                        break;
+                    }
+                    else if (userInfo.Id == reader.GetUInt32(1))
+                    {
+                        isP1 = false;
+                        thisMatchNum = reader.GetInt32(0);
+                        p1ID = reader.GetUInt32(1);
+                        p2ID = reader.GetUInt32(2);
+                        p1Username = reader.GetString(3);
+                        p2Username = reader.GetString(4);
+                        break;
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
             if (isP1 == null)
             {
                 await Context.Channel.SendMessageAsync($"You are currently not in a match against anyone");
@@ -235,7 +302,7 @@ namespace BPR
 
             var results = new Tuple<double, double>(0,0);
             double p1elo = 0, p2elo = 0;
-            string query = $"SELECT elo FROM leaderboard WHERE id = {Globals.matches[i].p1.id};";
+            query = $"SELECT elo FROM leaderboard WHERE id = {p1ID};";
             Globals.conn.Open();
             try
             {
@@ -254,7 +321,7 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
-            query = $"SELECT elo FROM leaderboard WHERE id = {Globals.matches[i].p2.id};";
+            query = $"SELECT elo FROM leaderboard WHERE id = {p2ID};";
             Globals.conn.Open();
             try
             {
@@ -284,19 +351,19 @@ namespace BPR
             };
             embed.AddField(x =>
             {
-                x.Name = $"{Globals.matches[i].p1.username}: {Convert.ToInt32(results.Item1)} elo";
-                x.Value = $"{Globals.matches[i].p1.username} now has {Convert.ToInt32(new1)} elo";
+                x.Name = $"{p1Username}: {Convert.ToInt32(results.Item1)} elo";
+                x.Value = $"{p1Username} now has {Convert.ToInt32(new1)} elo";
             });
             embed.AddField(x =>
             {
-                x.Name = $"{Globals.matches[i].p2.username}: {Convert.ToInt32(results.Item2)} elo";
-                x.Value = $"{Globals.matches[i].p2.username} now has {Convert.ToInt32(new2)} elo";
+                x.Name = $"{p2Username}: {Convert.ToInt32(results.Item2)} elo";
+                x.Value = $"{p2Username} now has {Convert.ToInt32(new2)} elo";
             });
 
             await Context.Channel.SendMessageAsync("", embed: embed);
 
-            Console.WriteLine($"Giving {Globals.matches[i].p1.username} {results.Item1} elo, resulting in {new1}");
-            query = $"UPDATE leaderboard SET elo = {new1} WHERE id = {Globals.matches[i].p1.id};";
+            Console.WriteLine($"Giving {p2Username} {results.Item1} elo, resulting in {new1}");
+            query = $"UPDATE leaderboard SET elo = {new1} WHERE id = {p1ID};";
             Globals.conn.Open();
             try
             {
@@ -310,9 +377,9 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
-            Console.WriteLine($"Giving {Globals.matches[i].p2.username} {results.Item2} elo, resulting in {new2}");
+            Console.WriteLine($"Giving {p2Username} {results.Item2} elo, resulting in {new2}");
             Globals.conn.Open();
-            query = $"UPDATE leaderboard SET elo = {new2} WHERE id = {Globals.matches[i].p2.id};";
+            query = $"UPDATE leaderboard SET elo = {new2} WHERE id = {p2ID};";
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -326,13 +393,112 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            
-            for (int j = i + 1; j < Globals.matchCount; j++)
+            Globals.conn.Open();
+            query = $"DELETE FROM matches WHERE number = {Globals.matchCount};";
+            try
             {
-                Globals.matches[j - 1] = Globals.matches[j];
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
             Console.WriteLine($"Match #{Globals.matchCount} has ended.");
             Globals.matchCount--;
+        }
+
+        [Command("super")]
+        [Summary("Allows admin to report any match")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task AdminMatchReportAsync(ulong p1ID, ulong p2ID)
+        {
+
+
+            var userInfo = Context.User;
+            Console.WriteLine($"{userInfo.Username} is reporting a result");
+            bool isP1 = true;
+           
+
+            var results = new Tuple<double, double>(0, 0);
+            double p1elo = 0, p2elo = 0;
+            string query = $"SELECT elo FROM leaderboard WHERE id = {p1ID};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    p1elo = reader.GetDouble(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            query = $"SELECT elo FROM leaderboard WHERE id = {p2ID};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    p2elo = reader.GetDouble(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            results = EloConvert(p1elo, p2elo, isP1);
+
+            double new1 = p1elo + results.Item1;
+            double new2 = p2elo + results.Item2;
+            
+            query = $"UPDATE leaderboard SET elo = {new1} WHERE id = {p1ID};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            
+            Globals.conn.Open();
+            query = $"UPDATE leaderboard SET elo = {new2} WHERE id = {p2ID};";
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            await Context.Channel.SendMessageAsync($"Match hard updated");
         }
 
         private Tuple<double, double> EloConvert(double p1, double p2, bool isP1)
