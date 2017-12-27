@@ -122,6 +122,7 @@ namespace BPR
         private async Task NewMatch(Player p1, Player p2)
         {
             var userInfo = Context.User;
+            Globals.matchCount++;
             string query = $"INSERT INTO matches(number, id1, id2, username1, username2) VALUES({Globals.matchCount}, {p1.id}, {p2.id}, '{p1.username}', '{p2.username}');";
             Globals.conn.Open();
             try
@@ -204,13 +205,13 @@ namespace BPR
 
                 while (reader.Read())
                 {
-                    if (userInfo.Id == reader.GetUInt32(0))
+                    if (userInfo.Id == reader.GetUInt64(0))
                     {
                         await Context.Channel.SendMessageAsync($"You are currently in a match against {reader.GetString(3)}");
                         Globals.conn.Close();
                         return;
                     }
-                    else if (userInfo.Id == reader.GetUInt32(1))
+                    else if (userInfo.Id == reader.GetUInt64(1))
                     {
                         await Context.Channel.SendMessageAsync($"You are currently in a match against {reader.GetString(4)}");
                         Globals.conn.Close();
@@ -251,22 +252,22 @@ namespace BPR
 
                 while (reader.Read())
                 {
-                    if (userInfo.Id == reader.GetUInt32(0))
+                    if (userInfo.Id == reader.GetUInt64(1))
                     {
                         isP1 = true;
                         thisMatchNum = reader.GetInt32(0);
-                        p1ID = reader.GetUInt32(1);
-                        p2ID = reader.GetUInt32(2);
+                        p1ID = reader.GetUInt64(1);
+                        p2ID = reader.GetUInt64(2);
                         p1Username = reader.GetString(3);
                         p2Username = reader.GetString(4);
                         break;
                     }
-                    else if (userInfo.Id == reader.GetUInt32(1))
+                    else if (userInfo.Id == reader.GetUInt64(2))
                     {
                         isP1 = false;
                         thisMatchNum = reader.GetInt32(0);
-                        p1ID = reader.GetUInt32(1);
-                        p2ID = reader.GetUInt32(2);
+                        p1ID = reader.GetUInt64(1);
+                        p2ID = reader.GetUInt64(2);
                         p1Username = reader.GetString(3);
                         p2Username = reader.GetString(4);
                         break;
@@ -286,8 +287,8 @@ namespace BPR
                 return;
             }
 
-            if(winner == "Y" || winner == "y") { }
-            else if (winner == "N" || winner == "n")
+            if(winner == "W" || winner == "w" || winner == "Y" || winner == "y") { }
+            else if (winner == "L" || winner == "l" || winner == "N" || winner == "n")
             {
                 isP1 = !isP1;
             }
@@ -567,7 +568,7 @@ namespace BPR
                     embed.AddField(x =>
                     {
                         x.Name = $"{i}: {reader.GetString(0)}";
-                        x.Value = $"{reader.GetDouble(1)} elo";
+                        x.Value = $"{reader.GetInt16(1)} elo";
                     });
                     i++;
                 }
@@ -581,6 +582,51 @@ namespace BPR
             Globals.conn.Close();
 
             await Context.Channel.SendMessageAsync("", embed: embed);
+        }
+
+        [Command("delete")]
+        [Summary("Allows admin to delete user from leaderboard")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task DeleteLeaderboardAsync([Remainder] ulong id)
+        {
+            var userInfo = Context.User;
+            string username = "";
+            string query = $"SELECT username FROM leaderboard WHERE id = {id};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    username = reader.GetString(0);
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            query = $"DELETE FROM leaderboard WHERE id = {id};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            await Context.Channel.SendMessageAsync($"{username} has been deleted from the leaderboards");
         }
     }
 }
