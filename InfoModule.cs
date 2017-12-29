@@ -123,7 +123,7 @@ namespace BPR
         {
             var userInfo = Context.User;
             Globals.matchCount++;
-            string query = $"INSERT INTO matches(number, id1, id2, username1, username2) VALUES({Globals.matchCount}, {p1.id}, {p2.id}, '{p1.username}', '{p2.username}');";
+            string query = $"INSERT INTO matchesNA(number, id1, id2, username1, username2) VALUES({Globals.matchCount}, {p1.id}, {p2.id}, '{p1.username}', '{p2.username}');";
             Globals.conn.Open();
             try
             {
@@ -162,7 +162,7 @@ namespace BPR
                 Title = "Ongoing Matches",
                 Description = $"{Globals.matchCount} match{pluralizer} ongoing"
             };
-            string query = $"SELECT number, username1, username2 FROM matches;";
+            string query = $"SELECT number, username1, username2 FROM matchesNA;";
             Globals.conn.Open();
             try
             {
@@ -196,7 +196,7 @@ namespace BPR
         {
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is requesting match info");
-            string query = $"SELECT id1, id2, username1, username2 FROM matches;";
+            string query = $"SELECT id1, id2, username1, username2 FROM matchesNA;";
             Globals.conn.Open();
             try
             {
@@ -243,7 +243,7 @@ namespace BPR
             string p1Username = "";
             string p2Username = "";
             int thisMatchNum;
-            string query = $"SELECT * FROM matches;";
+            string query = $"SELECT * FROM matchesNA;";
             Globals.conn.Open();
             try
             {
@@ -395,7 +395,7 @@ namespace BPR
             Globals.conn.Close();
 
             Globals.conn.Open();
-            query = $"DELETE FROM matches WHERE number = {Globals.matchCount};";
+            query = $"DELETE FROM matchesNA WHERE number = {Globals.matchCount};";
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -426,7 +426,7 @@ namespace BPR
 
             var results = new Tuple<double, double>(0, 0);
             double p1elo = 0, p2elo = 0;
-            string query = $"SELECT elo FROM leaderboard WHERE id = {p1ID};";
+            string query = $"SELECT elo FROM leaderboardNA WHERE id = {p1ID};";
             Globals.conn.Open();
             try
             {
@@ -445,7 +445,7 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
-            query = $"SELECT elo FROM leaderboard WHERE id = {p2ID};";
+            query = $"SELECT elo FROM leaderboardNA WHERE id = {p2ID};";
             Globals.conn.Open();
             try
             {
@@ -469,7 +469,7 @@ namespace BPR
             double new1 = p1elo + results.Item1;
             double new2 = p2elo + results.Item2;
             
-            query = $"UPDATE leaderboard SET elo = {new1} WHERE id = {p1ID};";
+            query = $"UPDATE leaderboardNA SET elo = {new1} WHERE id = {p1ID};";
             Globals.conn.Open();
             try
             {
@@ -485,7 +485,7 @@ namespace BPR
             Globals.conn.Close();
             
             Globals.conn.Open();
-            query = $"UPDATE leaderboard SET elo = {new2} WHERE id = {p2ID};";
+            query = $"UPDATE leaderboardNA SET elo = {new2} WHERE id = {p2ID};";
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -525,7 +525,7 @@ namespace BPR
         public async Task JoinDBAsync()
         {
             var userInfo = Context.User;
-            string query = $"INSERT INTO leaderboard(id, username) VALUES({userInfo.Id}, '{userInfo.Username}');";
+            string query = $"INSERT INTO leaderboardNA(id, username) VALUES({userInfo.Id}, '{userInfo.Username}');";
             Globals.conn.Open();
             try
             {
@@ -556,7 +556,7 @@ namespace BPR
             };
             
             int i = 1;
-            string query = $"SELECT username, elo FROM leaderboard ORDER BY elo DESC;";
+            string query = $"SELECT username, elo FROM leaderboardNA ORDER BY elo DESC;";
             Globals.conn.Open();
             try
             {
@@ -591,7 +591,7 @@ namespace BPR
         {
             var userInfo = Context.User;
             string username = "";
-            string query = $"SELECT username FROM leaderboard WHERE id = {id};";
+            string query = $"SELECT username FROM leaderboardNA WHERE id = {id};";
             Globals.conn.Open();
             try
             {
@@ -611,7 +611,7 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
-            query = $"DELETE FROM leaderboard WHERE id = {id};";
+            query = $"DELETE FROM leaderboardNA WHERE id = {id};";
             Globals.conn.Open();
             try
             {
