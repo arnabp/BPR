@@ -52,6 +52,15 @@ namespace BPR
             var user = Context.Guild.GetUser(userinfo.Id);
             await Context.Channel.SendMessageAsync(user.Username);
         }
+
+        [Command("CheckFirstRole")]
+        [Summary("Gets the first role attributed to the user")]
+        public async Task CheckFirstRole()
+        {
+            var userinfo = Context.User;
+            var user = Context.Guild.GetUser(userinfo.Id);
+            await Context.Channel.SendMessageAsync($"{user.Roles.ElementAt(1).Id}: {user.Roles.ElementAt(1).Name}");
+        }
     }
 
     [Group("queue")]
@@ -65,7 +74,7 @@ namespace BPR
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is attempting to join queue");
 
-            if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.First().Id == 396442734271004672)
+            if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.ElementAt(1).Id == 396442734271004672)
             {
                 bool isInQueue = false;
                 if (Globals.liveQueueNA.Count > 0)
@@ -88,7 +97,7 @@ namespace BPR
                     }
                 }
             }
-            else if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.First().Id == 396442764298158081)
+            else if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.ElementAt(1).Id == 396442764298158081)
             {
                 bool isInQueue = false;
                 if (Globals.liveQueueEU.Count > 0)
@@ -155,7 +164,7 @@ namespace BPR
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is attempting to leave queue");
 
-            if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.First().Id == 396442734271004672)
+            if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.ElementAt(1).Id == 396442734271004672)
             {
                 bool isInQueue = false;
                 if (Globals.liveQueueNA.Count > 0)
@@ -173,7 +182,7 @@ namespace BPR
                     Console.WriteLine($"{userInfo.Username} tried to leave an empty queue");
                 }
             }
-            else if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.First().Id == 396442764298158081)
+            else if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.ElementAt(1).Id == 396442764298158081)
             {
                 bool isInQueue = false;
                 if (Globals.liveQueueEU.Count > 0)
@@ -326,7 +335,7 @@ namespace BPR
             string p2Username = "";
             int thisMatchNum;
 
-            if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.First().Id == 396442734271004672)
+            if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.ElementAt(1).Id == 396442734271004672)
             {
                 string query = $"SELECT * FROM matchesNA;";
                 Globals.conn.Open();
@@ -496,7 +505,7 @@ namespace BPR
                 Console.WriteLine($"Match #{Globals.matchCountNA} has ended.");
                 Globals.matchCountNA--;
             }
-            else if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.First().Id == 396442764298158081)
+            else if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.ElementAt(1).Id == 396442764298158081)
             {
                 string query = $"SELECT * FROM matchesEU;";
                 Globals.conn.Open();
