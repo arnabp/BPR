@@ -863,8 +863,8 @@ namespace BPR
             double expected1 = 1 / (1 + System.Math.Pow(10, ((p2 - p1) / 400)));
             double expected2 = 1 / (1 + System.Math.Pow(10, ((p1 - p2) / 400)));
 
-            double change1 = 32 * (Convert.ToDouble(isP1) - expected1);
-            double change2 = 32 * (Convert.ToDouble(!isP1) - expected2);
+            double change1 = (32 * (Convert.ToDouble(isP1) - expected1)) + 2;
+            double change2 = (32 * (Convert.ToDouble(!isP1) - expected2)) + 2;
 
             var allChange = Tuple.Create(change1, change2);
 
