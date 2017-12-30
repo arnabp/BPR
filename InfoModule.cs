@@ -36,6 +36,22 @@ namespace BPR
             await Context.Channel.SendMessageAsync(echo);
             Console.WriteLine($"{echo} has been echoed");
         }
+        
+        [Command("CheckRoleId")]
+        [Summary("Gets name of role from given id.")]
+        public async Task CheckRoleIdAsync([Remainder] ulong id)
+        {
+            await Context.Channel.SendMessageAsync(Context.Guild.GetRole(id).Name);
+        }
+
+        [Command("CheckGuildUser")]
+        [Summary("Gets the username of the person using the command (through Guild)")]
+        public async Task CheckGuildUserAsync()
+        {
+            var userinfo = Context.User;
+            var user = Context.Guild.GetUser(userinfo.Id);
+            await Context.Channel.SendMessageAsync(user.Username);
+        }
     }
 
     [Group("queue")]
@@ -49,7 +65,7 @@ namespace BPR
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is attempting to join queue");
 
-            if (Context.Guild.CurrentUser.Guild.Roles.First().Id == 396442764298158081)
+            if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.First().Id == 396442734271004672)
             {
                 bool isInQueue = false;
                 if (Globals.liveQueueNA.Count > 0)
@@ -72,7 +88,7 @@ namespace BPR
                     }
                 }
             }
-            else if (Context.Guild.CurrentUser.Guild.Roles.First().Id == 396442734271004672)
+            else if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.First().Id == 396442764298158081)
             {
                 bool isInQueue = false;
                 if (Globals.liveQueueEU.Count > 0)
@@ -139,7 +155,7 @@ namespace BPR
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is attempting to leave queue");
 
-            if (Context.Guild.CurrentUser.Guild.Roles.First().Id == 396442764298158081)
+            if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.First().Id == 396442734271004672)
             {
                 bool isInQueue = false;
                 if (Globals.liveQueueNA.Count > 0)
@@ -157,7 +173,7 @@ namespace BPR
                     Console.WriteLine($"{userInfo.Username} tried to leave an empty queue");
                 }
             }
-            else if (Context.Guild.CurrentUser.Guild.Roles.First().Id == 396442734271004672)
+            else if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.First().Id == 396442764298158081)
             {
                 bool isInQueue = false;
                 if (Globals.liveQueueEU.Count > 0)
@@ -310,7 +326,7 @@ namespace BPR
             string p2Username = "";
             int thisMatchNum;
 
-            if (Context.Guild.CurrentUser.Guild.Roles.First().Id == 396442764298158081)
+            if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.First().Id == 396442734271004672)
             {
                 string query = $"SELECT * FROM matchesNA;";
                 Globals.conn.Open();
@@ -480,7 +496,7 @@ namespace BPR
                 Console.WriteLine($"Match #{Globals.matchCountNA} has ended.");
                 Globals.matchCountNA--;
             }
-            else if (Context.Guild.CurrentUser.Guild.Roles.First().Id == 396442734271004672)
+            else if (Context.Guild.GetUser(userInfo.Id).Guild.Roles.First().Id == 396442764298158081)
             {
                 string query = $"SELECT * FROM matchesEU;";
                 Globals.conn.Open();
@@ -856,7 +872,7 @@ namespace BPR
         public async Task JoinDBAsync()
         {
             var userInfo = Context.User;
-            var user = Context.Guild.CurrentUser;
+            var user = Context.Guild.GetUser(userInfo.Id);
             string query = $"INSERT INTO leaderboardNA(id, username) VALUES({userInfo.Id}, '{userInfo.Username}');";
             Globals.conn.Open();
             try
@@ -872,7 +888,7 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            await user.AddRoleAsync(Context.Guild.GetRole(396442764298158081));
+            await user.AddRoleAsync(Context.Guild.GetRole(396442734271004672));
 
             await Context.Channel.SendMessageAsync($"You've been succesfully registered! You have 2500 elo.");
             Console.WriteLine($"{userInfo.Username} has been registered");
@@ -960,7 +976,7 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            await user.RemoveRoleAsync(Context.Guild.GetRole(396442764298158081));
+            await user.RemoveRoleAsync(Context.Guild.GetRole(396442734271004672));
 
             await Context.Channel.SendMessageAsync($"{username} has been deleted from the leaderboards");
         }
@@ -974,7 +990,7 @@ namespace BPR
         public async Task JoinDBAsync()
         {
             var userInfo = Context.User;
-            var user = Context.Guild.CurrentUser;
+            var user = Context.Guild.GetUser(userInfo.Id);
             string query = $"INSERT INTO leaderboardEU(id, username) VALUES({userInfo.Id}, '{userInfo.Username}');";
             Globals.conn.Open();
             try
@@ -991,7 +1007,7 @@ namespace BPR
             Globals.conn.Close();
 
             
-            await user.AddRoleAsync(Context.Guild.GetRole(396442734271004672));
+            await user.AddRoleAsync(Context.Guild.GetRole(396442764298158081));
 
             await Context.Channel.SendMessageAsync($"You've been succesfully registered! You have 2500 elo.");
             Console.WriteLine($"{userInfo.Username} has been registered");
@@ -1079,7 +1095,7 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            await user.RemoveRoleAsync(Context.Guild.GetRole(396442734271004672));
+            await user.RemoveRoleAsync(Context.Guild.GetRole(396442764298158081));
 
             await Context.Channel.SendMessageAsync($"{username} has been deleted from the leaderboards");
         }
