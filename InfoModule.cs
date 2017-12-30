@@ -853,7 +853,7 @@ namespace BPR
     {
         [Command("join")]
         [Summary("Join the leaderboard")]
-        public async Task JoinDBAsync(IGuildUser user)
+        public async Task JoinDBAsync([Remainder] IGuildUser user)
         {
             var userInfo = Context.User;
             string query = $"INSERT INTO leaderboardNA(id, username) VALUES({userInfo.Id}, '{userInfo.Username}');";
@@ -970,7 +970,7 @@ namespace BPR
     {
         [Command("join")]
         [Summary("Join the leaderboard")]
-        public async Task JoinDBAsync(IGuildUser user)
+        public async Task JoinDBAsync([Remainder] IGuildUser user)
         {
             var userInfo = Context.User;
             string query = $"INSERT INTO leaderboardEU(id, username) VALUES({userInfo.Id}, '{userInfo.Username}');";
