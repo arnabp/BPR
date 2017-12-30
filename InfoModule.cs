@@ -164,12 +164,12 @@ namespace BPR
             embed.AddField(x =>
             {
                 x.Name = "NA Queue";
-                x.Value = $"{Globals.liveQueueNA} {pluralizerNA} in queue";
+                x.Value = $"{Globals.liveQueueNA.Count} {pluralizerNA} in queue";
             });
             embed.AddField(x =>
             {
                 x.Name = "EU Queue";
-                x.Value = $"{Globals.liveQueueEU} {pluralizerEU} in queue";
+                x.Value = $"{Globals.liveQueueEU.Count} {pluralizerEU} in queue";
             });
 
             await Context.Channel.SendMessageAsync("", embed: embed);
@@ -180,7 +180,6 @@ namespace BPR
         public async Task QueueLeaveAsync()
         {
             var userInfo = Context.User;
-            await Context.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to leave queue");
 
             if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
@@ -220,6 +219,7 @@ namespace BPR
                 }
             }
             else await Context.Channel.SendMessageAsync($"Incorrect role order or roles has not been added.");
+            await Context.Message.DeleteAsync();
         }
 
         private async Task NewMatchNA(Player p1, Player p2)
@@ -1089,6 +1089,7 @@ namespace BPR
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
         {
             var user = Context.Guild.GetUser(id);
+            await Context.Message.DeleteAsync();
             string username = "";
             string query = $"SELECT username FROM leaderboardEU WHERE id = {id};";
             Globals.conn.Open();
