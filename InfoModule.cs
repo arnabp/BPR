@@ -61,6 +61,22 @@ namespace BPR
             var user = Context.Guild.GetUser(userinfo.Id);
             await Context.Channel.SendMessageAsync($"{user.Roles.ElementAt(1).Id}: {user.Roles.ElementAt(1).Name}");
         }
+
+        [Command("CheckMessageId")]
+        [Summary("Gets the id of the sent message")]
+        public async Task CheckMessageId()
+        {
+            await Context.Channel.SendMessageAsync($"Id is {Context.Message.Id}");
+        }
+
+        [Command("Silent")]
+        [Summary("Deletes the message")]
+        public async Task Silent()
+        {
+            var userInfo = Context.User;
+            await Context.Message.DeleteAsync();
+            await Context.Channel.SendMessageAsync($"Message from {userInfo.Username} has been deleted.");
+        }
     }
 
     [Group("queue")]
@@ -72,6 +88,7 @@ namespace BPR
         public async Task JoinAsync()
         {
             var userInfo = Context.User;
+            await Context.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to join queue");
 
             if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
@@ -83,13 +100,13 @@ namespace BPR
                 }
                 if (isInQueue)
                 {
-                    await Context.Channel.SendMessageAsync($"You are already in the queue");
+                    await Context.Channel.SendMessageAsync($"Player already in queue tried to rejoin queue");
                     Console.WriteLine($"{userInfo.Username} tried to join the queue twice");
                 }
                 else
                 {
                     Globals.liveQueueNA.Enqueue(new Player(userInfo.Id, userInfo.Username, userInfo.Discriminator));
-                    await Context.Channel.SendMessageAsync($"{userInfo.Username} added to queue");
+                    await Context.Channel.SendMessageAsync($"A player has been added to queue");
                     Console.WriteLine($"{userInfo} has joined queue");
                     if (Globals.liveQueueNA.Count > 1)
                     {
@@ -106,13 +123,13 @@ namespace BPR
                 }
                 if (isInQueue)
                 {
-                    await Context.Channel.SendMessageAsync($"You are already in the queue");
+                    await Context.Channel.SendMessageAsync($"Player already in queue tried to rejoin queue");
                     Console.WriteLine($"{userInfo.Username} tried to join the queue twice");
                 }
                 else
                 {
                     Globals.liveQueueEU.Enqueue(new Player(userInfo.Id, userInfo.Username, userInfo.Discriminator));
-                    await Context.Channel.SendMessageAsync($"{userInfo.Username} added to queue");
+                    await Context.Channel.SendMessageAsync($"A player has been added to queue");
                     Console.WriteLine($"{userInfo} has joined queue");
                     if (Globals.liveQueueEU.Count > 1)
                     {
@@ -128,31 +145,32 @@ namespace BPR
         public async Task QueueListAsync()
         {
             Console.WriteLine($"Matches are being listed");
-            string pluralizer;
+            string pluralizer, pluralizerNA, pluralizerEU;
             int totalCount = Globals.liveQueueNA.Count + Globals.liveQueueEU.Count;
             if (totalCount == 1) pluralizer = "person is";
             else pluralizer = "people are";
+
+            if (Globals.liveQueueNA.Count == 1) pluralizerNA = "person is";
+            else pluralizerNA = "people are";
+
+            if (Globals.liveQueueEU.Count == 1) pluralizerEU = "person is";
+            else pluralizerEU = "people are";
+
             var embed = new EmbedBuilder
             {
                 Title = "Queue List",
-                Description = $"{Globals.liveQueueNA.Count} {pluralizer} in queue"
+                Description = $"{totalCount} {pluralizer} in queue"
             };
-            if (Globals.liveQueueNA.Count == 1)
+            embed.AddField(x =>
             {
-                embed.AddField(x =>
-                {
-                    x.Name = $"{Globals.liveQueueNA.Peek().username}";
-                    x.Value = $"In queue for X minutes (WIP)";
-                });
-            }
-            if (Globals.liveQueueEU.Count == 1)
+                x.Name = "NA Queue";
+                x.Value = $"{Globals.liveQueueNA} {pluralizerNA} in queue";
+            });
+            embed.AddField(x =>
             {
-                embed.AddField(x =>
-                {
-                    x.Name = $"{Globals.liveQueueEU.Peek().username}";
-                    x.Value = $"In queue for X minutes (WIP)";
-                });
-            }
+                x.Name = "EU Queue";
+                x.Value = $"{Globals.liveQueueEU} {pluralizerEU} in queue";
+            });
 
             await Context.Channel.SendMessageAsync("", embed: embed);
         }
@@ -162,6 +180,7 @@ namespace BPR
         public async Task QueueLeaveAsync()
         {
             var userInfo = Context.User;
+            await Context.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to leave queue");
 
             if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
@@ -174,11 +193,11 @@ namespace BPR
                 if (isInQueue)
                 {
                     Globals.liveQueueNA.Dequeue();
-                    await Context.Channel.SendMessageAsync($"{userInfo.Username} left the queue");
+                    await Context.Channel.SendMessageAsync($"A player has left the queue");
                 }
                 else
                 {
-                    await Context.Channel.SendMessageAsync($"You are not in queue");
+                    await Context.Channel.SendMessageAsync($"Player not in queue tried to leave queue");
                     Console.WriteLine($"{userInfo.Username} tried to leave an empty queue");
                 }
             }
@@ -192,11 +211,11 @@ namespace BPR
                 if (isInQueue)
                 {
                     Globals.liveQueueEU.Dequeue();
-                    await Context.Channel.SendMessageAsync($"{userInfo.Username} left the queue");
+                    await Context.Channel.SendMessageAsync($"A player has left the queue");
                 }
                 else
                 {
-                    await Context.Channel.SendMessageAsync($"You are not in queue");
+                    await Context.Channel.SendMessageAsync($"Player not in queue tried to leave queue");
                     Console.WriteLine($"{userInfo.Username} tried to leave an empty queue");
                 }
             }
@@ -899,7 +918,7 @@ namespace BPR
 
             await user.AddRoleAsync(Context.Guild.GetRole(396442734271004672));
 
-            await Context.Channel.SendMessageAsync($"You've been succesfully registered! You have 2500 elo.");
+            await Context.Channel.SendMessageAsync($"{userInfo.Username} has been succesfully registered! You have 2500 elo.");
             Console.WriteLine($"{userInfo.Username} has been registered");
         }
 
@@ -998,6 +1017,8 @@ namespace BPR
         [Summary("Join the leaderboard")]
         public async Task JoinDBAsync()
         {
+            await Context.Message.DeleteAsync();
+
             var userInfo = Context.User;
             var user = Context.Guild.GetUser(userInfo.Id);
             string query = $"INSERT INTO leaderboardEU(id, username) VALUES({userInfo.Id}, '{userInfo.Username}');";
@@ -1018,7 +1039,7 @@ namespace BPR
             
             await user.AddRoleAsync(Context.Guild.GetRole(396442764298158081));
 
-            await Context.Channel.SendMessageAsync($"You've been succesfully registered! You have 2500 elo.");
+            await Context.Channel.SendMessageAsync($"{userInfo.Username} has been succesfully registered! You have 2500 elo.");
             Console.WriteLine($"{userInfo.Username} has been registered");
         }
 
