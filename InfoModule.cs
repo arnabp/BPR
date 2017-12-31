@@ -106,7 +106,7 @@ namespace BPR
                 else
                 {
                     Globals.liveQueueNA.Enqueue(new Player(userInfo.Id, userInfo.Username, userInfo.Discriminator));
-                    await Context.Channel.SendMessageAsync($"A player has been added to queue");
+                    await Context.Channel.SendMessageAsync($"A player has been added to NA queue");
                     Console.WriteLine($"{userInfo} has joined queue");
                     if (Globals.liveQueueNA.Count > 1)
                     {
@@ -129,7 +129,7 @@ namespace BPR
                 else
                 {
                     Globals.liveQueueEU.Enqueue(new Player(userInfo.Id, userInfo.Username, userInfo.Discriminator));
-                    await Context.Channel.SendMessageAsync($"A player has been added to queue");
+                    await Context.Channel.SendMessageAsync($"A player has been added to EU queue");
                     Console.WriteLine($"{userInfo} has joined queue");
                     if (Globals.liveQueueEU.Count > 1)
                     {
@@ -192,7 +192,7 @@ namespace BPR
                 if (isInQueue)
                 {
                     Globals.liveQueueNA.Dequeue();
-                    await Context.Channel.SendMessageAsync($"A player has left the queue");
+                    await Context.Channel.SendMessageAsync($"A player has left the NA queue");
                 }
                 else
                 {
@@ -210,7 +210,7 @@ namespace BPR
                 if (isInQueue)
                 {
                     Globals.liveQueueEU.Dequeue();
-                    await Context.Channel.SendMessageAsync($"A player has left the queue");
+                    await Context.Channel.SendMessageAsync($"A player has left the EU queue");
                 }
                 else
                 {
