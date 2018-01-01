@@ -352,7 +352,7 @@ namespace BPR
             ulong p2ID = 0;
             string p1Username = "";
             string p2Username = "";
-            int thisMatchNum;
+            int thisMatchNum = 0;
 
             if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
             {
@@ -476,7 +476,7 @@ namespace BPR
 
                 await Context.Channel.SendMessageAsync("", embed: embed);
 
-                Console.WriteLine($"Giving {p2Username} {results.Item1} elo, resulting in {new1}");
+                Console.WriteLine($"Giving {p1Username} {results.Item1} elo, resulting in {new1}");
                 query = $"UPDATE leaderboardNA SET elo = {new1} WHERE id = {p1ID};";
                 Globals.conn.Open();
                 try
@@ -508,7 +508,7 @@ namespace BPR
                 Globals.conn.Close();
 
                 Globals.conn.Open();
-                query = $"DELETE FROM matchesNA WHERE number = {Globals.matchCountNA};";
+                query = $"DELETE FROM matchesNA WHERE number = {thisMatchNum};";
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -521,7 +521,7 @@ namespace BPR
                     throw;
                 }
                 Globals.conn.Close();
-                Console.WriteLine($"Match #{Globals.matchCountNA} has ended.");
+                Console.WriteLine($"Match #{thisMatchNum} has ended.");
                 Globals.matchCountNA--;
             }
             else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
@@ -646,7 +646,7 @@ namespace BPR
 
                 await Context.Channel.SendMessageAsync("", embed: embed);
 
-                Console.WriteLine($"Giving {p2Username} {results.Item1} elo, resulting in {new1}");
+                Console.WriteLine($"Giving {p1Username} {results.Item1} elo, resulting in {new1}");
                 query = $"UPDATE leaderboardEU SET elo = {new1} WHERE id = {p1ID};";
                 Globals.conn.Open();
                 try
@@ -678,7 +678,7 @@ namespace BPR
                 Globals.conn.Close();
 
                 Globals.conn.Open();
-                query = $"DELETE FROM matchesEU WHERE number = {Globals.matchCountEU};";
+                query = $"DELETE FROM matchesEU WHERE number = {thisMatchNum};";
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -691,7 +691,7 @@ namespace BPR
                     throw;
                 }
                 Globals.conn.Close();
-                Console.WriteLine($"Match #{Globals.matchCountEU} has ended.");
+                Console.WriteLine($"Match #{thisMatchNum} has ended.");
                 Globals.matchCountEU--;
             }
             else await Context.Channel.SendMessageAsync($"Incorrect role order or roles has not been added.");
