@@ -225,8 +225,7 @@ namespace BPR
         private async Task NewMatchNA(Player p1, Player p2)
         {
             var userInfo = Context.User;
-            Globals.matchCountNA++;
-            string query = $"INSERT INTO matchesNA(number, id1, id2, username1, username2) VALUES({Globals.matchCountNA}, {p1.id}, {p2.id}, '{p1.username}', '{p2.username}');";
+            string query = $"INSERT INTO matchesNA(id1, id2, username1, username2) VALUES({p1.id}, {p2.id}, '{p1.username}', '{p2.username}');";
             Globals.conn.Open();
             try
             {
@@ -241,16 +240,36 @@ namespace BPR
             }
             Globals.conn.Close();
 
+            int matchCount = 0;
+            query = $"SELECT count(*) FROM matchesNA;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    matchCount = reader.GetInt16(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
             await Context.Channel.SendMessageAsync($"New match has started between <@{p1.id}> and <@{p2.id}>");
-            Console.WriteLine($"Match #{Globals.matchCountNA} has started.");
+            Console.WriteLine($"NA Match #{matchCount} has started.");
 
         }
 
         private async Task NewMatchEU(Player p1, Player p2)
         {
             var userInfo = Context.User;
-            Globals.matchCountEU++;
-            string query = $"INSERT INTO matchesEU(number, id1, id2, username1, username2) VALUES({Globals.matchCountEU}, {p1.id}, {p2.id}, '{p1.username}', '{p2.username}');";
+            string query = $"INSERT INTO matchesEU(id1, id2, username1, username2) VALUES({p1.id}, {p2.id}, '{p1.username}', '{p2.username}');";
             Globals.conn.Open();
             try
             {
@@ -265,8 +284,29 @@ namespace BPR
             }
             Globals.conn.Close();
 
+            int matchCount = 0;
+            query = $"SELECT count(*) FROM matchesEU;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    matchCount = reader.GetInt16(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
             await Context.Channel.SendMessageAsync($"New match has started between <@{p1.id}> and <@{p2.id}>");
-            Console.WriteLine($"Match #{Globals.matchCountEU} has started.");
+            Console.WriteLine($"EU Match #{matchCount} has started.");
 
         }
     }
@@ -281,15 +321,8 @@ namespace BPR
         {
             Console.WriteLine($"Matches are being listed");
             string pluralizer;
-            if (Globals.matchCountNA + Globals.matchCountEU != 1) pluralizer = "es";
-            else pluralizer = "";
-            Console.WriteLine($"Pluralization checked");
-            var embed = new EmbedBuilder
-            {
-                Title = "Ongoing Matches",
-                Description = $"{Globals.matchCountNA + Globals.matchCountEU} match{pluralizer} ongoing"
-            };
-            string query = $"SELECT number, username1, username2 FROM matchesNA;";
+            int matchCountNA = 0, matchCountEU = 0;
+            string query = $"SELECT count(*) FROM matchesNA;";
             Globals.conn.Open();
             try
             {
@@ -298,11 +331,59 @@ namespace BPR
 
                 while (reader.Read())
                 {
+                    matchCountNA = reader.GetInt16(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            query = $"SELECT count(*) FROM matchesEU;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    matchCountEU = reader.GetInt16(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            if (matchCountNA + matchCountEU != 1) pluralizer = "es";
+            else pluralizer = "";
+            Console.WriteLine($"Pluralization checked");
+            var embed = new EmbedBuilder
+            {
+                Title = "Ongoing Matches",
+                Description = $"{matchCountNA + matchCountEU} match{pluralizer} ongoing"
+            };
+            query = $"SELECT username1, username2 FROM matchesNA;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                int k = 1;
+                while (reader.Read())
+                {
                     embed.AddField(x =>
                     {
-                        x.Name = $"NA Match #{reader.GetInt32(0)}";
+                        x.Name = $"NA Match #{k}";
                         x.Value = $"{reader.GetString(1)} vs {reader.GetString(2)}";
                     });
+                    k++;
                 }
             }
             catch (Exception ex)
@@ -313,20 +394,22 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            query = $"SELECT number, username1, username2 FROM matchesEU;";
+            query = $"SELECT username1, username2 FROM matchesEU;";
             Globals.conn.Open();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
                 MySqlDataReader reader = cmd.ExecuteReader();
 
+                int k = 1;
                 while (reader.Read())
                 {
                     embed.AddField(x =>
                     {
-                        x.Name = $"EU Match #{reader.GetInt32(0)}";
+                        x.Name = $"EU Match #{k}";
                         x.Value = $"{reader.GetString(1)} vs {reader.GetString(2)}";
                     });
+                    k++;
                 }
             }
             catch (Exception ex)
@@ -352,11 +435,11 @@ namespace BPR
             ulong p2ID = 0;
             string p1Username = "";
             string p2Username = "";
-            int thisMatchNum = 0;
+            int thisMatchNum = 1;
 
             if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
             {
-                string query = $"SELECT * FROM matchesNA;";
+                string query = $"SELECT id1, id2, username1, username2 FROM matchesNA;";
                 Globals.conn.Open();
                 try
                 {
@@ -365,26 +448,25 @@ namespace BPR
 
                     while (reader.Read())
                     {
-                        if (userInfo.Id == reader.GetUInt64(1))
+                        if (userInfo.Id == reader.GetUInt64(0))
                         {
                             isP1 = true;
-                            thisMatchNum = reader.GetInt32(0);
-                            p1ID = reader.GetUInt64(1);
-                            p2ID = reader.GetUInt64(2);
-                            p1Username = reader.GetString(3);
-                            p2Username = reader.GetString(4);
+                            p1ID = reader.GetUInt64(0);
+                            p2ID = reader.GetUInt64(1);
+                            p1Username = reader.GetString(2);
+                            p2Username = reader.GetString(3);
                             break;
                         }
-                        else if (userInfo.Id == reader.GetUInt64(2))
+                        else if (userInfo.Id == reader.GetUInt64(1))
                         {
                             isP1 = false;
-                            thisMatchNum = reader.GetInt32(0);
-                            p1ID = reader.GetUInt64(1);
-                            p2ID = reader.GetUInt64(2);
-                            p1Username = reader.GetString(3);
-                            p2Username = reader.GetString(4);
+                            p1ID = reader.GetUInt64(0);
+                            p2ID = reader.GetUInt64(1);
+                            p1Username = reader.GetString(2);
+                            p2Username = reader.GetString(3);
                             break;
                         }
+                        thisMatchNum++;
                     }
                 }
                 catch (Exception ex)
@@ -508,7 +590,7 @@ namespace BPR
                 Globals.conn.Close();
 
                 Globals.conn.Open();
-                query = $"DELETE FROM matchesNA WHERE number = {thisMatchNum};";
+                query = $"DELETE FROM matchesNA WHERE id1 = {p1ID};";
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -522,39 +604,37 @@ namespace BPR
                 }
                 Globals.conn.Close();
                 Console.WriteLine($"Match #{thisMatchNum} has ended.");
-                Globals.matchCountNA--;
             }
             else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
             {
-                string query = $"SELECT * FROM matchesEU;";
+                string query = $"SELECT id1, id2, username1, username2 FROM matchesEU;";
                 Globals.conn.Open();
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
                     MySqlDataReader reader = cmd.ExecuteReader();
-
+                    
                     while (reader.Read())
                     {
-                        if (userInfo.Id == reader.GetUInt64(1))
+                        if (userInfo.Id == reader.GetUInt64(0))
                         {
                             isP1 = true;
-                            thisMatchNum = reader.GetInt32(0);
-                            p1ID = reader.GetUInt64(1);
-                            p2ID = reader.GetUInt64(2);
-                            p1Username = reader.GetString(3);
-                            p2Username = reader.GetString(4);
+                            p1ID = reader.GetUInt64(0);
+                            p2ID = reader.GetUInt64(1);
+                            p1Username = reader.GetString(2);
+                            p2Username = reader.GetString(3);
                             break;
                         }
-                        else if (userInfo.Id == reader.GetUInt64(2))
+                        else if (userInfo.Id == reader.GetUInt64(1))
                         {
                             isP1 = false;
-                            thisMatchNum = reader.GetInt32(0);
-                            p1ID = reader.GetUInt64(1);
-                            p2ID = reader.GetUInt64(2);
-                            p1Username = reader.GetString(3);
-                            p2Username = reader.GetString(4);
+                            p1ID = reader.GetUInt64(0);
+                            p2ID = reader.GetUInt64(1);
+                            p1Username = reader.GetString(2);
+                            p2Username = reader.GetString(3);
                             break;
                         }
+                        thisMatchNum++;
                     }
                 }
                 catch (Exception ex)
@@ -678,7 +758,7 @@ namespace BPR
                 Globals.conn.Close();
 
                 Globals.conn.Open();
-                query = $"DELETE FROM matchesEU WHERE number = {thisMatchNum};";
+                query = $"DELETE FROM matchesEU WHERE id1 = {p1ID};";
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -692,7 +772,6 @@ namespace BPR
                 }
                 Globals.conn.Close();
                 Console.WriteLine($"Match #{thisMatchNum} has ended.");
-                Globals.matchCountEU--;
             }
             else await Context.Channel.SendMessageAsync($"Incorrect role order or roles has not been added.");
         }
