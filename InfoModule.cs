@@ -144,7 +144,7 @@ namespace BPR
         [Summary("List current people in queue")]
         public async Task QueueListAsync()
         {
-            Console.WriteLine($"Matches are being listed");
+            Console.WriteLine($"Queue is being listed");
             string pluralizer, pluralizerNA, pluralizerEU;
             int totalCount = Globals.liveQueueNA.Count + Globals.liveQueueEU.Count;
             if (totalCount == 1) pluralizer = "person is";
