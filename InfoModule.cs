@@ -381,7 +381,7 @@ namespace BPR
                     embed.AddField(x =>
                     {
                         x.Name = $"NA Match #{k}";
-                        x.Value = $"{reader.GetString(1)} vs {reader.GetString(2)}";
+                        x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}";
                     });
                     k++;
                 }
@@ -407,7 +407,7 @@ namespace BPR
                     embed.AddField(x =>
                     {
                         x.Name = $"EU Match #{k}";
-                        x.Value = $"{reader.GetString(1)} vs {reader.GetString(2)}";
+                        x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}";
                     });
                     k++;
                 }
