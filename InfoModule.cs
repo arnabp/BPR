@@ -148,7 +148,7 @@ namespace BPR
                     await Context.Channel.SendMessageAsync($"A player has been added to NA queue");
                     Console.WriteLine($"{userInfo.Username} has joined queue");
                     
-                    if (queueCount > 1)
+                    if (queueCount > 0)
                     {
                         await NewMatchNA(0, 1); // This should be modified when anti-smurfing mechanism is introduced
                     }
