@@ -1321,6 +1321,8 @@ namespace BPR
         [Summary("Join the leaderboard")]
         public async Task JoinDBAsync()
         {
+            await Context.Message.DeleteAsync();
+
             var userInfo = Context.User;
             var user = Context.Guild.GetUser(userInfo.Id);
             string query = $"INSERT INTO leaderboardNA(id, username) VALUES({userInfo.Id}, '{userInfo.Username}');";
