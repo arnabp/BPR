@@ -237,7 +237,7 @@ namespace BPR
                     }
                     Globals.conn.Close();
 
-                    await Context.Channel.SendMessageAsync($"A player has been added to NA queue");
+                    await Context.Channel.SendMessageAsync($"A player has been added to EU queue");
                     Console.WriteLine($"{userInfo.Username} has joined queue");
 
                     if (queueCount > 1)
@@ -1318,6 +1318,7 @@ namespace BPR
     public class LeaderboardNAModule : ModuleBase<SocketCommandContext>
     {
         [Command("join")]
+        [Alias("register")]
         [Summary("Join the leaderboard")]
         public async Task JoinDBAsync()
         {
@@ -1342,7 +1343,7 @@ namespace BPR
 
             await user.AddRoleAsync(Context.Guild.GetRole(396442734271004672));
 
-            await Context.Channel.SendMessageAsync($"{userInfo.Username} has been succesfully registered! You have 2500 elo.");
+            await Context.Channel.SendMessageAsync($"{userInfo.Username} has been succesfully registered to the NA leaderboard! You have 2500 elo.");
             Console.WriteLine($"{userInfo.Username} has been registered");
         }
 
@@ -1438,6 +1439,7 @@ namespace BPR
     public class LeaderboardEUModule : ModuleBase<SocketCommandContext>
     {
         [Command("join")]
+        [Alias("register")]
         [Summary("Join the leaderboard")]
         public async Task JoinDBAsync()
         {
@@ -1463,7 +1465,7 @@ namespace BPR
             
             await user.AddRoleAsync(Context.Guild.GetRole(396442764298158081));
 
-            await Context.Channel.SendMessageAsync($"{userInfo.Username} has been succesfully registered! You have 2500 elo.");
+            await Context.Channel.SendMessageAsync($"{userInfo.Username} has been succesfully registered to the EU leaderboard! You have 2500 elo.");
             Console.WriteLine($"{userInfo.Username} has been registered");
         }
 
