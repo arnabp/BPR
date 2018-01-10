@@ -151,6 +151,20 @@ namespace BPR
                     if (queueCount > 0)
                     {
                         await NewMatchNA(0, 1); // This should be modified when anti-smurfing mechanism is introduced
+                        Globals.conn.Open();
+                        query = $"TRUNCATE TABLE queueNA;";
+                        try
+                        {
+                            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                            cmd.ExecuteNonQuery();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                            Globals.conn.Close();
+                            throw;
+                        }
+                        Globals.conn.Close();
                     }
                 }
             }
@@ -228,7 +242,21 @@ namespace BPR
 
                     if (queueCount > 1)
                     {
-                        await NewMatchNA(0, 1); // This should be modified when anti-smurfing mechanism is introduced
+                        await NewMatchEU(0, 1); // This should be modified when anti-smurfing mechanism is introduced
+                        Globals.conn.Open();
+                        query = $"TRUNCATE TABLE queueEU;";
+                        try
+                        {
+                            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                            cmd.ExecuteNonQuery();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                            Globals.conn.Close();
+                            throw;
+                        }
+                        Globals.conn.Close();
                     }
                 }
             }
