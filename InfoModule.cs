@@ -65,6 +65,7 @@ namespace BPR
     }
 
     [Group("queue")]
+    [Alias("q")]
     public class QueueModule : ModuleBase<SocketCommandContext>
     {
 
@@ -655,6 +656,7 @@ namespace BPR
     }
 
     [Group("match")]
+    [Alias("m")]
     public class MatchModule : ModuleBase<SocketCommandContext>
     {
         [Command("list")]
