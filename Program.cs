@@ -19,8 +19,6 @@ namespace BPR
 {
     public static class Globals
     {
-        public static Queue<Player> liveQueueNA = new Queue<Player>();
-        public static Queue<Player> liveQueueEU = new Queue<Player>();
         public static MySqlConnection conn = new MySqlConnection("");
     }
 

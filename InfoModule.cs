@@ -12,21 +12,6 @@ using System.Linq;
 
 namespace BPR
 {
-    public struct Player
-    {
-        public ulong id;
-        public string username;
-        public string discriminator;
-        public bool inMatch;
-        public Player(ulong ID, string USERNAME, string DISCRIMINATOR)
-        {
-            id = ID;
-            username = USERNAME;
-            discriminator = DISCRIMINATOR;
-            inMatch = false;
-        }
-    }
-
     public class InfoModule : ModuleBase<SocketCommandContext>
     {
         [Command("echo")]
@@ -94,10 +79,50 @@ namespace BPR
             if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
             {
                 bool isInQueue = false;
-                if (Globals.liveQueueNA.Count > 0)
+                int queueCount = 0;
+                string query = $"SELECT count(*) FROM queueNA;";
+                Globals.conn.Open();
+                try
                 {
-                    if (Globals.liveQueueNA.Peek().username == userInfo.Username) isInQueue = true;
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        queueCount = reader.GetInt16(0);
+                    }
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                if (queueCount > 0)
+                {
+                    query = $"SELECT id FROM queueNA;";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        MySqlDataReader reader = cmd.ExecuteReader();
+                        
+                        while (reader.Read())
+                        {
+                            if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                }
+
                 if (isInQueue)
                 {
                     await Context.Channel.SendMessageAsync($"Player already in queue tried to rejoin queue");
@@ -105,22 +130,77 @@ namespace BPR
                 }
                 else
                 {
-                    Globals.liveQueueNA.Enqueue(new Player(userInfo.Id, userInfo.Username, userInfo.Discriminator));
-                    await Context.Channel.SendMessageAsync($"A player has been added to NA queue");
-                    Console.WriteLine($"{userInfo} has joined queue");
-                    if (Globals.liveQueueNA.Count > 1)
+                    query = $"INSERT INTO queueNA(time, username, id) VALUES({DateTime.Now.ToBinary()}, '{userInfo.Username}', {userInfo.Id});";
+                    Globals.conn.Open();
+                    try
                     {
-                        await NewMatchNA(Globals.liveQueueNA.Dequeue(), Globals.liveQueueNA.Dequeue());
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+
+                    await Context.Channel.SendMessageAsync($"A player has been added to NA queue");
+                    Console.WriteLine($"{userInfo.Username} has joined queue");
+                    
+                    if (queueCount > 1)
+                    {
+                        await NewMatchNA(0, 1); // This should be modified when anti-smurfing mechanism is introduced
                     }
                 }
             }
             else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
             {
                 bool isInQueue = false;
-                if (Globals.liveQueueEU.Count > 0)
+                int queueCount = 0;
+                string query = $"SELECT count(*) FROM queueEU;";
+                Globals.conn.Open();
+                try
                 {
-                    if (Globals.liveQueueEU.Peek().username == userInfo.Username) isInQueue = true;
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        queueCount = reader.GetInt16(0);
+                    }
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                if (queueCount > 0)
+                {
+                    query = $"SELECT id FROM queueEU;";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        MySqlDataReader reader = cmd.ExecuteReader();
+
+                        while (reader.Read())
+                        {
+                            if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                }
+
                 if (isInQueue)
                 {
                     await Context.Channel.SendMessageAsync($"Player already in queue tried to rejoin queue");
@@ -128,12 +208,27 @@ namespace BPR
                 }
                 else
                 {
-                    Globals.liveQueueEU.Enqueue(new Player(userInfo.Id, userInfo.Username, userInfo.Discriminator));
-                    await Context.Channel.SendMessageAsync($"A player has been added to EU queue");
-                    Console.WriteLine($"{userInfo} has joined queue");
-                    if (Globals.liveQueueEU.Count > 1)
+                    query = $"INSERT INTO queueEU(time, username, id) VALUES({DateTime.Now.ToBinary()}, '{userInfo.Username}', {userInfo.Id});";
+                    Globals.conn.Open();
+                    try
                     {
-                        await NewMatchEU(Globals.liveQueueEU.Dequeue(), Globals.liveQueueEU.Dequeue());
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+
+                    await Context.Channel.SendMessageAsync($"A player has been added to NA queue");
+                    Console.WriteLine($"{userInfo.Username} has joined queue");
+
+                    if (queueCount > 1)
+                    {
+                        await NewMatchNA(0, 1); // This should be modified when anti-smurfing mechanism is introduced
                     }
                 }
             }
@@ -145,15 +240,57 @@ namespace BPR
         public async Task QueueListAsync()
         {
             Console.WriteLine($"Queue is being listed");
+
+            int queueCountNA = 0, queueCountEU = 0;
+            string query = $"SELECT count(*) FROM queueNA;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    queueCountNA = reader.GetInt16(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            query = $"SELECT count(*) FROM queueEU;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    queueCountEU = reader.GetInt16(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
             string pluralizer, pluralizerNA, pluralizerEU;
-            int totalCount = Globals.liveQueueNA.Count + Globals.liveQueueEU.Count;
+            int totalCount = queueCountNA + queueCountEU;
             if (totalCount == 1) pluralizer = "person is";
             else pluralizer = "people are";
 
-            if (Globals.liveQueueNA.Count == 1) pluralizerNA = "person is";
+            if (queueCountNA == 1) pluralizerNA = "person is";
             else pluralizerNA = "people are";
 
-            if (Globals.liveQueueEU.Count == 1) pluralizerEU = "person is";
+            if (queueCountEU == 1) pluralizerEU = "person is";
             else pluralizerEU = "people are";
 
             var embed = new EmbedBuilder
@@ -164,12 +301,12 @@ namespace BPR
             embed.AddField(x =>
             {
                 x.Name = "NA Queue";
-                x.Value = $"{Globals.liveQueueNA.Count} {pluralizerNA} in queue";
+                x.Value = $"{queueCountNA} {pluralizerNA} in queue";
             });
             embed.AddField(x =>
             {
                 x.Name = "EU Queue";
-                x.Value = $"{Globals.liveQueueEU.Count} {pluralizerEU} in queue";
+                x.Value = $"{queueCountEU} {pluralizerEU} in queue";
             });
 
             await Context.Channel.SendMessageAsync("", embed: embed);
@@ -185,13 +322,66 @@ namespace BPR
             if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
             {
                 bool isInQueue = false;
-                if (Globals.liveQueueNA.Count > 0)
+                int queueCount = 0;
+                string query = $"SELECT count(*) FROM queueNA;";
+                Globals.conn.Open();
+                try
                 {
-                    if (Globals.liveQueueNA.Peek().username == userInfo.Username) isInQueue = true;
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        queueCount = reader.GetInt16(0);
+                    }
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                if (queueCount > 0)
+                {
+                    query = $"SELECT id FROM queueNA;";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        MySqlDataReader reader = cmd.ExecuteReader();
+
+                        while (reader.Read())
+                        {
+                            if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                }
+                
                 if (isInQueue)
                 {
-                    Globals.liveQueueNA.Dequeue();
+                    Globals.conn.Open();
+                    query = $"DELETE FROM queueNA WHERE id = {userInfo.Id};";
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
                     await Context.Channel.SendMessageAsync($"A player has left the NA queue");
                 }
                 else
@@ -203,13 +393,66 @@ namespace BPR
             else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
             {
                 bool isInQueue = false;
-                if (Globals.liveQueueEU.Count > 0)
+                int queueCount = 0;
+                string query = $"SELECT count(*) FROM queueEU;";
+                Globals.conn.Open();
+                try
                 {
-                    if (Globals.liveQueueEU.Peek().username == userInfo.Username) isInQueue = true;
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        queueCount = reader.GetInt16(0);
+                    }
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                if (queueCount > 0)
+                {
+                    query = $"SELECT id FROM queueEU;";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        MySqlDataReader reader = cmd.ExecuteReader();
+
+                        while (reader.Read())
+                        {
+                            if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                }
+
                 if (isInQueue)
                 {
-                    Globals.liveQueueEU.Dequeue();
+                    Globals.conn.Open();
+                    query = $"DELETE FROM queueEU WHERE id = {userInfo.Id};";
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
                     await Context.Channel.SendMessageAsync($"A player has left the EU queue");
                 }
                 else
@@ -222,10 +465,46 @@ namespace BPR
             await Context.Message.DeleteAsync();
         }
 
-        private async Task NewMatchNA(Player p1, Player p2)
+        private async Task NewMatchNA(int p1, int p2)
         {
-            var userInfo = Context.User;
-            string query = $"INSERT INTO matchesNA(id1, id2, username1, username2) VALUES({p1.id}, {p2.id}, '{p1.username}', '{p2.username}');";
+            long p1time = 0, p2time = 0;
+            string p1name = "", p2name = "";
+            ulong p1id = 0, p2id = 0;
+            string query = $"SELECT time, username, id FROM queueNA;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                int i = 0;
+                while (reader.Read())
+                {
+                    if (i == p1)
+                    {
+                        p1time = reader.GetInt64(0);
+                        p1name = reader.GetString(1);
+                        p1id = reader.GetUInt64(2);
+                    }
+                    if(i == p2)
+                    {
+                        p2time = reader.GetInt64(0);
+                        p2name = reader.GetString(1);
+                        p2id = reader.GetUInt64(2);
+                    }
+                    i++;
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            query = $"INSERT INTO matchesNA(id1, id2, username1, username2) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}');";
             Globals.conn.Open();
             try
             {
@@ -261,15 +540,51 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            await Context.Channel.SendMessageAsync($"New match has started between <@{p1.id}> and <@{p2.id}>");
+            await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}> and <@{p2id}>");
             Console.WriteLine($"NA Match #{matchCount} has started.");
 
         }
 
-        private async Task NewMatchEU(Player p1, Player p2)
+        private async Task NewMatchEU(int p1, int p2)
         {
-            var userInfo = Context.User;
-            string query = $"INSERT INTO matchesEU(id1, id2, username1, username2) VALUES({p1.id}, {p2.id}, '{p1.username}', '{p2.username}');";
+            long p1time = 0, p2time = 0;
+            string p1name = "", p2name = "";
+            ulong p1id = 0, p2id = 0;
+            string query = $"SELECT time, username, id FROM queueEU;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                int i = 0;
+                while (reader.Read())
+                {
+                    if (i == p1)
+                    {
+                        p1time = reader.GetInt64(0);
+                        p1name = reader.GetString(1);
+                        p1id = reader.GetUInt64(2);
+                    }
+                    if (i == p2)
+                    {
+                        p2time = reader.GetInt64(0);
+                        p2name = reader.GetString(1);
+                        p2id = reader.GetUInt64(2);
+                    }
+                    i++;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            query = $"INSERT INTO matchesEU(id1, id2, username1, username2) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}');";
             Globals.conn.Open();
             try
             {
@@ -305,7 +620,7 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            await Context.Channel.SendMessageAsync($"New match has started between <@{p1.id}> and <@{p2.id}>");
+            await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}> and <@{p2id}>");
             Console.WriteLine($"EU Match #{matchCount} has started.");
 
         }
