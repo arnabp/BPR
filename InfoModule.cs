@@ -717,7 +717,6 @@ namespace BPR
             Globals.conn.Close();
             if (matchCountNA + matchCountEU != 1) pluralizer = "es";
             else pluralizer = "";
-            Console.WriteLine($"Pluralization checked");
             var embed = new EmbedBuilder
             {
                 Title = "Ongoing Matches",

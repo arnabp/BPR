@@ -23,9 +23,7 @@ public class TimerService
     {
         _timer = new Timer(async _ =>
         {
-            // 3) Any code you want to periodically run goes here, for example:
-            Console.WriteLine("Tick");
-
+            // 3) Any code you want to periodically run goes here:
             if (client.GetChannel(401167888762929153) is IMessageChannel chan)
             {
                 IEnumerable<IMessage> messageList = await chan.GetMessagesAsync(4).Flatten();
@@ -168,7 +166,6 @@ public class TimerService
         Globals.conn.Close();
         if (matchCountNA + matchCountEU != 1) pluralizer = "es";
         else pluralizer = "";
-        Console.WriteLine($"Pluralization checked");
         var embed = new EmbedBuilder
         {
             Title = "Ongoing Matches",
