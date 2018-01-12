@@ -1367,7 +1367,7 @@ namespace BPR
             Console.WriteLine($"NA Leaderboard is being requested");
             var embed = new EmbedBuilder
             {
-                Title = "Leaderboard"
+                Title = "NA Leaderboard"
             };
 
             int i = 1;
@@ -1489,7 +1489,7 @@ namespace BPR
             Console.WriteLine($"EU Leaderboard is being requested");
             var embed = new EmbedBuilder
             {
-                Title = "Leaderboard"
+                Title = "EU Leaderboard"
             };
 
             int i = 1;
