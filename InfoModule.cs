@@ -251,7 +251,7 @@ namespace BPR
                     await Context.Channel.SendMessageAsync($"A player has been added to EU queue");
                     Console.WriteLine($"{userInfo.Username} has joined queue");
 
-                    if (queueCount > 1)
+                    if (queueCount > 0)
                     {
                         await NewMatchEU(0, 1); // This should be modified when anti-smurfing mechanism is introduced
                         Globals.conn.Open();
