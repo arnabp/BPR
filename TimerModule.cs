@@ -26,8 +26,8 @@ public class TimerService
             // 3) Any code you want to periodically run goes here:
             if (client.GetChannel(392829581192855554) is IMessageChannel general)
             {
-                await CheckQueueTimeoutNA(general);
-                await CheckQueueTimeoutEU(general);
+                //await CheckQueueTimeoutNA(general);
+                //await CheckQueueTimeoutEU(general);
             }
 
             if (client.GetChannel(401167888762929153) is IMessageChannel queueInfo)
