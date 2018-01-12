@@ -325,7 +325,7 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDif = DateTime.FromBinary(reader.GetInt64(0)) - nowTime;
+                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
                 if(timeDif.TotalMinutes > 10)
                 {
                     RemoveFromQueueNA(reader.GetUInt64(1));
@@ -374,7 +374,7 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDif = DateTime.FromBinary(reader.GetInt64(0)) - nowTime;
+                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
                 if (timeDif.TotalMinutes > 10)
                 {
                     RemoveFromQueueEU(reader.GetUInt64(1));
