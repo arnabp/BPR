@@ -62,6 +62,16 @@ namespace BPR
             await Context.Message.DeleteAsync();
             await Context.Channel.SendMessageAsync($"Message from {userInfo.Username} has been deleted.");
         }
+
+        [Command("GetUser")]
+        [Summary("Gets username from ID")]
+        public async Task GetUser([Remainder] ulong id)
+        {
+            var user = Context.Guild.GetUser(id);
+            if (user != null) await Context.Channel.SendMessageAsync($"This user is {user.Username}");
+            else await Context.Channel.SendMessageAsync($"This user does not exist");
+
+        }
     }
 
     [Group("queue")]
@@ -109,7 +119,7 @@ namespace BPR
                     {
                         MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
                         MySqlDataReader reader = cmd.ExecuteReader();
-                        
+
                         while (reader.Read())
                         {
                             if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
@@ -148,7 +158,7 @@ namespace BPR
 
                     await Context.Channel.SendMessageAsync($"A player has been added to NA queue");
                     Console.WriteLine($"{userInfo.Username} has joined queue");
-                    
+
                     if (queueCount > 0)
                     {
                         await NewMatchNA(0, 1); // This should be modified when anti-smurfing mechanism is introduced
@@ -394,7 +404,7 @@ namespace BPR
                     }
                     Globals.conn.Close();
                 }
-                
+
                 if (isInQueue)
                 {
                     Globals.conn.Open();
@@ -515,7 +525,7 @@ namespace BPR
                         p1name = reader.GetString(1);
                         p1id = reader.GetUInt64(2);
                     }
-                    if(i == p2)
+                    if (i == p2)
                     {
                         p2time = reader.GetInt64(0);
                         p2name = reader.GetString(1);
@@ -523,7 +533,7 @@ namespace BPR
                     }
                     i++;
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -661,7 +671,7 @@ namespace BPR
     {
         [Command("list")]
         [Summary("Lists all ongoing matches")]
-        [Alias("all","ongoing","show")]
+        [Alias("all", "ongoing", "show")]
         public async Task ListMatchAsync()
         {
             Console.WriteLine($"Matches are being listed");
@@ -958,7 +968,7 @@ namespace BPR
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
                     MySqlDataReader reader = cmd.ExecuteReader();
-                    
+
                     while (reader.Read())
                     {
                         if (userInfo.Id == reader.GetUInt64(0))
@@ -1131,7 +1141,7 @@ namespace BPR
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is reporting a result");
             bool isP1 = true;
-           
+
 
             var results = new Tuple<double, double>(0, 0);
             double p1elo = 0, p2elo = 0;
@@ -1177,7 +1187,7 @@ namespace BPR
 
             double new1 = p1elo + results.Item1;
             double new2 = p2elo + results.Item2;
-            
+
             query = $"UPDATE leaderboardNA SET elo = {new1} WHERE id = {p1ID};";
             Globals.conn.Open();
             try
@@ -1192,7 +1202,7 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
-            
+
             Globals.conn.Open();
             query = $"UPDATE leaderboardNA SET elo = {new2} WHERE id = {p2ID};";
             try
@@ -1351,7 +1361,7 @@ namespace BPR
 
         [Command("list")]
         [Summary("Lists the current status of the leaderboard")]
-        [Alias("view","show")]
+        [Alias("view", "show")]
         public async Task ListLeaderboardAsync()
         {
             Console.WriteLine($"NA Leaderboard is being requested");
@@ -1359,7 +1369,7 @@ namespace BPR
             {
                 Title = "Leaderboard"
             };
-            
+
             int i = 1;
             string query = $"SELECT username, elo FROM leaderboardNA ORDER BY elo DESC;";
             Globals.conn.Open();
@@ -1407,7 +1417,7 @@ namespace BPR
                 {
                     username = reader.GetString(0);
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -1431,7 +1441,7 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            await user.RemoveRoleAsync(Context.Guild.GetRole(396442734271004672));
+            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(396442734271004672));
 
             await Context.Channel.SendMessageAsync($"{username} has been deleted from the leaderboards");
         }
@@ -1464,7 +1474,7 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            
+
             await user.AddRoleAsync(Context.Guild.GetRole(396442764298158081));
 
             await Context.Channel.SendMessageAsync($"{userInfo.Username} has been succesfully registered to the EU leaderboard! You have 2500 elo.");
@@ -1554,7 +1564,7 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            await user.RemoveRoleAsync(Context.Guild.GetRole(396442764298158081));
+            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(396442764298158081));
 
             await Context.Channel.SendMessageAsync($"{username} has been deleted from the leaderboards");
         }
