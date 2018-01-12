@@ -28,6 +28,7 @@ public class TimerService
             {
                 //await CheckQueueTimeoutNA(general);
                 //await CheckQueueTimeoutEU(general);
+                await CheckQueueTimeoutTest(general);
             }
 
             if (client.GetChannel(401167888762929153) is IMessageChannel queueInfo)
@@ -395,6 +396,58 @@ public class TimerService
     {
         Globals.conn.Open();
         string query = $"DELETE FROM queueEU WHERE id = {id};";
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            cmd.ExecuteNonQuery();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            Globals.conn.Close();
+            throw;
+        }
+        Globals.conn.Close();
+
+    }
+
+    public async Task CheckQueueTimeoutTest(IMessageChannel thisChannel)
+    {
+        DateTime nowTime = DateTime.Now;
+
+        string query = $"SELECT time, id, username FROM queuetest;";
+        Globals.conn.Open();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                Console.WriteLine($"{reader.GetString(2)} has been in queue for {timeDif.TotalSeconds} seconds.");
+                if (timeDif.TotalMinutes > 10)
+                {
+                    Console.WriteLine($"{reader.GetString(2)} is being removed from queue");
+                    RemoveFromQueueTest(reader.GetUInt64(1));
+                    await thisChannel.SendMessageAsync($"A player has timed out of test queue");
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            Globals.conn.Close();
+            throw;
+        }
+        Globals.conn.Close();
+    }
+
+    public void RemoveFromQueueTest(ulong id)
+    {
+        Globals.conn.Open();
+        string query = $"DELETE FROM queuetest WHERE id = {id};";
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);

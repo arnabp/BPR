@@ -663,6 +663,107 @@ namespace BPR
             Console.WriteLine($"EU Match #{matchCount} has started.");
 
         }
+
+        [Command("joinAdmin")]
+        [Summary("Joins the test queue")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task JoinAdminAsync()
+        {
+            var userInfo = Context.User;
+            await Context.Message.DeleteAsync();
+            Console.WriteLine($"{userInfo.Username} is attempting to join test queue");
+
+            bool isInQueue = false;
+            int queueCount = 0;
+            string query = $"SELECT count(*) FROM queuetest;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    queueCount = reader.GetInt16(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            if (queueCount > 0)
+            {
+                query = $"SELECT id FROM queuetest;";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+            }
+
+            if (isInQueue)
+            {
+                await Context.Channel.SendMessageAsync($"Player already in queue tried to rejoin queue");
+                Console.WriteLine($"{userInfo.Username} tried to join the queue twice");
+            }
+            else
+            {
+                query = $"INSERT INTO queuetest(time, username, id) VALUES({DateTime.Now.ToBinary()}, '{userInfo.Username}', {userInfo.Id});";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                await Context.Channel.SendMessageAsync($"A player has been added to NA queue");
+                Console.WriteLine($"{userInfo.Username} has joined queue");
+
+                if (queueCount > 0)
+                {
+                    await NewMatchNA(0, 1); // This should be modified when anti-smurfing mechanism is introduced
+                    Globals.conn.Open();
+                    query = $"TRUNCATE TABLE queuetest;";
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                }
+            }
+            
+        }
     }
 
     [Group("match")]
