@@ -41,7 +41,7 @@ public class TimerService
         },
         null,
         TimeSpan.FromMinutes(0),  // 4) Time that message should fire after the timer is created
-        TimeSpan.FromSeconds(1)); // 5) Time after which message should repeat (use `Timeout.Infinite` for no repeat)
+        TimeSpan.FromSeconds(30)); // 5) Time after which message should repeat (use `Timeout.Infinite` for no repeat)
     }
 
     public void Stop() // 6) Example to make the timer stop running
