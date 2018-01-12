@@ -24,6 +24,8 @@ public class TimerService
         _timer = new Timer(async _ =>
         {
             // 3) Any code you want to periodically run goes here, for example:
+            Console.WriteLine("Tick");
+
             if (client.GetChannel(401167888762929153) is IMessageChannel chan)
             {
                 IEnumerable<IMessage> messageList = await chan.GetMessagesAsync(4).Flatten();
@@ -44,19 +46,8 @@ public class TimerService
         TimeSpan.FromSeconds(30)); // 5) Time after which message should repeat (use `Timeout.Infinite` for no repeat)
     }
 
-    public void Stop() // 6) Example to make the timer stop running
-    {
-        _timer.Change(Timeout.Infinite, Timeout.Infinite);
-    }
-
-    public void Restart() // 7) Example to restart the timer
-    {
-        _timer.Change(TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(30));
-    }
-
     public async Task UpdateLeaderboardNA(IUserMessage thisMessage)
     {
-        Console.WriteLine($"NA Leaderboard is being requested");
         var embed = new EmbedBuilder
         {
             Title = "NA Leaderboard"
@@ -96,7 +87,6 @@ public class TimerService
 
     public async Task UpdateLeaderboardEU(IUserMessage thisMessage)
     {
-        Console.WriteLine($"EU Leaderboard is being requested");
         var embed = new EmbedBuilder
         {
             Title = "EU Leaderboard"
@@ -136,7 +126,6 @@ public class TimerService
 
     public async Task UpdateMatches(IUserMessage thisMessage)
     {
-        Console.WriteLine($"Matches are being listed");
         string pluralizer;
         int matchCountNA = 0, matchCountEU = 0;
         string query = $"SELECT count(*) FROM matchesNA;";
@@ -245,8 +234,6 @@ public class TimerService
 
     public async Task UpdateQueue(IUserMessage thisMessage)
     {
-        Console.WriteLine($"Queue is being listed");
-
         int queueCountNA = 0, queueCountEU = 0;
         string query = $"SELECT count(*) FROM queueNA;";
         Globals.conn.Open();
