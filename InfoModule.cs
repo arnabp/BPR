@@ -1335,15 +1335,21 @@ namespace BPR
         public async Task JoinDBAsync()
         {
             await Context.Message.DeleteAsync();
-
             var userInfo = Context.User;
             var user = Context.Guild.GetUser(userInfo.Id);
-            string query = $"INSERT INTO leaderboardNA(id, username) VALUES({userInfo.Id}, '{userInfo.Username}');";
+
+            int count = 0;
+            string query = $"SELECT count(*) FROM leaderboardNA;";
             Globals.conn.Open();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                cmd.ExecuteNonQuery();
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    count = reader.GetInt16(0);
+                }
             }
             catch (Exception ex)
             {
@@ -1353,10 +1359,33 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            await user.AddRoleAsync(Context.Guild.GetRole(396442734271004672));
+            if (count < 25)
+            {
+                query = $"INSERT INTO leaderboardNA(id, username) VALUES({userInfo.Id}, '{userInfo.Username}');";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
 
-            await Context.Channel.SendMessageAsync($"{userInfo.Username} has been succesfully registered to the NA leaderboard! You have 2500 elo.");
-            Console.WriteLine($"{userInfo.Username} has been registered");
+                await user.AddRoleAsync(Context.Guild.GetRole(396442734271004672));
+
+                await Context.Channel.SendMessageAsync($"{userInfo.Username} has been succesfully registered to the NA leaderboard! You have 2500 elo.");
+                Console.WriteLine($"{userInfo.Username} has been registered");
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("The NA leaderboard has been filled up. Please try again next season.");
+                Console.WriteLine($"{userInfo.Username} tried to join a filled up leaderboard.");
+            }
         }
 
         [Command("list")]
@@ -1456,15 +1485,21 @@ namespace BPR
         public async Task JoinDBAsync()
         {
             await Context.Message.DeleteAsync();
-
             var userInfo = Context.User;
             var user = Context.Guild.GetUser(userInfo.Id);
-            string query = $"INSERT INTO leaderboardEU(id, username) VALUES({userInfo.Id}, '{userInfo.Username}');";
+
+            int count = 0;
+            string query = $"SELECT count(*) FROM leaderboardEU;";
             Globals.conn.Open();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                cmd.ExecuteNonQuery();
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    count = reader.GetInt16(0);
+                }
             }
             catch (Exception ex)
             {
@@ -1474,11 +1509,33 @@ namespace BPR
             }
             Globals.conn.Close();
 
+            if (count < 25)
+            {
+                query = $"INSERT INTO leaderboardEU(id, username) VALUES({userInfo.Id}, '{userInfo.Username}');";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
 
-            await user.AddRoleAsync(Context.Guild.GetRole(396442764298158081));
+                await user.AddRoleAsync(Context.Guild.GetRole(396442764298158081));
 
-            await Context.Channel.SendMessageAsync($"{userInfo.Username} has been succesfully registered to the EU leaderboard! You have 2500 elo.");
-            Console.WriteLine($"{userInfo.Username} has been registered");
+                await Context.Channel.SendMessageAsync($"{userInfo.Username} has been succesfully registered to the EU leaderboard! You have 2500 elo.");
+                Console.WriteLine($"{userInfo.Username} has been registered");
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("The EU leaderboard has been filled up. Please try again next season.");
+                Console.WriteLine($"{userInfo.Username} tried to join a filled up leaderboard.");
+            }
         }
 
         [Command("list")]
