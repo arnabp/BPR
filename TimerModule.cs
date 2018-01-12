@@ -24,9 +24,15 @@ public class TimerService
         _timer = new Timer(async _ =>
         {
             // 3) Any code you want to periodically run goes here:
-            if (client.GetChannel(401167888762929153) is IMessageChannel chan)
+            if (client.GetChannel(392829581192855554) is IMessageChannel general)
             {
-                IEnumerable<IMessage> messageList = await chan.GetMessagesAsync(4).Flatten();
+                await CheckQueueTimeoutNA(general);
+                await CheckQueueTimeoutEU(general);
+            }
+
+            if (client.GetChannel(401167888762929153) is IMessageChannel queueInfo)
+            {
+                IEnumerable<IMessage> messageList = await queueInfo.GetMessagesAsync(4).Flatten();
 
                 IUserMessage leaderboardNAm = messageList.ToList()[3] as IUserMessage;
                 IUserMessage leaderboardEUm = messageList.ToList()[2] as IUserMessage;
@@ -37,6 +43,7 @@ public class TimerService
                 if (leaderboardEUm != null) await UpdateLeaderboardEU(leaderboardEUm);
                 if (matchListm != null) await UpdateMatches(matchListm);
                 if (queueListm != null) await UpdateQueue(queueListm);
+                
             }
         },
         null,
@@ -303,5 +310,103 @@ public class TimerService
             x.Content = "";
             x.Embed = embed.Build();
         });
+    }
+
+    public async Task CheckQueueTimeoutNA(IMessageChannel thisChannel)
+    {
+        DateTime nowTime = DateTime.Now;
+
+        string query = $"SELECT time, id FROM queueNA;";
+        Globals.conn.Open();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                TimeSpan timeDif = DateTime.FromBinary(reader.GetInt64(0)) - nowTime;
+                if(timeDif.TotalMinutes > 10)
+                {
+                    RemoveFromQueueNA(reader.GetUInt64(1));
+                    await thisChannel.SendMessageAsync($"A player has timed out of NA queue");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            Globals.conn.Close();
+            throw;
+        }
+        Globals.conn.Close();
+    }
+
+    public void RemoveFromQueueNA(ulong id)
+    {
+        Globals.conn.Open();
+        string query = $"DELETE FROM queueNA WHERE id = {id};";
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            cmd.ExecuteNonQuery();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            Globals.conn.Close();
+            throw;
+        }
+        Globals.conn.Close();
+        
+    }
+
+    public async Task CheckQueueTimeoutEU(IMessageChannel thisChannel)
+    {
+        DateTime nowTime = DateTime.Now;
+
+        string query = $"SELECT time, id FROM queueEU;";
+        Globals.conn.Open();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                TimeSpan timeDif = DateTime.FromBinary(reader.GetInt64(0)) - nowTime;
+                if (timeDif.TotalMinutes > 10)
+                {
+                    RemoveFromQueueEU(reader.GetUInt64(1));
+                    await thisChannel.SendMessageAsync($"A player has timed out of EU queue");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            Globals.conn.Close();
+            throw;
+        }
+        Globals.conn.Close();
+    }
+
+    public void RemoveFromQueueEU(ulong id)
+    {
+        Globals.conn.Open();
+        string query = $"DELETE FROM queueEU WHERE id = {id};";
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            cmd.ExecuteNonQuery();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            Globals.conn.Close();
+            throw;
+        }
+        Globals.conn.Close();
+
     }
 }
