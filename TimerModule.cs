@@ -26,9 +26,8 @@ public class TimerService
             // 3) Any code you want to periodically run goes here:
             if (client.GetChannel(392829581192855554) is IMessageChannel general)
             {
-                //await CheckQueueTimeoutNA(general);
-                //await CheckQueueTimeoutEU(general);
-                await CheckQueueTimeoutTest(general);
+                await CheckQueueTimeoutNA(general);
+                await CheckQueueTimeoutEU(general);
             }
 
             if (client.GetChannel(401167888762929153) is IMessageChannel queueInfo)
@@ -317,6 +316,7 @@ public class TimerService
     {
         DateTime nowTime = DateTime.Now;
 
+        List<ulong> timeOuts = new List<ulong>(5);
         string query = $"SELECT time, id FROM queueNA;";
         Globals.conn.Open();
         try
@@ -327,11 +327,12 @@ public class TimerService
             while (reader.Read())
             {
                 TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
-                if(timeDif.TotalMinutes > 10)
+                if (timeDif.TotalMinutes > 10)
                 {
-                    RemoveFromQueueNA(reader.GetUInt64(1));
-                    await thisChannel.SendMessageAsync($"A player has timed out of NA queue");
+                    Console.WriteLine($"{reader.GetString(2)} is being timed out from queue");
+                    timeOuts.Add(reader.GetUInt64(1));
                 }
+
             }
         }
         catch (Exception ex)
@@ -341,31 +342,32 @@ public class TimerService
             throw;
         }
         Globals.conn.Close();
-    }
 
-    public void RemoveFromQueueNA(ulong id)
-    {
-        Globals.conn.Open();
-        string query = $"DELETE FROM queueNA WHERE id = {id};";
-        try
+        foreach (var id in timeOuts)
         {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            cmd.ExecuteNonQuery();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
+            Globals.conn.Open();
+            query = $"DELETE FROM queueNA WHERE id = {id};";
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+                await thisChannel.SendMessageAsync($"A player has timed out of NA queue");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
             Globals.conn.Close();
-            throw;
         }
-        Globals.conn.Close();
-        
     }
 
     public async Task CheckQueueTimeoutEU(IMessageChannel thisChannel)
     {
         DateTime nowTime = DateTime.Now;
 
+        List<ulong> timeOuts = new List<ulong>(5);
         string query = $"SELECT time, id FROM queueEU;";
         Globals.conn.Open();
         try
@@ -378,9 +380,10 @@ public class TimerService
                 TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
                 if (timeDif.TotalMinutes > 10)
                 {
-                    RemoveFromQueueEU(reader.GetUInt64(1));
-                    await thisChannel.SendMessageAsync($"A player has timed out of EU queue");
+                    Console.WriteLine($"{reader.GetString(2)} is being timed out from queue");
+                    timeOuts.Add(reader.GetUInt64(1));
                 }
+
             }
         }
         catch (Exception ex)
@@ -390,25 +393,25 @@ public class TimerService
             throw;
         }
         Globals.conn.Close();
-    }
 
-    public void RemoveFromQueueEU(ulong id)
-    {
-        Globals.conn.Open();
-        string query = $"DELETE FROM queueEU WHERE id = {id};";
-        try
+        foreach (var id in timeOuts)
         {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            cmd.ExecuteNonQuery();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
+            Globals.conn.Open();
+            query = $"DELETE FROM queueEU WHERE id = {id};";
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+                await thisChannel.SendMessageAsync($"A player has timed out of EU queue");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
             Globals.conn.Close();
-            throw;
         }
-        Globals.conn.Close();
-
     }
 
     public async Task CheckQueueTimeoutTest(IMessageChannel thisChannel)
