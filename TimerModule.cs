@@ -415,6 +415,7 @@ public class TimerService
     {
         DateTime nowTime = DateTime.Now;
 
+        List<ulong> timeOuts = new List<ulong>(5);
         string query = $"SELECT time, id, username FROM queuetest;";
         Globals.conn.Open();
         try
@@ -429,8 +430,7 @@ public class TimerService
                 if (timeDif.TotalMinutes > 10)
                 {
                     Console.WriteLine($"{reader.GetString(2)} is being removed from queue");
-                    RemoveFromQueueTest(reader.GetUInt64(1));
-                    await thisChannel.SendMessageAsync($"A player has timed out of test queue");
+                    timeOuts.Add(reader.GetUInt64(1));
                 }
 
             }
@@ -442,24 +442,24 @@ public class TimerService
             throw;
         }
         Globals.conn.Close();
-    }
 
-    public void RemoveFromQueueTest(ulong id)
-    {
-        Globals.conn.Open();
-        string query = $"DELETE FROM queuetest WHERE id = {id};";
-        try
+        foreach(var id in timeOuts)
         {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            cmd.ExecuteNonQuery();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
+            Globals.conn.Open();
+            query = $"DELETE FROM queuetest WHERE id = {id};";
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+                await thisChannel.SendMessageAsync($"A player has timed out of test queue");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
             Globals.conn.Close();
-            throw;
         }
-        Globals.conn.Close();
-
     }
 }
