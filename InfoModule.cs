@@ -740,7 +740,7 @@ namespace BPR
                 }
                 Globals.conn.Close();
 
-                await Context.Channel.SendMessageAsync($"A player has been added to NA queue");
+                await Context.Channel.SendMessageAsync($"A player has been added to test queue");
                 Console.WriteLine($"{userInfo.Username} has joined queue");
 
                 if (queueCount > 0)
