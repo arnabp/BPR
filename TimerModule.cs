@@ -329,7 +329,6 @@ public class TimerService
                 TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
                 if (timeDif.TotalMinutes > 10)
                 {
-                    Console.WriteLine($"{reader.GetString(2)} is being timed out from queue");
                     timeOuts.Add(reader.GetUInt64(1));
                 }
 
@@ -380,7 +379,6 @@ public class TimerService
                 TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
                 if (timeDif.TotalMinutes > 10)
                 {
-                    Console.WriteLine($"{reader.GetString(2)} is being timed out from queue");
                     timeOuts.Add(reader.GetUInt64(1));
                 }
 
