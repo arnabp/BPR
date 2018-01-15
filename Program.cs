@@ -28,14 +28,18 @@ namespace BPR
         private CommandService _commands;
         private DiscordSocketClient _client;
         private IServiceProvider _services;
+        private TimerService _timer;
 
         static void Main(string[] args)
                 => new Program().MainAsync().GetAwaiter().GetResult();
 
         public async Task MainAsync()
         {
+            TaskScheduler.UnobservedTaskException += new EventHandler<UnobservedTaskExceptionEventArgs>(TaskScheduler_UnobservedTaskException);
+
             _client = new DiscordSocketClient();
             _commands = new CommandService();
+            _timer = new TimerService(_client);
 
             _client.Log += Log;
 
@@ -87,5 +91,10 @@ namespace BPR
             return Task.CompletedTask;
         }
 
+        static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        {
+            Console.WriteLine("Unobserved error caught");
+            e.SetObserved();
+        }
     }
 }
