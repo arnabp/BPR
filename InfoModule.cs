@@ -14,14 +14,6 @@ namespace BPR
 {
     public class InfoModule : ModuleBase<SocketCommandContext>
     {
-        [Command("echo")]
-        [Summary("Echoes a message.")]
-        public async Task EchoAsync([Remainder] [Summary("The text to echo")] string echo)
-        {
-            await Context.Channel.SendMessageAsync(echo);
-            Console.WriteLine($"{echo} has been echoed");
-        }
-        
         [Command("CheckRoleId")]
         [Summary("Gets name of role from given id.")]
         public async Task CheckRoleIdAsync([Remainder] ulong id)
