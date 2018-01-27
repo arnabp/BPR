@@ -581,6 +581,7 @@ namespace BPR
 
     [Group("queue2")]
     [Alias("q2")]
+    [RequireUserPermission(GuildPermission.Administrator)]
     public class Queue2Module : ModuleBase<SocketCommandContext>
     {
 
@@ -1686,6 +1687,7 @@ namespace BPR
 
     [Group("match2")]
     [Alias("m2")]
+    [RequireUserPermission(GuildPermission.Administrator)]
     public class Match2Module : ModuleBase<SocketCommandContext>
     {
         [Command("report")]
