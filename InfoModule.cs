@@ -66,24 +66,24 @@ namespace BPR
         }
     }
 
-    [Group("queue")]
-    [Alias("q")]
-    public class QueueModule : ModuleBase<SocketCommandContext>
+    [Group("queue1")]
+    [Alias("q1")]
+    public class Queue1Module : ModuleBase<SocketCommandContext>
     {
 
         [Command("join")]
-        [Summary("Joins the current queue")]
+        [Summary("Joins the 1v1 queue")]
         public async Task JoinAsync()
         {
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
-            Console.WriteLine($"{userInfo.Username} is attempting to join queue");
+            Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue");
 
             if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
             {
                 bool isInQueue = false;
                 int queueCount = 0;
-                string query = $"SELECT count(*) FROM queueNA;";
+                string query = $"SELECT count(*) FROM queueNA1;";
                 Globals.conn.Open();
                 try
                 {
@@ -105,7 +105,7 @@ namespace BPR
 
                 if (queueCount > 0)
                 {
-                    query = $"SELECT id FROM queueNA;";
+                    query = $"SELECT id FROM queueNA1;";
                     Globals.conn.Open();
                     try
                     {
@@ -128,12 +128,12 @@ namespace BPR
 
                 if (isInQueue)
                 {
-                    await Context.Channel.SendMessageAsync($"Player already in queue tried to rejoin queue");
+                    await Context.Channel.SendMessageAsync($"Player already in 1v1 queue tried to rejoin queue");
                     Console.WriteLine($"{userInfo.Username} tried to join the queue twice");
                 }
                 else
                 {
-                    query = $"INSERT INTO queueNA(time, username, id) VALUES({DateTime.Now.ToBinary()}, '{userInfo.Username}', {userInfo.Id});";
+                    query = $"INSERT INTO queueNA1(time, username, id) VALUES({DateTime.Now.ToBinary()}, '{userInfo.Username}', {userInfo.Id});";
                     Globals.conn.Open();
                     try
                     {
@@ -148,14 +148,13 @@ namespace BPR
                     }
                     Globals.conn.Close();
 
-                    await Context.Channel.SendMessageAsync($"A player has been added to NA queue");
-                    Console.WriteLine($"{userInfo.Username} has joined queue");
+                    await Context.Channel.SendMessageAsync($"A player has been added to NA 1v1 queue");
 
                     if (queueCount > 0)
                     {
                         await NewMatchNA(0, 1); // This should be modified when anti-smurfing mechanism is introduced
                         Globals.conn.Open();
-                        query = $"TRUNCATE TABLE queueNA;";
+                        query = $"TRUNCATE TABLE queueNA1;";
                         try
                         {
                             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -175,7 +174,7 @@ namespace BPR
             {
                 bool isInQueue = false;
                 int queueCount = 0;
-                string query = $"SELECT count(*) FROM queueEU;";
+                string query = $"SELECT count(*) FROM queueEU1;";
                 Globals.conn.Open();
                 try
                 {
@@ -197,7 +196,7 @@ namespace BPR
 
                 if (queueCount > 0)
                 {
-                    query = $"SELECT id FROM queueEU;";
+                    query = $"SELECT id FROM queueEU1;";
                     Globals.conn.Open();
                     try
                     {
@@ -220,12 +219,12 @@ namespace BPR
 
                 if (isInQueue)
                 {
-                    await Context.Channel.SendMessageAsync($"Player already in queue tried to rejoin queue");
+                    await Context.Channel.SendMessageAsync($"Player already in 1v1 queue tried to rejoin queue");
                     Console.WriteLine($"{userInfo.Username} tried to join the queue twice");
                 }
                 else
                 {
-                    query = $"INSERT INTO queueEU(time, username, id) VALUES({DateTime.Now.ToBinary()}, '{userInfo.Username}', {userInfo.Id});";
+                    query = $"INSERT INTO queueEU1(time, username, id) VALUES({DateTime.Now.ToBinary()}, '{userInfo.Username}', {userInfo.Id});";
                     Globals.conn.Open();
                     try
                     {
@@ -240,14 +239,14 @@ namespace BPR
                     }
                     Globals.conn.Close();
 
-                    await Context.Channel.SendMessageAsync($"A player has been added to EU queue");
+                    await Context.Channel.SendMessageAsync($"A player has been added to EU 1v1 queue");
                     Console.WriteLine($"{userInfo.Username} has joined queue");
 
                     if (queueCount > 0)
                     {
                         await NewMatchEU(0, 1); // This should be modified when anti-smurfing mechanism is introduced
                         Globals.conn.Open();
-                        query = $"TRUNCATE TABLE queueEU;";
+                        query = $"TRUNCATE TABLE queueEU1;";
                         try
                         {
                             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -266,95 +265,18 @@ namespace BPR
             else await Context.Channel.SendMessageAsync($"Incorrect role order or roles has not been added.");
         }
 
-        [Command("list")]
-        [Summary("List current people in queue")]
-        public async Task QueueListAsync()
-        {
-            Console.WriteLine($"Queue is being listed");
-
-            int queueCountNA = 0, queueCountEU = 0;
-            string query = $"SELECT count(*) FROM queueNA;";
-            Globals.conn.Open();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    queueCountNA = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
-                throw;
-            }
-            Globals.conn.Close();
-
-            query = $"SELECT count(*) FROM queueEU;";
-            Globals.conn.Open();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    queueCountEU = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
-                throw;
-            }
-            Globals.conn.Close();
-
-            string pluralizer, pluralizerNA, pluralizerEU;
-            int totalCount = queueCountNA + queueCountEU;
-            if (totalCount == 1) pluralizer = "person is";
-            else pluralizer = "people are";
-
-            if (queueCountNA == 1) pluralizerNA = "person is";
-            else pluralizerNA = "people are";
-
-            if (queueCountEU == 1) pluralizerEU = "person is";
-            else pluralizerEU = "people are";
-
-            var embed = new EmbedBuilder
-            {
-                Title = "Queue List",
-                Description = $"{totalCount} {pluralizer} in queue"
-            };
-            embed.AddField(x =>
-            {
-                x.Name = "NA Queue";
-                x.Value = $"{queueCountNA} {pluralizerNA} in queue";
-            });
-            embed.AddField(x =>
-            {
-                x.Name = "EU Queue";
-                x.Value = $"{queueCountEU} {pluralizerEU} in queue";
-            });
-
-            await Context.Channel.SendMessageAsync("", embed: embed);
-        }
-
         [Command("leave")]
-        [Summary("Leaves the current queue")]
+        [Summary("Leaves the 1v1 queue")]
         public async Task QueueLeaveAsync()
         {
             var userInfo = Context.User;
-            Console.WriteLine($"{userInfo.Username} is attempting to leave queue");
+            Console.WriteLine($"{userInfo.Username} is attempting to leave 1v1 queue");
 
             if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
             {
                 bool isInQueue = false;
                 int queueCount = 0;
-                string query = $"SELECT count(*) FROM queueNA;";
+                string query = $"SELECT count(*) FROM queueNA1;";
                 Globals.conn.Open();
                 try
                 {
@@ -376,7 +298,7 @@ namespace BPR
 
                 if (queueCount > 0)
                 {
-                    query = $"SELECT id FROM queueNA;";
+                    query = $"SELECT id FROM queueNA1;";
                     Globals.conn.Open();
                     try
                     {
@@ -400,7 +322,7 @@ namespace BPR
                 if (isInQueue)
                 {
                     Globals.conn.Open();
-                    query = $"DELETE FROM queueNA WHERE id = {userInfo.Id};";
+                    query = $"DELETE FROM queueNA1 WHERE id = {userInfo.Id};";
                     try
                     {
                         MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -413,11 +335,11 @@ namespace BPR
                         throw;
                     }
                     Globals.conn.Close();
-                    await Context.Channel.SendMessageAsync($"A player has left the NA queue");
+                    await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
                 }
                 else
                 {
-                    await Context.Channel.SendMessageAsync($"Player not in queue tried to leave queue");
+                    await Context.Channel.SendMessageAsync($"Player not in 1v1 queue tried to leave queue");
                     Console.WriteLine($"{userInfo.Username} tried to leave an empty queue");
                 }
             }
@@ -425,7 +347,7 @@ namespace BPR
             {
                 bool isInQueue = false;
                 int queueCount = 0;
-                string query = $"SELECT count(*) FROM queueEU;";
+                string query = $"SELECT count(*) FROM queueEU1;";
                 Globals.conn.Open();
                 try
                 {
@@ -447,7 +369,7 @@ namespace BPR
 
                 if (queueCount > 0)
                 {
-                    query = $"SELECT id FROM queueEU;";
+                    query = $"SELECT id FROM queueEU1;";
                     Globals.conn.Open();
                     try
                     {
@@ -471,7 +393,7 @@ namespace BPR
                 if (isInQueue)
                 {
                     Globals.conn.Open();
-                    query = $"DELETE FROM queueEU WHERE id = {userInfo.Id};";
+                    query = $"DELETE FROM queueEU1 WHERE id = {userInfo.Id};";
                     try
                     {
                         MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -484,11 +406,11 @@ namespace BPR
                         throw;
                     }
                     Globals.conn.Close();
-                    await Context.Channel.SendMessageAsync($"A player has left the EU queue");
+                    await Context.Channel.SendMessageAsync($"A player has left the EU 1v1 queue");
                 }
                 else
                 {
-                    await Context.Channel.SendMessageAsync($"Player not in queue tried to leave queue");
+                    await Context.Channel.SendMessageAsync($"Player not in 1v1 queue tried to leave queue");
                     Console.WriteLine($"{userInfo.Username} tried to leave an empty queue");
                 }
             }
@@ -501,7 +423,7 @@ namespace BPR
             long p1time = 0, p2time = 0;
             string p1name = "", p2name = "";
             ulong p1id = 0, p2id = 0;
-            string query = $"SELECT time, username, id FROM queueNA;";
+            string query = $"SELECT time, username, id FROM queueNA1;";
             Globals.conn.Open();
             try
             {
@@ -535,7 +457,7 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            query = $"INSERT INTO matchesNA(id1, id2, username1, username2) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}');";
+            query = $"INSERT INTO matchesNA1(id1, id2, username1, username2) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}');";
             Globals.conn.Open();
             try
             {
@@ -551,7 +473,7 @@ namespace BPR
             Globals.conn.Close();
 
             int matchCount = 0;
-            query = $"SELECT count(*) FROM matchesNA;";
+            query = $"SELECT count(*) FROM matchesNA1;";
             Globals.conn.Open();
             try
             {
@@ -572,7 +494,7 @@ namespace BPR
             Globals.conn.Close();
 
             await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}> and <@{p2id}>");
-            Console.WriteLine($"NA Match #{matchCount} has started.");
+            Console.WriteLine($"NA 1v1 Match #{matchCount} has started.");
 
         }
 
@@ -581,7 +503,7 @@ namespace BPR
             long p1time = 0, p2time = 0;
             string p1name = "", p2name = "";
             ulong p1id = 0, p2id = 0;
-            string query = $"SELECT time, username, id FROM queueEU;";
+            string query = $"SELECT time, username, id FROM queueEU1;";
             Globals.conn.Open();
             try
             {
@@ -615,7 +537,7 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            query = $"INSERT INTO matchesEU(id1, id2, username1, username2) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}');";
+            query = $"INSERT INTO matchesEU1(id1, id2, username1, username2) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}');";
             Globals.conn.Open();
             try
             {
@@ -631,7 +553,7 @@ namespace BPR
             Globals.conn.Close();
 
             int matchCount = 0;
-            query = $"SELECT count(*) FROM matchesEU;";
+            query = $"SELECT count(*) FROM matchesEU1;";
             Globals.conn.Open();
             try
             {
@@ -651,45 +573,30 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}> and <@{p2id}>");
-            Console.WriteLine($"EU Match #{matchCount} has started.");
+            await Context.Channel.SendMessageAsync($"New 1v1 match has started between <@{p1id}> and <@{p2id}>");
+            Console.WriteLine($"EU 1v1 Match #{matchCount} has started.");
 
         }
+    }
 
-        [Command("joinAdmin")]
-        [Summary("Joins the test queue")]
-        [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task JoinAdminAsync()
+    [Group("queue2")]
+    [Alias("q2")]
+    public class Queue2Module : ModuleBase<SocketCommandContext>
+    {
+
+        [Command("join")]
+        [Summary("Joins the 2v2 queue")]
+        public async Task JoinAsync()
         {
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
-            Console.WriteLine($"{userInfo.Username} is attempting to join test queue");
+            Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue");
 
-            bool isInQueue = false;
-            int queueCount = 0;
-            string query = $"SELECT count(*) FROM queuetest;";
-            Globals.conn.Open();
-            try
+            if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
             {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    queueCount = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
-                throw;
-            }
-            Globals.conn.Close();
-
-            if (queueCount > 0)
-            {
-                query = $"SELECT id FROM queuetest;";
+                bool isInQueue = false;
+                int queueCount = 0;
+                string query = $"SELECT count(*) FROM queueNA2;";
                 Globals.conn.Open();
                 try
                 {
@@ -698,7 +605,7 @@ namespace BPR
 
                     while (reader.Read())
                     {
-                        if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
+                        queueCount = reader.GetInt16(0);
                     }
                 }
                 catch (Exception ex)
@@ -708,38 +615,39 @@ namespace BPR
                     throw;
                 }
                 Globals.conn.Close();
-            }
-
-            if (isInQueue)
-            {
-                await Context.Channel.SendMessageAsync($"Player already in queue tried to rejoin queue");
-                Console.WriteLine($"{userInfo.Username} tried to join the queue twice");
-            }
-            else
-            {
-                query = $"INSERT INTO queuetest(time, username, id) VALUES({DateTime.Now.ToBinary()}, '{userInfo.Username}', {userInfo.Id});";
-                Globals.conn.Open();
-                try
-                {
-                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                    cmd.ExecuteNonQuery();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                    Globals.conn.Close();
-                    throw;
-                }
-                Globals.conn.Close();
-
-                await Context.Channel.SendMessageAsync($"A player has been added to test queue");
-                Console.WriteLine($"{userInfo.Username} has joined queue");
 
                 if (queueCount > 0)
                 {
-                    await NewMatchNA(0, 1); // This should be modified when anti-smurfing mechanism is introduced
+                    query = $"SELECT id FROM queueNA2;";
                     Globals.conn.Open();
-                    query = $"TRUNCATE TABLE queuetest;";
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        MySqlDataReader reader = cmd.ExecuteReader();
+
+                        while (reader.Read())
+                        {
+                            if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                }
+
+                if (isInQueue)
+                {
+                    await Context.Channel.SendMessageAsync($"Player already in 2v2 queue tried to rejoin queue");
+                    Console.WriteLine($"{userInfo.Username} tried to join the queue twice");
+                }
+                else
+                {
+                    query = $"INSERT INTO queueNA2(time, username, id) VALUES({DateTime.Now.ToBinary()}, '{userInfo.Username}', {userInfo.Id});";
+                    Globals.conn.Open();
                     try
                     {
                         MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -752,124 +660,484 @@ namespace BPR
                         throw;
                     }
                     Globals.conn.Close();
+
+                    await Context.Channel.SendMessageAsync($"A player has been added to NA 2v2 queue");
+
+                    if (queueCount > 3)
+                    {
+                        await NewMatchNA(0, 1, 2, 3); // This should be modified when anti-smurfing mechanism is introduced
+                        Globals.conn.Open();
+                        query = $"TRUNCATE TABLE queueNA2;";
+                        try
+                        {
+                            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                            cmd.ExecuteNonQuery();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                            Globals.conn.Close();
+                            throw;
+                        }
+                        Globals.conn.Close();
+                    }
                 }
             }
-            
+            else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
+            {
+                bool isInQueue = false;
+                int queueCount = 0;
+                string query = $"SELECT count(*) FROM queueEU2;";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        queueCount = reader.GetInt16(0);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                if (queueCount > 0)
+                {
+                    query = $"SELECT id FROM queueEU2;";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        MySqlDataReader reader = cmd.ExecuteReader();
+
+                        while (reader.Read())
+                        {
+                            if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                }
+
+                if (isInQueue)
+                {
+                    await Context.Channel.SendMessageAsync($"Player already in 2v2 queue tried to rejoin queue");
+                    Console.WriteLine($"{userInfo.Username} tried to join the queue twice");
+                }
+                else
+                {
+                    query = $"INSERT INTO queueEU2(time, username, id) VALUES({DateTime.Now.ToBinary()}, '{userInfo.Username}', {userInfo.Id});";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+
+                    await Context.Channel.SendMessageAsync($"A player has been added to EU 2v2 queue");
+                    Console.WriteLine($"{userInfo.Username} has joined queue");
+
+                    if (queueCount > 3)
+                    {
+                        await NewMatchEU(0, 1, 2, 3); // This should be modified when anti-smurfing mechanism is introduced
+                        Globals.conn.Open();
+                        query = $"TRUNCATE TABLE queueEU2;";
+                        try
+                        {
+                            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                            cmd.ExecuteNonQuery();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                            Globals.conn.Close();
+                            throw;
+                        }
+                        Globals.conn.Close();
+                    }
+                }
+            }
+            else await Context.Channel.SendMessageAsync($"Incorrect role order or roles has not been added.");
+        }
+
+        [Command("leave")]
+        [Summary("Leaves the 2v2 queue")]
+        public async Task QueueLeaveAsync()
+        {
+            var userInfo = Context.User;
+            Console.WriteLine($"{userInfo.Username} is attempting to leave 2v2 queue");
+
+            if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
+            {
+                bool isInQueue = false;
+                int queueCount = 0;
+                string query = $"SELECT count(*) FROM queueNA2;";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        queueCount = reader.GetInt16(0);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                if (queueCount > 0)
+                {
+                    query = $"SELECT id FROM queueNA2;";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        MySqlDataReader reader = cmd.ExecuteReader();
+
+                        while (reader.Read())
+                        {
+                            if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                }
+
+                if (isInQueue)
+                {
+                    Globals.conn.Open();
+                    query = $"DELETE FROM queueNA2 WHERE id = {userInfo.Id};";
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                    await Context.Channel.SendMessageAsync($"A player has left the NA 2v2 queue");
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync($"Player not in 2v2 queue tried to leave queue");
+                    Console.WriteLine($"{userInfo.Username} tried to leave an empty queue");
+                }
+            }
+            else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
+            {
+                bool isInQueue = false;
+                int queueCount = 0;
+                string query = $"SELECT count(*) FROM queueEU2;";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        queueCount = reader.GetInt16(0);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                if (queueCount > 0)
+                {
+                    query = $"SELECT id FROM queueEU2;";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        MySqlDataReader reader = cmd.ExecuteReader();
+
+                        while (reader.Read())
+                        {
+                            if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                }
+
+                if (isInQueue)
+                {
+                    Globals.conn.Open();
+                    query = $"DELETE FROM queueEU2 WHERE id = {userInfo.Id};";
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                    await Context.Channel.SendMessageAsync($"A player has left the EU 2v2 queue");
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync($"Player not in 2v2 queue tried to leave queue");
+                    Console.WriteLine($"{userInfo.Username} tried to leave an empty queue");
+                }
+            }
+            else await Context.Channel.SendMessageAsync($"Incorrect role order or roles has not been added.");
+            await Context.Message.DeleteAsync();
+        }
+
+        private async Task NewMatchNA(int p1, int p2, int p3, int p4)
+        {
+            int[] playerPositions = new int[4] { p1, p2, p3, p4 };
+            Random rnd = new Random();
+            int[] newplayerPositions = playerPositions.OrderBy(x => rnd.Next()).ToArray();
+            p1 = newplayerPositions[0];
+            p2 = newplayerPositions[1];
+            p3 = newplayerPositions[2];
+            p4 = newplayerPositions[3];
+
+            long p1time = 0, p2time = 0, p3time = 0, p4time = 0;
+            string p1name = "", p2name = "", p3name = "", p4name = "";
+            ulong p1id = 0, p2id = 0, p3id = 0, p4id = 0;
+            string query = $"SELECT time, username, id FROM queueNA2;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                int i = 0;
+                while (reader.Read())
+                {
+                    if (i == p1)
+                    {
+                        p1time = reader.GetInt64(0);
+                        p1name = reader.GetString(1);
+                        p1id = reader.GetUInt64(2);
+                    }
+                    if (i == p2)
+                    {
+                        p2time = reader.GetInt64(0);
+                        p2name = reader.GetString(1);
+                        p2id = reader.GetUInt64(2);
+                    }
+                    if (i == p3)
+                    {
+                        p3time = reader.GetInt64(0);
+                        p3name = reader.GetString(1);
+                        p3id = reader.GetUInt64(2);
+                    }
+                    if (i == p4)
+                    {
+                        p4time = reader.GetInt64(0);
+                        p4name = reader.GetString(1);
+                        p4id = reader.GetUInt64(2);
+                    }
+                    i++;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            query = $"INSERT INTO matchesNA2(id1, id2, id3, id4, username1, username2, username3, username4) " +
+                $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}');";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            int matchCount = 0;
+            query = $"SELECT count(*) FROM matchesNA2;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    matchCount = reader.GetInt16(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}>, <@{p2id}> and <@{p3id}>, <@{p4id}>");
+            Console.WriteLine($"NA 2v2 Match #{matchCount} has started.");
+
+        }
+
+        private async Task NewMatchEU(int p1, int p2, int p3, int p4)
+        {
+            int[] playerPositions = new int[4] { p1, p2, p3, p4 };
+            Random rnd = new Random();
+            int[] newplayerPositions = playerPositions.OrderBy(x => rnd.Next()).ToArray();
+            p1 = newplayerPositions[0];
+            p2 = newplayerPositions[1];
+            p3 = newplayerPositions[2];
+            p4 = newplayerPositions[3];
+
+            long p1time = 0, p2time = 0, p3time = 0, p4time = 0;
+            string p1name = "", p2name = "", p3name = "", p4name = "";
+            ulong p1id = 0, p2id = 0, p3id = 0, p4id = 0;
+            string query = $"SELECT time, username, id FROM queueEU2;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                int i = 0;
+                while (reader.Read())
+                {
+                    if (i == p1)
+                    {
+                        p1time = reader.GetInt64(0);
+                        p1name = reader.GetString(1);
+                        p1id = reader.GetUInt64(2);
+                    }
+                    if (i == p2)
+                    {
+                        p2time = reader.GetInt64(0);
+                        p2name = reader.GetString(1);
+                        p2id = reader.GetUInt64(2);
+                    }
+                    if (i == p3)
+                    {
+                        p3time = reader.GetInt64(0);
+                        p3name = reader.GetString(1);
+                        p3id = reader.GetUInt64(2);
+                    }
+                    if (i == p4)
+                    {
+                        p4time = reader.GetInt64(0);
+                        p4name = reader.GetString(1);
+                        p4id = reader.GetUInt64(2);
+                    }
+                    i++;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            query = $"INSERT INTO matchesEU2(id1, id2, id3, id4, username1, username2, username3, username4) " +
+                $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}');";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            int matchCount = 0;
+            query = $"SELECT count(*) FROM matchesEU2;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    matchCount = reader.GetInt16(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}>, <@{p2id}> and <@{p3id}>, <@{p4id}>");
+            Console.WriteLine($"EU 2v2 Match #{matchCount} has started.");
+
         }
     }
 
-    [Group("match")]
-    [Alias("m")]
-    public class MatchModule : ModuleBase<SocketCommandContext>
+    [Group("match1")]
+    [Alias("m1")]
+    public class Match1Module : ModuleBase<SocketCommandContext>
     {
-        [Command("list")]
-        [Summary("Lists all ongoing matches")]
-        [Alias("all", "ongoing", "show")]
-        public async Task ListMatchAsync()
-        {
-            Console.WriteLine($"Matches are being listed");
-            string pluralizer;
-            int matchCountNA = 0, matchCountEU = 0;
-            string query = $"SELECT count(*) FROM matchesNA;";
-            Globals.conn.Open();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    matchCountNA = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
-                throw;
-            }
-            Globals.conn.Close();
-            query = $"SELECT count(*) FROM matchesEU;";
-            Globals.conn.Open();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    matchCountEU = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
-                throw;
-            }
-            Globals.conn.Close();
-            if (matchCountNA + matchCountEU != 1) pluralizer = "es";
-            else pluralizer = "";
-            var embed = new EmbedBuilder
-            {
-                Title = "Ongoing Matches",
-                Description = $"{matchCountNA + matchCountEU} match{pluralizer} ongoing"
-            };
-            query = $"SELECT username1, username2 FROM matchesNA;";
-            Globals.conn.Open();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                int k = 1;
-                while (reader.Read())
-                {
-                    embed.AddField(x =>
-                    {
-                        x.Name = $"NA Match #{k}";
-                        x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}";
-                    });
-                    k++;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
-                throw;
-            }
-            Globals.conn.Close();
-
-            query = $"SELECT username1, username2 FROM matchesEU;";
-            Globals.conn.Open();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                int k = 1;
-                while (reader.Read())
-                {
-                    embed.AddField(x =>
-                    {
-                        x.Name = $"EU Match #{k}";
-                        x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}";
-                    });
-                    k++;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
-                throw;
-            }
-            Globals.conn.Close();
-
-            await Context.Channel.SendMessageAsync("", embed: embed);
-        }
-
         [Command("report")]
         [Summary("Allows user to report current match")]
         [Alias("score", "result")]
@@ -886,7 +1154,7 @@ namespace BPR
 
             if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
             {
-                string query = $"SELECT id1, id2, username1, username2 FROM matchesNA;";
+                string query = $"SELECT id1, id2, username1, username2 FROM matchesNA1;";
                 Globals.conn.Open();
                 try
                 {
@@ -945,7 +1213,7 @@ namespace BPR
 
                 var results = new Tuple<double, double>(0, 0);
                 double p1elo = 0, p2elo = 0;
-                query = $"SELECT elo FROM leaderboardNA WHERE id = {p1ID};";
+                query = $"SELECT elo1 FROM leaderboardNA WHERE id = {p1ID};";
                 Globals.conn.Open();
                 try
                 {
@@ -964,7 +1232,7 @@ namespace BPR
                     throw;
                 }
                 Globals.conn.Close();
-                query = $"SELECT elo FROM leaderboardNA WHERE id = {p2ID};";
+                query = $"SELECT elo1 FROM leaderboardNA WHERE id = {p2ID};";
                 Globals.conn.Open();
                 try
                 {
@@ -1006,7 +1274,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync("", embed: embed);
 
                 Console.WriteLine($"Giving {p1Username} {results.Item1} elo, resulting in {new1}");
-                query = $"UPDATE leaderboardNA SET elo = {new1} WHERE id = {p1ID};";
+                query = $"UPDATE leaderboardNA SET elo1 = {new1} WHERE id = {p1ID};";
                 Globals.conn.Open();
                 try
                 {
@@ -1022,7 +1290,7 @@ namespace BPR
                 Globals.conn.Close();
                 Console.WriteLine($"Giving {p2Username} {results.Item2} elo, resulting in {new2}");
                 Globals.conn.Open();
-                query = $"UPDATE leaderboardNA SET elo = {new2} WHERE id = {p2ID};";
+                query = $"UPDATE leaderboardNA SET elo1 = {new2} WHERE id = {p2ID};";
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1037,7 +1305,7 @@ namespace BPR
                 Globals.conn.Close();
 
                 Globals.conn.Open();
-                query = $"DELETE FROM matchesNA WHERE id1 = {p1ID};";
+                query = $"DELETE FROM matchesNA1 WHERE id1 = {p1ID};";
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1054,7 +1322,7 @@ namespace BPR
             }
             else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
             {
-                string query = $"SELECT id1, id2, username1, username2 FROM matchesEU;";
+                string query = $"SELECT id1, id2, username1, username2 FROM matchesEU1;";
                 Globals.conn.Open();
                 try
                 {
@@ -1113,7 +1381,7 @@ namespace BPR
 
                 var results = new Tuple<double, double>(0, 0);
                 double p1elo = 0, p2elo = 0;
-                query = $"SELECT elo FROM leaderboardEU WHERE id = {p1ID};";
+                query = $"SELECT elo1 FROM leaderboardEU WHERE id = {p1ID};";
                 Globals.conn.Open();
                 try
                 {
@@ -1132,7 +1400,7 @@ namespace BPR
                     throw;
                 }
                 Globals.conn.Close();
-                query = $"SELECT elo FROM leaderboardEU WHERE id = {p2ID};";
+                query = $"SELECT elo1 FROM leaderboardEU WHERE id = {p2ID};";
                 Globals.conn.Open();
                 try
                 {
@@ -1174,7 +1442,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync("", embed: embed);
 
                 Console.WriteLine($"Giving {p1Username} {results.Item1} elo, resulting in {new1}");
-                query = $"UPDATE leaderboardEU SET elo = {new1} WHERE id = {p1ID};";
+                query = $"UPDATE leaderboardEU SET elo1 = {new1} WHERE id = {p1ID};";
                 Globals.conn.Open();
                 try
                 {
@@ -1190,7 +1458,7 @@ namespace BPR
                 Globals.conn.Close();
                 Console.WriteLine($"Giving {p2Username} {results.Item2} elo, resulting in {new2}");
                 Globals.conn.Open();
-                query = $"UPDATE leaderboardEU SET elo = {new2} WHERE id = {p2ID};";
+                query = $"UPDATE leaderboardEU SET elo1 = {new2} WHERE id = {p2ID};";
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1205,7 +1473,7 @@ namespace BPR
                 Globals.conn.Close();
 
                 Globals.conn.Open();
-                query = $"DELETE FROM matchesEU WHERE id1 = {p1ID};";
+                query = $"DELETE FROM matchesEU1 WHERE id1 = {p1ID};";
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1228,8 +1496,6 @@ namespace BPR
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task AdminMatchReportNAAsync(ulong p1ID, ulong p2ID)
         {
-
-
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is reporting a result");
             bool isP1 = true;
@@ -1237,7 +1503,7 @@ namespace BPR
 
             var results = new Tuple<double, double>(0, 0);
             double p1elo = 0, p2elo = 0;
-            string query = $"SELECT elo FROM leaderboardNA WHERE id = {p1ID};";
+            string query = $"SELECT elo1 FROM leaderboardNA WHERE id = {p1ID};";
             Globals.conn.Open();
             try
             {
@@ -1256,7 +1522,7 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
-            query = $"SELECT elo FROM leaderboardNA WHERE id = {p2ID};";
+            query = $"SELECT elo1 FROM leaderboardNA WHERE id = {p2ID};";
             Globals.conn.Open();
             try
             {
@@ -1280,7 +1546,7 @@ namespace BPR
             double new1 = p1elo + results.Item1;
             double new2 = p2elo + results.Item2;
 
-            query = $"UPDATE leaderboardNA SET elo = {new1} WHERE id = {p1ID};";
+            query = $"UPDATE leaderboardNA SET elo1 = {new1} WHERE id = {p1ID};";
             Globals.conn.Open();
             try
             {
@@ -1296,7 +1562,7 @@ namespace BPR
             Globals.conn.Close();
 
             Globals.conn.Open();
-            query = $"UPDATE leaderboardNA SET elo = {new2} WHERE id = {p2ID};";
+            query = $"UPDATE leaderboardNA SET elo1 = {new2} WHERE id = {p2ID};";
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1327,7 +1593,7 @@ namespace BPR
 
             var results = new Tuple<double, double>(0, 0);
             double p1elo = 0, p2elo = 0;
-            string query = $"SELECT elo FROM leaderboardEU WHERE id = {p1ID};";
+            string query = $"SELECT elo1 FROM leaderboardEU WHERE id = {p1ID};";
             Globals.conn.Open();
             try
             {
@@ -1346,7 +1612,7 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
-            query = $"SELECT elo FROM leaderboardEU WHERE id = {p2ID};";
+            query = $"SELECT elo1 FROM leaderboardEU WHERE id = {p2ID};";
             Globals.conn.Open();
             try
             {
@@ -1370,7 +1636,7 @@ namespace BPR
             double new1 = p1elo + results.Item1;
             double new2 = p2elo + results.Item2;
 
-            query = $"UPDATE leaderboardEU SET elo = {new1} WHERE id = {p1ID};";
+            query = $"UPDATE leaderboardEU SET elo1 = {new1} WHERE id = {p1ID};";
             Globals.conn.Open();
             try
             {
@@ -1386,7 +1652,7 @@ namespace BPR
             Globals.conn.Close();
 
             Globals.conn.Open();
-            query = $"UPDATE leaderboardEU SET elo = {new2} WHERE id = {p2ID};";
+            query = $"UPDATE leaderboardEU SET elo1 = {new2} WHERE id = {p2ID};";
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1416,6 +1682,659 @@ namespace BPR
             return allChange;
         }
 
+    }
+
+    [Group("match2")]
+    [Alias("m2")]
+    public class Match2Module : ModuleBase<SocketCommandContext>
+    {
+        [Command("report")]
+        [Summary("Allows user to report current match")]
+        [Alias("score", "result")]
+        public async Task MatchReportAsync([Remainder] [Summary("The winner, \"Y\" or \"N\"")] string winner)
+        {
+            var userInfo = Context.User;
+            Console.WriteLine($"{userInfo.Username} is reporting a result");
+            bool? isT1 = null;
+            ulong p1ID = 0, p2ID = 0, p3ID = 0, p4ID = 0;
+            string p1Username = "", p2Username = "", p3Username = "", p4Username = "";
+            int thisMatchNum = 1;
+
+            if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
+            {
+                string query = $"SELECT id1, id2, id3, id4, username1, username2, username3, username4 FROM matchesNA2;";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        if (userInfo.Id == reader.GetUInt64(0) || userInfo.Id == reader.GetUInt64(1))
+                        {
+                            isT1 = true;
+                            p1ID = reader.GetUInt64(0);
+                            p2ID = reader.GetUInt64(1);
+                            p3ID = reader.GetUInt64(2);
+                            p4ID = reader.GetUInt64(3);
+                            p1Username = reader.GetString(4);
+                            p2Username = reader.GetString(5);
+                            p3Username = reader.GetString(6);
+                            p4Username = reader.GetString(7);
+                            break;
+                        }
+                        else if (userInfo.Id == reader.GetUInt64(2) || userInfo.Id == reader.GetUInt64(3))
+                        {
+                            isT1 = false;
+                            p1ID = reader.GetUInt64(0);
+                            p2ID = reader.GetUInt64(1);
+                            p3ID = reader.GetUInt64(2);
+                            p4ID = reader.GetUInt64(3);
+                            p1Username = reader.GetString(4);
+                            p2Username = reader.GetString(5);
+                            p3Username = reader.GetString(6);
+                            p4Username = reader.GetString(7);
+                            break;
+                        }
+                        thisMatchNum++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                if (isT1 == null)
+                {
+                    await Context.Channel.SendMessageAsync($"You are currently not in a match against anyone");
+                    return;
+                }
+
+                if (winner == "W" || winner == "w" || winner == "Y" || winner == "y") { }
+                else if (winner == "L" || winner == "l" || winner == "N" || winner == "n")
+                {
+                    isT1 = !isT1;
+                }
+                else
+                {
+                    Console.WriteLine($"{userInfo.Username} entered the wrong result type");
+                    await Context.Channel.SendMessageAsync("Invalid results entered");
+                    return;
+                }
+
+                Console.WriteLine($"isT1: {isT1}");
+
+                var results = new Tuple<double, double, double, double>(0, 0, 0, 0);
+                double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
+                query = $"SELECT id, elo2 FROM leaderboardNA;";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        if (reader.GetDouble(0) == p1ID) p1elo = reader.GetDouble(1);
+                        if (reader.GetDouble(0) == p2ID) p2elo = reader.GetDouble(1);
+                        if (reader.GetDouble(0) == p3ID) p3elo = reader.GetDouble(1);
+                        if (reader.GetDouble(0) == p4ID) p4elo = reader.GetDouble(1);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                results = EloConvert(p1elo, p2elo, p3elo, p4elo, (bool)isT1);
+
+                double new1 = p1elo + results.Item1;
+                double new2 = p2elo + results.Item2;
+                double new3 = p3elo + results.Item3;
+                double new4 = p4elo + results.Item4;
+
+                var embed = new EmbedBuilder
+                {
+                    Title = "Match Result"
+                };
+                embed.AddField(x =>
+                {
+                    x.Name = $"{p1Username}: {Convert.ToInt32(results.Item1)} elo";
+                    x.Value = $"{p1Username} now has {Convert.ToInt32(new1)} elo";
+                });
+                embed.AddField(x =>
+                {
+                    x.Name = $"{p2Username}: {Convert.ToInt32(results.Item2)} elo";
+                    x.Value = $"{p2Username} now has {Convert.ToInt32(new2)} elo";
+                });
+                embed.AddField(x =>
+                {
+                    x.Name = $"{p3Username}: {Convert.ToInt32(results.Item3)} elo";
+                    x.Value = $"{p3Username} now has {Convert.ToInt32(new3)} elo";
+                });
+                embed.AddField(x =>
+                {
+                    x.Name = $"{p4Username}: {Convert.ToInt32(results.Item4)} elo";
+                    x.Value = $"{p4Username} now has {Convert.ToInt32(new4)} elo";
+                });
+
+                await Context.Channel.SendMessageAsync("", embed: embed);
+
+                Console.WriteLine($"Giving {p1Username} {results.Item1} elo, resulting in {new1}");
+                query = $"UPDATE leaderboardNA SET elo2 = {new1} WHERE id = {p1ID};";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                Console.WriteLine($"Giving {p2Username} {results.Item2} elo, resulting in {new2}");
+                Globals.conn.Open();
+                query = $"UPDATE leaderboardNA SET elo2 = {new2} WHERE id = {p2ID};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                Console.WriteLine($"Giving {p3Username} {results.Item3} elo, resulting in {new3}");
+                query = $"UPDATE leaderboardNA SET elo2 = {new3} WHERE id = {p3ID};";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                Console.WriteLine($"Giving {p4Username} {results.Item4} elo, resulting in {new4}");
+                Globals.conn.Open();
+                query = $"UPDATE leaderboardNA SET elo2 = {new4} WHERE id = {p4ID};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                Globals.conn.Open();
+                query = $"DELETE FROM matchesNA2 WHERE id1 = {p1ID};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                Console.WriteLine($"Match #{thisMatchNum} has ended.");
+            }
+            else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
+            {
+                string query = $"SELECT id1, id2, id3, id4, username1, username2, username3, username4 FROM matchesEU2;";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        if (userInfo.Id == reader.GetUInt64(0) || userInfo.Id == reader.GetUInt64(1))
+                        {
+                            isT1 = true;
+                            p1ID = reader.GetUInt64(0);
+                            p2ID = reader.GetUInt64(1);
+                            p3ID = reader.GetUInt64(2);
+                            p4ID = reader.GetUInt64(3);
+                            p1Username = reader.GetString(4);
+                            p2Username = reader.GetString(5);
+                            p3Username = reader.GetString(6);
+                            p4Username = reader.GetString(7);
+                            break;
+                        }
+                        else if (userInfo.Id == reader.GetUInt64(2) || userInfo.Id == reader.GetUInt64(3))
+                        {
+                            isT1 = false;
+                            p1ID = reader.GetUInt64(0);
+                            p2ID = reader.GetUInt64(1);
+                            p3ID = reader.GetUInt64(2);
+                            p4ID = reader.GetUInt64(3);
+                            p1Username = reader.GetString(4);
+                            p2Username = reader.GetString(5);
+                            p3Username = reader.GetString(6);
+                            p4Username = reader.GetString(7);
+                            break;
+                        }
+                        thisMatchNum++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                if (isT1 == null)
+                {
+                    await Context.Channel.SendMessageAsync($"You are currently not in a match against anyone");
+                    return;
+                }
+
+                if (winner == "W" || winner == "w" || winner == "Y" || winner == "y") { }
+                else if (winner == "L" || winner == "l" || winner == "N" || winner == "n")
+                {
+                    isT1 = !isT1;
+                }
+                else
+                {
+                    Console.WriteLine($"{userInfo.Username} entered the wrong result type");
+                    await Context.Channel.SendMessageAsync("Invalid results entered");
+                    return;
+                }
+
+                Console.WriteLine($"isT1: {isT1}");
+
+                var results = new Tuple<double, double, double, double>(0, 0, 0, 0);
+                double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
+                query = $"SELECT id, elo2 FROM leaderboardEU;";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        if (reader.GetDouble(0) == p1ID) p1elo = reader.GetDouble(1);
+                        if (reader.GetDouble(0) == p2ID) p2elo = reader.GetDouble(1);
+                        if (reader.GetDouble(0) == p3ID) p3elo = reader.GetDouble(1);
+                        if (reader.GetDouble(0) == p4ID) p4elo = reader.GetDouble(1);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                results = EloConvert(p1elo, p2elo, p3elo, p4elo, (bool)isT1);
+
+                double new1 = p1elo + results.Item1;
+                double new2 = p2elo + results.Item2;
+                double new3 = p3elo + results.Item3;
+                double new4 = p4elo + results.Item4;
+
+                var embed = new EmbedBuilder
+                {
+                    Title = "Match Result"
+                };
+                embed.AddField(x =>
+                {
+                    x.Name = $"{p1Username}: {Convert.ToInt32(results.Item1)} elo";
+                    x.Value = $"{p1Username} now has {Convert.ToInt32(new1)} elo";
+                });
+                embed.AddField(x =>
+                {
+                    x.Name = $"{p2Username}: {Convert.ToInt32(results.Item2)} elo";
+                    x.Value = $"{p2Username} now has {Convert.ToInt32(new2)} elo";
+                });
+                embed.AddField(x =>
+                {
+                    x.Name = $"{p3Username}: {Convert.ToInt32(results.Item3)} elo";
+                    x.Value = $"{p3Username} now has {Convert.ToInt32(new3)} elo";
+                });
+                embed.AddField(x =>
+                {
+                    x.Name = $"{p4Username}: {Convert.ToInt32(results.Item4)} elo";
+                    x.Value = $"{p4Username} now has {Convert.ToInt32(new4)} elo";
+                });
+
+                await Context.Channel.SendMessageAsync("", embed: embed);
+
+                Console.WriteLine($"Giving {p1Username} {results.Item1} elo, resulting in {new1}");
+                query = $"UPDATE leaderboardEU SET elo2 = {new1} WHERE id = {p1ID};";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                Console.WriteLine($"Giving {p2Username} {results.Item2} elo, resulting in {new2}");
+                Globals.conn.Open();
+                query = $"UPDATE leaderboardEU SET elo2 = {new2} WHERE id = {p2ID};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                Console.WriteLine($"Giving {p3Username} {results.Item3} elo, resulting in {new3}");
+                query = $"UPDATE leaderboardEU SET elo2 = {new3} WHERE id = {p3ID};";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                Console.WriteLine($"Giving {p4Username} {results.Item4} elo, resulting in {new4}");
+                Globals.conn.Open();
+                query = $"UPDATE leaderboardEU SET elo2 = {new4} WHERE id = {p4ID};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                Globals.conn.Open();
+                query = $"DELETE FROM matchesEU2 WHERE id1 = {p1ID};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                Console.WriteLine($"Match #{thisMatchNum} has ended.");
+            }
+            else await Context.Channel.SendMessageAsync($"Incorrect role order or roles has not been added.");
+        }
+
+        [Command("superNA")]
+        [Summary("Allows admin to report any match")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task AdminMatchReportNAAsync(ulong p1ID, ulong p2ID, ulong p3ID, ulong p4ID)
+        {
+            var userInfo = Context.User;
+            Console.WriteLine($"{userInfo.Username} is reporting a result");
+            bool isT1 = true;
+
+            var results = new Tuple<double, double, double, double>(0, 0, 0, 0);
+            double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
+            string query = $"SELECT id, elo2 FROM leaderboardNA;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (reader.GetDouble(0) == p1ID) p1elo = reader.GetDouble(1);
+                    if (reader.GetDouble(0) == p2ID) p2elo = reader.GetDouble(1);
+                    if (reader.GetDouble(0) == p3ID) p3elo = reader.GetDouble(1);
+                    if (reader.GetDouble(0) == p4ID) p4elo = reader.GetDouble(1);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            results = EloConvert(p1elo, p2elo, p3elo, p4elo, isT1);
+
+            double new1 = p1elo + results.Item1;
+            double new2 = p2elo + results.Item2;
+            double new3 = p3elo + results.Item3;
+            double new4 = p4elo + results.Item4;
+
+            query = $"UPDATE leaderboardNA SET elo2 = {new1} WHERE id = {p1ID};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            Globals.conn.Open();
+            query = $"UPDATE leaderboardNA SET elo2 = {new2} WHERE id = {p2ID};";
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            query = $"UPDATE leaderboardNA SET elo3 = {new3} WHERE id = {p3ID};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            Globals.conn.Open();
+            query = $"UPDATE leaderboardNA SET elo4 = {new4} WHERE id = {p4ID};";
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            await Context.Channel.SendMessageAsync($"Match hard updated");
+        }
+
+        [Command("superEU")]
+        [Summary("Allows admin to report any match")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task AdminMatchReportEUAsync(ulong p1ID, ulong p2ID, ulong p3ID, ulong p4ID)
+        {
+            var userInfo = Context.User;
+            Console.WriteLine($"{userInfo.Username} is reporting a result");
+            bool isT1 = true;
+
+            var results = new Tuple<double, double, double, double>(0, 0, 0, 0);
+            double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
+            string query = $"SELECT id, elo2 FROM leaderboardEU;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (reader.GetDouble(0) == p1ID) p1elo = reader.GetDouble(1);
+                    if (reader.GetDouble(0) == p2ID) p2elo = reader.GetDouble(1);
+                    if (reader.GetDouble(0) == p3ID) p3elo = reader.GetDouble(1);
+                    if (reader.GetDouble(0) == p4ID) p4elo = reader.GetDouble(1);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            results = EloConvert(p1elo, p2elo, p3elo, p4elo, isT1);
+
+            double new1 = p1elo + results.Item1;
+            double new2 = p2elo + results.Item2;
+            double new3 = p3elo + results.Item3;
+            double new4 = p4elo + results.Item4;
+
+            query = $"UPDATE leaderboardEU SET elo2 = {new1} WHERE id = {p1ID};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            Globals.conn.Open();
+            query = $"UPDATE leaderboardEU SET elo2 = {new2} WHERE id = {p2ID};";
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            query = $"UPDATE leaderboardEU SET elo3 = {new3} WHERE id = {p3ID};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            Globals.conn.Open();
+            query = $"UPDATE leaderboardEU SET elo4 = {new4} WHERE id = {p4ID};";
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            await Context.Channel.SendMessageAsync($"Match hard updated");
+        }
+
+        private Tuple<double, double, double, double> EloConvert(double p1, double p2, double p3, double p4, bool isT1)
+        {
+            double t1avg = (p1 + p2) / 2;
+            double t2avg = (p3 + p4) / 2;
+
+            p1 = (p1 + t1avg) / 2;
+            p2 = (p2 + t1avg) / 2;
+            p3 = (p3 + t2avg) / 2;
+            p4 = (p4 + t2avg) / 2;
+
+            double expected1 = 1 / (1 + System.Math.Pow(10, ((t2avg - p1) / 400)));
+            double expected2 = 1 / (1 + System.Math.Pow(10, ((t2avg - p2) / 400)));
+            double expected3 = 1 / (1 + System.Math.Pow(10, ((t1avg - p3) / 400)));
+            double expected4 = 1 / (1 + System.Math.Pow(10, ((t1avg - p4) / 400)));
+
+            double change1 = (32 * (Convert.ToDouble(isT1) - expected1)) + 2;
+            double change2 = (32 * (Convert.ToDouble(isT1) - expected2)) + 2;
+            double change3 = (32 * (Convert.ToDouble(!isT1) - expected3)) + 2;
+            double change4 = (32 * (Convert.ToDouble(!isT1) - expected4)) + 2;
+
+            var allChange = Tuple.Create(change1, change2, change3, change4);
+
+            return allChange;
+        }
     }
 
     [Group("leaderboardNA")]
@@ -1478,46 +2397,6 @@ namespace BPR
                 await Context.Channel.SendMessageAsync("The NA leaderboard has been filled up. Please try again next season.");
                 Console.WriteLine($"{userInfo.Username} tried to join a filled up leaderboard.");
             }
-        }
-
-        [Command("list")]
-        [Summary("Lists the current status of the leaderboard")]
-        [Alias("view", "show")]
-        public async Task ListLeaderboardAsync()
-        {
-            Console.WriteLine($"NA Leaderboard is being requested");
-            var embed = new EmbedBuilder
-            {
-                Title = "NA Leaderboard"
-            };
-
-            int i = 1;
-            string query = $"SELECT username, elo FROM leaderboardNA ORDER BY elo DESC;";
-            Globals.conn.Open();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    embed.AddField(x =>
-                    {
-                        x.Name = $"{i}: {reader.GetString(0)}";
-                        x.Value = $"{reader.GetInt16(1)} elo";
-                    });
-                    i++;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
-                throw;
-            }
-            Globals.conn.Close();
-
-            await Context.Channel.SendMessageAsync("", embed: embed);
         }
 
         [Command("delete")]
@@ -1628,46 +2507,6 @@ namespace BPR
                 await Context.Channel.SendMessageAsync("The EU leaderboard has been filled up. Please try again next season.");
                 Console.WriteLine($"{userInfo.Username} tried to join a filled up leaderboard.");
             }
-        }
-
-        [Command("list")]
-        [Summary("Lists the current status of the leaderboard")]
-        [Alias("view", "show")]
-        public async Task ListLeaderboardAsync()
-        {
-            Console.WriteLine($"EU Leaderboard is being requested");
-            var embed = new EmbedBuilder
-            {
-                Title = "EU Leaderboard"
-            };
-
-            int i = 1;
-            string query = $"SELECT username, elo FROM leaderboardEU ORDER BY elo DESC;";
-            Globals.conn.Open();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    embed.AddField(x =>
-                    {
-                        x.Name = $"{i}: {reader.GetString(0)}";
-                        x.Value = $"{reader.GetInt16(1)} elo";
-                    });
-                    i++;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
-                throw;
-            }
-            Globals.conn.Close();
-
-            await Context.Channel.SendMessageAsync("", embed: embed);
         }
 
         [Command("delete")]
