@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Reflection;
-using System.Collections.Generic;
+using System.Web.Http;
 
 
 using Discord;
 using Discord.WebSocket;
-using Discord.Net.Providers.WS4Net;
 using Discord.Commands;
 
 using Microsoft.Extensions.DependencyInjection;
-
-using MySql.Data;
 using MySql.Data.MySqlClient;
-
+using System.Web.Http.ExceptionHandling;
+using System.Threading;
+using System.Web.Http.Results;
 
 namespace BPR
 {
@@ -35,7 +34,8 @@ namespace BPR
 
         public async Task MainAsync()
         {
-            TaskScheduler.UnobservedTaskException += new EventHandler<UnobservedTaskExceptionEventArgs>(TaskScheduler_UnobservedTaskException);
+            GlobalConfiguration.Configuration.Services.Replace(typeof(IExceptionHandler),
+                new OopsExceptionHandler(GlobalConfiguration.Configuration.Services.GetExceptionHandler()));
 
             _client = new DiscordSocketClient();
             _commands = new CommandService();
@@ -91,10 +91,38 @@ namespace BPR
             return Task.CompletedTask;
         }
 
-        static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        internal class OopsExceptionHandler : IExceptionHandler
         {
-            Console.WriteLine("Unobserved error caught");
-            e.SetObserved();
+            private readonly IExceptionHandler _innerHandler;
+
+            public OopsExceptionHandler(IExceptionHandler innerHandler)
+            {
+                if (innerHandler == null)
+                    throw new ArgumentNullException(nameof(innerHandler));
+
+                _innerHandler = innerHandler;
+            }
+
+            public IExceptionHandler InnerHandler
+            {
+                get { return _innerHandler; }
+            }
+
+            public Task HandleAsync(ExceptionHandlerContext context, CancellationToken cancellationToken)
+            {
+                Handle(context);
+
+                return Task.FromResult<object>(null);
+            }
+
+            public void Handle(ExceptionHandlerContext context)
+            {
+                // Create your own custom result here...
+                // In dev, you might want to null out the result
+                // to display the YSOD.
+                // context.Result = null;
+                context.Result = new InternalServerErrorResult(context.Request);
+            }
         }
     }
 }

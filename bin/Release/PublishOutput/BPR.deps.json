@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.0",
-    "signature": "b21e51c1c13f2e9942da1bd1b909cc886232f155"
+    "signature": "6dccee44c6277f05007a3e25d7f7fe7e756df4ae"
   },
   "compilationOptions": {},
   "targets": {
@@ -10,6 +10,7 @@
         "dependencies": {
           "Discord.Net": "1.0.2",
           "Discord.Net.Providers.WS4Net": "1.0.2",
+          "Microsoft.AspNet.WebApi": "5.2.3",
           "MySql.Data": "6.10.5"
         },
         "runtime": {
@@ -86,6 +87,32 @@
         },
         "runtime": {
           "lib/netstandard1.3/Discord.Net.WebSocket.dll": {}
+        }
+      },
+      "Microsoft.AspNet.WebApi/5.2.3": {
+        "dependencies": {
+          "Microsoft.AspNet.WebApi.WebHost": "5.2.3"
+        }
+      },
+      "Microsoft.AspNet.WebApi.Client/5.2.3": {
+        "runtime": {
+          "lib/net45/System.Net.Http.Formatting.dll": {}
+        }
+      },
+      "Microsoft.AspNet.WebApi.Core/5.2.3": {
+        "dependencies": {
+          "Microsoft.AspNet.WebApi.Client": "5.2.3"
+        },
+        "runtime": {
+          "lib/net45/System.Web.Http.dll": {}
+        }
+      },
+      "Microsoft.AspNet.WebApi.WebHost/5.2.3": {
+        "dependencies": {
+          "Microsoft.AspNet.WebApi.Core": "5.2.3"
+        },
+        "runtime": {
+          "lib/net45/System.Web.Http.WebHost.dll": {}
         }
       },
       "Microsoft.CSharp/4.3.0": {
@@ -1202,6 +1229,34 @@
       "sha512": "sha512-18TAK7E8iOYv6GRkaJwkI0SCfp6iB/YZ3c6ToW70RwoFV0nlBLfphzH1r4BL76YvYg5yt1NHAoglGNjn5URamQ==",
       "path": "discord.net.websocket/1.0.2",
       "hashPath": "discord.net.websocket.1.0.2.nupkg.sha512"
+    },
+    "Microsoft.AspNet.WebApi/5.2.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-mGBfSy61+2dIdPwgguW8EaCVsbYTwwVHeCc/pVq1PhlZS87ColgJ++Hve40TrX6Dtqde0fo9M1Tt19rXlHC5GA==",
+      "path": "microsoft.aspnet.webapi/5.2.3",
+      "hashPath": "microsoft.aspnet.webapi.5.2.3.nupkg.sha512"
+    },
+    "Microsoft.AspNet.WebApi.Client/5.2.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-3kiI8peSXbXHDDrRuo+QaX0iCEVRe0nvn2dBDRw656uPX32UalbBlSIDUDlJxu05eau4tnuhsikiUuugvvoUoQ==",
+      "path": "microsoft.aspnet.webapi.client/5.2.3",
+      "hashPath": "microsoft.aspnet.webapi.client.5.2.3.nupkg.sha512"
+    },
+    "Microsoft.AspNet.WebApi.Core/5.2.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-o90QYlRV8VKR1S7+EcJw9w8WSyVFLl+IIzN8ILZ+n2t6rsc/KS8kBxRzA7wCFPRUHhebCfLqilBk39phvanx3g==",
+      "path": "microsoft.aspnet.webapi.core/5.2.3",
+      "hashPath": "microsoft.aspnet.webapi.core.5.2.3.nupkg.sha512"
+    },
+    "Microsoft.AspNet.WebApi.WebHost/5.2.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-bhm4/BKdS3t6nK2R3NjCpxulcwtMFiHqVBDLuN3W5So1PhZfE+RBs7eVazGOhsEKCk7PoSmiSnl9DG0cpyfHtA==",
+      "path": "microsoft.aspnet.webapi.webhost/5.2.3",
+      "hashPath": "microsoft.aspnet.webapi.webhost.5.2.3.nupkg.sha512"
     },
     "Microsoft.CSharp/4.3.0": {
       "type": "package",
