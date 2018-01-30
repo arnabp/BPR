@@ -150,7 +150,7 @@ namespace BPR
 
                     await Context.Channel.SendMessageAsync($"A player has been added to NA 1v1 queue");
 
-                    if (queueCount > 0)
+                    if (queueCount == 1)
                     {
                         await NewMatchNA(0, 1); // This should be modified when anti-smurfing mechanism is introduced
                         Globals.conn.Open();
@@ -242,7 +242,7 @@ namespace BPR
                     await Context.Channel.SendMessageAsync($"A player has been added to EU 1v1 queue");
                     Console.WriteLine($"{userInfo.Username} has joined queue");
 
-                    if (queueCount > 0)
+                    if (queueCount == 1)
                     {
                         await NewMatchEU(0, 1); // This should be modified when anti-smurfing mechanism is introduced
                         Globals.conn.Open();
@@ -663,7 +663,7 @@ namespace BPR
 
                     await Context.Channel.SendMessageAsync($"A player has been added to NA 2v2 queue");
 
-                    if (queueCount > 3)
+                    if (queueCount == 3)
                     {
                         await NewMatchNA(0, 1, 2, 3); // This should be modified when anti-smurfing mechanism is introduced
                         Globals.conn.Open();
@@ -755,7 +755,7 @@ namespace BPR
                     await Context.Channel.SendMessageAsync($"A player has been added to EU 2v2 queue");
                     Console.WriteLine($"{userInfo.Username} has joined queue");
 
-                    if (queueCount > 3)
+                    if (queueCount == 3)
                     {
                         await NewMatchEU(0, 1, 2, 3); // This should be modified when anti-smurfing mechanism is introduced
                         Globals.conn.Open();
@@ -1027,7 +1027,52 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}>, <@{p2id}> and <@{p3id}>, <@{p4id}>");
+            double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
+
+            query = $"SELECT id, elo2 FROM leaderboardNA;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if(reader.GetUInt64(0) == p1id)
+                    {
+                        p1elo = reader.GetDouble(1);
+                    }
+                    else if(reader.GetUInt64(0) == p2id)
+                    {
+                        p2elo = reader.GetDouble(1);
+                    }
+                    else if (reader.GetUInt64(0) == p3id)
+                    {
+                        p3elo = reader.GetDouble(1);
+                    }
+                    else if (reader.GetUInt64(0) == p4id)
+                    {
+                        p4elo = reader.GetDouble(1);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            if(p1elo + p2elo > p3elo + p4elo)
+            {
+                await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}>, <@{p2id}> and <@{p3id}>, <@{p4id}>");
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync($"New match has started between <@{p3id}>, <@{p4id}> and <@{p1id}>, <@{p2id}>");
+            }
+            
             Console.WriteLine($"NA 2v2 Match #{matchCount} has started.");
 
         }
@@ -1128,7 +1173,52 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}>, <@{p2id}> and <@{p3id}>, <@{p4id}>");
+            double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
+
+            query = $"SELECT id, elo2 FROM leaderboardEU;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (reader.GetUInt64(0) == p1id)
+                    {
+                        p1elo = reader.GetDouble(1);
+                    }
+                    else if (reader.GetUInt64(0) == p2id)
+                    {
+                        p2elo = reader.GetDouble(1);
+                    }
+                    else if (reader.GetUInt64(0) == p3id)
+                    {
+                        p3elo = reader.GetDouble(1);
+                    }
+                    else if (reader.GetUInt64(0) == p4id)
+                    {
+                        p4elo = reader.GetDouble(1);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            if (p1elo + p2elo > p3elo + p4elo)
+            {
+                await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}>, <@{p2id}> and <@{p3id}>, <@{p4id}>");
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync($"New match has started between <@{p3id}>, <@{p4id}> and <@{p1id}>, <@{p2id}>");
+            }
+
             Console.WriteLine($"EU 2v2 Match #{matchCount} has started.");
 
         }
