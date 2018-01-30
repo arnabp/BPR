@@ -746,7 +746,7 @@ public class TimerService
         DateTime nowTime = DateTime.Now;
 
         List<ulong> timeOuts = new List<ulong>(5);
-        string query = $"SELECT time, id FROM queueEU1;";
+        string query = $"SELECT time, id FROM queueEU2;";
         Globals.conn.Open();
         try
         {
