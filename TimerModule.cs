@@ -86,6 +86,7 @@ public class TimerService
 
             while (reader.Read())
             {
+                if (i > 25) break;
                 embed.AddField(x =>
                 {
                     x.Name = $"{i}: {reader.GetString(0)}";
@@ -125,6 +126,7 @@ public class TimerService
 
             while (reader.Read())
             {
+                if (i > 25) break;
                 embed.AddField(x =>
                 {
                     x.Name = $"{i}: {reader.GetString(0)}";
@@ -347,6 +349,7 @@ public class TimerService
 
             while (reader.Read())
             {
+                if (i > 25) break;
                 embed.AddField(x =>
                 {
                     x.Name = $"{i}: {reader.GetString(0)}";
@@ -386,6 +389,7 @@ public class TimerService
 
             while (reader.Read())
             {
+                if (i > 25) break;
                 embed.AddField(x =>
                 {
                     x.Name = $"{i}: {reader.GetString(0)}";

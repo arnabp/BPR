@@ -2462,7 +2462,7 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            if (count < 25)
+            if (count < 30)
             {
                 query = $"INSERT INTO leaderboardNA(id, username) VALUES({userInfo.Id}, '{userInfo.Username}');";
                 Globals.conn.Open();
@@ -2572,7 +2572,7 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            if (count < 25)
+            if (count < 30)
             {
                 query = $"INSERT INTO leaderboardEU(id, username) VALUES({userInfo.Id}, '{userInfo.Username}');";
                 Globals.conn.Open();
