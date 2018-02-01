@@ -72,6 +72,7 @@ namespace BPR
     {
 
         [Command("join")]
+        [Alias("j")]
         [Summary("Joins the 1v1 queue")]
         public async Task JoinAsync()
         {
@@ -585,6 +586,7 @@ namespace BPR
     {
 
         [Command("join")]
+        [Alias("j")]
         [Summary("Joins the 2v2 queue")]
         public async Task JoinAsync()
         {
@@ -1230,7 +1232,7 @@ namespace BPR
     {
         [Command("report")]
         [Summary("Allows user to report current match")]
-        [Alias("score", "result")]
+        [Alias("score", "result", "r")]
         public async Task MatchReportAsync([Remainder] [Summary("The winner, \"Y\" or \"N\"")] string winner)
         {
             var userInfo = Context.User;
@@ -1780,7 +1782,7 @@ namespace BPR
     {
         [Command("report")]
         [Summary("Allows user to report current match")]
-        [Alias("score", "result")]
+        [Alias("score", "result", "r")]
         public async Task MatchReportAsync([Remainder] [Summary("The winner, \"Y\" or \"N\"")] string winner)
         {
             var userInfo = Context.User;
