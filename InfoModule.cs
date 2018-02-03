@@ -82,7 +82,7 @@ namespace BPR
 
             if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
             {
-                bool isInQueue = false;
+                bool isInQueue = false, isInMatch = false;
                 int queueCount = 0;
                 string query = $"SELECT count(*) FROM queueNA1;";
                 Globals.conn.Open();
@@ -125,12 +125,37 @@ namespace BPR
                         throw;
                     }
                     Globals.conn.Close();
+
+                    query = $"SELECT id1, id2 FROM matchesNA1;";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        MySqlDataReader reader = cmd.ExecuteReader();
+
+                        while (reader.Read())
+                        {
+                            if (reader.GetUInt64(0) == userInfo.Id || reader.GetUInt64(1) == userInfo.Id) isInMatch = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
                 }
 
                 if (isInQueue)
                 {
                     await Context.Channel.SendMessageAsync($"Player already in 1v1 queue tried to rejoin queue");
                     Console.WriteLine($"{userInfo.Username} tried to join the queue twice");
+                }
+                else if (isInMatch)
+                {
+                    await Context.Channel.SendMessageAsync($"Player already in 1v1 match tried to queue");
+                    Console.WriteLine($"{userInfo.Username} tried to join the queue while in match");
                 }
                 else
                 {
@@ -173,7 +198,7 @@ namespace BPR
             }
             else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
             {
-                bool isInQueue = false;
+                bool isInQueue = false, isInMatch = false;
                 int queueCount = 0;
                 string query = $"SELECT count(*) FROM queueEU1;";
                 Globals.conn.Open();
@@ -216,12 +241,36 @@ namespace BPR
                         throw;
                     }
                     Globals.conn.Close();
+
+                    query = $"SELECT id1, id2 FROM matchesEU1;";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        MySqlDataReader reader = cmd.ExecuteReader();
+
+                        while (reader.Read())
+                        {
+                            if (reader.GetUInt64(0) == userInfo.Id || reader.GetUInt64(1) == userInfo.Id) isInMatch = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
                 }
 
                 if (isInQueue)
                 {
                     await Context.Channel.SendMessageAsync($"Player already in 1v1 queue tried to rejoin queue");
                     Console.WriteLine($"{userInfo.Username} tried to join the queue twice");
+                }
+                else if (isInMatch)
+                {
+                    await Context.Channel.SendMessageAsync($"Player already in 1v1 match tried to queue");
+                    Console.WriteLine($"{userInfo.Username} tried to join the queue while in match");
                 }
                 else
                 {
@@ -596,7 +645,7 @@ namespace BPR
 
             if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
             {
-                bool isInQueue = false;
+                bool isInQueue = false, isInMatch = false;
                 int queueCount = 0;
                 string query = $"SELECT count(*) FROM queueNA2;";
                 Globals.conn.Open();
@@ -639,12 +688,39 @@ namespace BPR
                         throw;
                     }
                     Globals.conn.Close();
+
+                    query = $"SELECT id1, id2, id3, id4 FROM matchesNA2;";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        MySqlDataReader reader = cmd.ExecuteReader();
+
+                        while (reader.Read())
+                        {
+                            if (reader.GetUInt64(0) == userInfo.Id 
+                                || reader.GetUInt64(1) == userInfo.Id
+                                || reader.GetUInt64(2) == userInfo.Id
+                                || reader.GetUInt64(3) == userInfo.Id) isInMatch = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
                 }
 
                 if (isInQueue)
                 {
                     await Context.Channel.SendMessageAsync($"Player already in 2v2 queue tried to rejoin queue");
                     Console.WriteLine($"{userInfo.Username} tried to join the queue twice");
+                }
+                else if (isInMatch)
+                {
+                    await Context.Channel.SendMessageAsync($"Player already in 2v2 match tried to queue");
+                    Console.WriteLine($"{userInfo.Username} tried to join the queue while in match");
                 }
                 else
                 {
@@ -687,7 +763,7 @@ namespace BPR
             }
             else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
             {
-                bool isInQueue = false;
+                bool isInQueue = false, isInMatch = false;
                 int queueCount = 0;
                 string query = $"SELECT count(*) FROM queueEU2;";
                 Globals.conn.Open();
@@ -730,12 +806,39 @@ namespace BPR
                         throw;
                     }
                     Globals.conn.Close();
+
+                    query = $"SELECT id1, id2, id3, id4 FROM matchesEU2;";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        MySqlDataReader reader = cmd.ExecuteReader();
+
+                        while (reader.Read())
+                        {
+                            if (reader.GetUInt64(0) == userInfo.Id
+                                || reader.GetUInt64(1) == userInfo.Id
+                                || reader.GetUInt64(2) == userInfo.Id
+                                || reader.GetUInt64(3) == userInfo.Id) isInMatch = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
                 }
 
                 if (isInQueue)
                 {
                     await Context.Channel.SendMessageAsync($"Player already in 2v2 queue tried to rejoin queue");
                     Console.WriteLine($"{userInfo.Username} tried to join the queue twice");
+                }
+                else if (isInMatch)
+                {
+                    await Context.Channel.SendMessageAsync($"Player already in 2v2 match tried to queue");
+                    Console.WriteLine($"{userInfo.Username} tried to join the queue while in match");
                 }
                 else
                 {
