@@ -125,27 +125,27 @@ namespace BPR
                         throw;
                     }
                     Globals.conn.Close();
-
-                    query = $"SELECT id1, id2 FROM matchesNA1;";
-                    Globals.conn.Open();
-                    try
-                    {
-                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                        MySqlDataReader reader = cmd.ExecuteReader();
-
-                        while (reader.Read())
-                        {
-                            if (reader.GetUInt64(0) == userInfo.Id || reader.GetUInt64(1) == userInfo.Id) isInMatch = true;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.ToString());
-                        Globals.conn.Close();
-                        throw;
-                    }
-                    Globals.conn.Close();
                 }
+
+                query = $"SELECT id1, id2 FROM matchesNA1;";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        if (reader.GetUInt64(0) == userInfo.Id || reader.GetUInt64(1) == userInfo.Id) isInMatch = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
 
                 if (isInQueue)
                 {
@@ -241,27 +241,27 @@ namespace BPR
                         throw;
                     }
                     Globals.conn.Close();
-
-                    query = $"SELECT id1, id2 FROM matchesEU1;";
-                    Globals.conn.Open();
-                    try
-                    {
-                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                        MySqlDataReader reader = cmd.ExecuteReader();
-
-                        while (reader.Read())
-                        {
-                            if (reader.GetUInt64(0) == userInfo.Id || reader.GetUInt64(1) == userInfo.Id) isInMatch = true;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.ToString());
-                        Globals.conn.Close();
-                        throw;
-                    }
-                    Globals.conn.Close();
                 }
+
+                query = $"SELECT id1, id2 FROM matchesEU1;";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        if (reader.GetUInt64(0) == userInfo.Id || reader.GetUInt64(1) == userInfo.Id) isInMatch = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
 
                 if (isInQueue)
                 {
@@ -689,31 +689,31 @@ namespace BPR
                         throw;
                     }
                     Globals.conn.Close();
-
-                    query = $"SELECT id1, id2, id3, id4 FROM matchesNA2;";
-                    Globals.conn.Open();
-                    try
-                    {
-                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                        MySqlDataReader reader = cmd.ExecuteReader();
-
-                        while (reader.Read())
-                        {
-                            if (reader.GetUInt64(0) == userInfo.Id 
-                                || reader.GetUInt64(1) == userInfo.Id
-                                || reader.GetUInt64(2) == userInfo.Id
-                                || reader.GetUInt64(3) == userInfo.Id) isInMatch = true;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.ToString());
-                        Globals.conn.Close();
-                        throw;
-                    }
-                    Globals.conn.Close();
                 }
-                Console.WriteLine($"{userInfo.Username} is in match? {isInMatch}");
+
+                query = $"SELECT id1, id2, id3, id4 FROM matchesNA2;";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        if (reader.GetUInt64(0) == userInfo.Id
+                            || reader.GetUInt64(1) == userInfo.Id
+                            || reader.GetUInt64(2) == userInfo.Id
+                            || reader.GetUInt64(3) == userInfo.Id) isInMatch = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
                 if (isInQueue)
                 {
                     await Context.Channel.SendMessageAsync($"Player already in 2v2 queue tried to rejoin queue");
@@ -808,31 +808,31 @@ namespace BPR
                         throw;
                     }
                     Globals.conn.Close();
-
-                    query = $"SELECT id1, id2, id3, id4 FROM matchesEU2;";
-                    Globals.conn.Open();
-                    try
-                    {
-                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                        MySqlDataReader reader = cmd.ExecuteReader();
-
-                        while (reader.Read())
-                        {
-                            if (reader.GetUInt64(0) == userInfo.Id
-                                || reader.GetUInt64(1) == userInfo.Id
-                                || reader.GetUInt64(2) == userInfo.Id
-                                || reader.GetUInt64(3) == userInfo.Id) isInMatch = true;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.ToString());
-                        Globals.conn.Close();
-                        throw;
-                    }
-                    Globals.conn.Close();
                 }
-                Console.WriteLine($"{userInfo.Username} is in match? {isInMatch}");
+
+                query = $"SELECT id1, id2, id3, id4 FROM matchesEU2;";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        if (reader.GetUInt64(0) == userInfo.Id
+                            || reader.GetUInt64(1) == userInfo.Id
+                            || reader.GetUInt64(2) == userInfo.Id
+                            || reader.GetUInt64(3) == userInfo.Id) isInMatch = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
                 if (isInQueue)
                 {
                     await Context.Channel.SendMessageAsync($"Player already in 2v2 queue tried to rejoin queue");
