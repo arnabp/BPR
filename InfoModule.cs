@@ -832,7 +832,7 @@ namespace BPR
                     }
                     Globals.conn.Close();
                 }
-
+                Console.WriteLine($"{userInfo.Username} is in match? {isInMatch}");
                 if (isInQueue)
                 {
                     await Context.Channel.SendMessageAsync($"Player already in 2v2 queue tried to rejoin queue");
