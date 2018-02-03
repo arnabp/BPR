@@ -317,6 +317,7 @@ namespace BPR
         }
 
         [Command("leave")]
+        [Alias("l")]
         [Summary("Leaves the 1v1 queue")]
         public async Task QueueLeaveAsync()
         {
@@ -887,6 +888,7 @@ namespace BPR
         }
 
         [Command("leave")]
+        [Alias("l")]
         [Summary("Leaves the 2v2 queue")]
         public async Task QueueLeaveAsync()
         {
