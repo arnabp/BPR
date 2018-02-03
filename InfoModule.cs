@@ -260,6 +260,7 @@ namespace BPR
                         Globals.conn.Close();
                         throw;
                     }
+                    Globals.conn.Close();
                 }
 
                 if (isInQueue)
@@ -710,6 +711,7 @@ namespace BPR
                         Globals.conn.Close();
                         throw;
                     }
+                    Globals.conn.Close();
                 }
 
                 if (isInQueue)
@@ -828,6 +830,7 @@ namespace BPR
                         Globals.conn.Close();
                         throw;
                     }
+                    Globals.conn.Close();
                 }
 
                 if (isInQueue)
