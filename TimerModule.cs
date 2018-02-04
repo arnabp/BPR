@@ -237,7 +237,7 @@ public class TimerService
                 embed.AddField(x =>
                 {
                     x.Name = $"EU Match #{k}";
-                    x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}\nRoom Number: #{reader.GetInt16(2)}";
+                    x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}\nRoom Number: #{reader.GetInt32(2)}";
                 });
                 k++;
             }
@@ -474,7 +474,7 @@ public class TimerService
                 embed.AddField(x =>
                 {
                     x.Name = $"NA Match #{k}";
-                    x.Value = $"{reader.GetString(0)} and {reader.GetString(1)} vs {reader.GetString(2)} and {reader.GetString(3)}\nRoom Number: #{reader.GetInt16(4)}";
+                    x.Value = $"{reader.GetString(0)} and {reader.GetString(1)} vs {reader.GetString(2)} and {reader.GetString(3)}\nRoom Number: #{reader.GetInt32(4)}";
                 });
                 k++;
             }
