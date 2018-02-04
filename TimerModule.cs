@@ -90,7 +90,7 @@ public class TimerService
                 embed.AddField(x =>
                 {
                     x.Name = $"{i}: {reader.GetString(0)}";
-                    x.Value = $"{reader.GetInt16(1)} elo\n{reader.GetInt16(3)} - {reader.GetInt16(3)}";
+                    x.Value = $"{reader.GetInt16(1)} elo\n{reader.GetInt16(3)} - {reader.GetInt16(4)}";
                 });
                 i++;
             }
@@ -130,7 +130,7 @@ public class TimerService
                 embed.AddField(x =>
                 {
                     x.Name = $"{i}: {reader.GetString(0)}";
-                    x.Value = $"{reader.GetInt16(1)} elo\n{reader.GetInt16(3)} - {reader.GetInt16(3)}";
+                    x.Value = $"{reader.GetInt16(1)} elo\n{reader.GetInt16(3)} - {reader.GetInt16(4)}";
                 });
                 i++;
             }
@@ -353,7 +353,7 @@ public class TimerService
                 embed.AddField(x =>
                 {
                     x.Name = $"{i}: {reader.GetString(0)}";
-                    x.Value = $"{reader.GetInt16(1)} elo\n{reader.GetInt16(3)} - {reader.GetInt16(3)}";
+                    x.Value = $"{reader.GetInt16(1)} elo\n{reader.GetInt16(3)} - {reader.GetInt16(4)}";
                 });
                 i++;
             }
@@ -393,7 +393,7 @@ public class TimerService
                 embed.AddField(x =>
                 {
                     x.Name = $"{i}: {reader.GetString(0)}";
-                    x.Value = $"{reader.GetInt16(1)} elo\n{reader.GetInt16(3)} - {reader.GetInt16(3)}";
+                    x.Value = $"{reader.GetInt16(1)} elo\n{reader.GetInt16(3)} - {reader.GetInt16(4)}";
                 });
                 i++;
             }
