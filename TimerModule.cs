@@ -198,7 +198,7 @@ public class TimerService
             Title = "Ongoing Matches",
             Description = $"{matchCountNA + matchCountEU} match{pluralizer} ongoing"
         };
-        query = $"SELECT username1, username2 FROM matchesNA1;";
+        query = $"SELECT username1, username2, room FROM matchesNA1;";
         Globals.conn.Open();
         try
         {
@@ -211,7 +211,7 @@ public class TimerService
                 embed.AddField(x =>
                 {
                     x.Name = $"NA Match #{k}";
-                    x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}";
+                    x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}\nRoom Number: #{reader.GetInt16(2)}";
                 });
                 k++;
             }
@@ -224,7 +224,7 @@ public class TimerService
         }
         Globals.conn.Close();
 
-        query = $"SELECT username1, username2 FROM matchesEU1;";
+        query = $"SELECT username1, username2, room FROM matchesEU1;";
         Globals.conn.Open();
         try
         {
@@ -237,7 +237,7 @@ public class TimerService
                 embed.AddField(x =>
                 {
                     x.Name = $"EU Match #{k}";
-                    x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}";
+                    x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}\nRoom Number: #{reader.GetInt16(2)}";
                 });
                 k++;
             }
@@ -461,7 +461,7 @@ public class TimerService
             Title = "Ongoing Matches",
             Description = $"{matchCountNA + matchCountEU} match{pluralizer} ongoing"
         };
-        query = $"SELECT username1, username2, username3, username4 FROM matchesNA2;";
+        query = $"SELECT username1, username2, username3, username4, room FROM matchesNA2;";
         Globals.conn.Open();
         try
         {
@@ -474,7 +474,7 @@ public class TimerService
                 embed.AddField(x =>
                 {
                     x.Name = $"NA Match #{k}";
-                    x.Value = $"{reader.GetString(0)} and {reader.GetString(1)} vs {reader.GetString(2)} and {reader.GetString(3)}";
+                    x.Value = $"{reader.GetString(0)} and {reader.GetString(1)} vs {reader.GetString(2)} and {reader.GetString(3)}\nRoom Number: #{reader.GetInt16(4)}";
                 });
                 k++;
             }
@@ -487,7 +487,7 @@ public class TimerService
         }
         Globals.conn.Close();
 
-        query = $"SELECT username1, username2, username3, username4 FROM matchesEU2;";
+        query = $"SELECT username1, username2, username3, username4, room FROM matchesEU2;";
         Globals.conn.Open();
         try
         {
@@ -500,7 +500,7 @@ public class TimerService
                 embed.AddField(x =>
                 {
                     x.Name = $"EU Match #{k}";
-                    x.Value = $"{reader.GetString(0)} and {reader.GetString(1)} vs {reader.GetString(2)} and {reader.GetString(3)}";
+                    x.Value = $"{reader.GetString(0)} and {reader.GetString(1)} vs {reader.GetString(2)} and {reader.GetString(3)}\nRoom Number: #{reader.GetInt16(4)}";
                 });
                 k++;
             }

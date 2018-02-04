@@ -548,6 +548,7 @@ namespace BPR
             await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}> and <@{p2id}>");
             Console.WriteLine($"NA 1v1 Match #{matchCount} has started.");
 
+            await Context.Channel.SendMessageAsync($"Please remember to add your room number with !match1 room 00000");
         }
 
         private async Task NewMatchEU(int p1, int p2)
@@ -628,6 +629,7 @@ namespace BPR
             await Context.Channel.SendMessageAsync($"New 1v1 match has started between <@{p1id}> and <@{p2id}>");
             Console.WriteLine($"EU 1v1 Match #{matchCount} has started.");
 
+            await Context.Channel.SendMessageAsync($"Please remember to add your room number with !match1 room 00000");
         }
     }
 
@@ -1185,6 +1187,7 @@ namespace BPR
             
             Console.WriteLine($"NA 2v2 Match #{matchCount} has started.");
 
+            await Context.Channel.SendMessageAsync($"Please remember to add your room number with !match2 room 00000");
         }
 
         private async Task NewMatchEU(int p1, int p2, int p3, int p4)
@@ -1331,6 +1334,7 @@ namespace BPR
 
             Console.WriteLine($"EU 2v2 Match #{matchCount} has started.");
 
+            await Context.Channel.SendMessageAsync($"Please remember to add your room number with !match2 room 00000");
         }
     }
 
@@ -1763,6 +1767,121 @@ namespace BPR
             else await Context.Channel.SendMessageAsync($"Incorrect role order or roles has not been added.");
         }
 
+        [Command("room")]
+        [Summary("Adds room number to match info")]
+        public async Task AddRoomNumberAsync([Remainder] int room)
+        {
+            var userInfo = Context.User;
+            Console.WriteLine($"{userInfo.Username} is adding a room number");
+            int thisMatchNum = 1, idnum = 0;
+            bool isInMatch = false;
+
+            if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
+            {
+                string query = $"SELECT id1, id2, username1, username2 FROM matchesNA1;";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        if (userInfo.Id == reader.GetUInt64(0))
+                        {
+                            isInMatch = true;
+                            idnum = 1;
+                            break;
+                        }
+                        else if (userInfo.Id == reader.GetUInt64(1))
+                        {
+                            isInMatch = true;
+                            idnum = 2;
+                            break;
+                        }
+                        thisMatchNum++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                
+                query = $"UPDATE matchesNA1 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                await Context.Channel.SendMessageAsync($"Match #{thisMatchNum} is in room #{room}");
+            }
+            else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
+            {
+                string query = $"SELECT id1, id2, username1, username2 FROM matchesEU1;";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        if (userInfo.Id == reader.GetUInt64(0))
+                        {
+                            isInMatch = true;
+                            idnum = 1;
+                            break;
+                        }
+                        else if (userInfo.Id == reader.GetUInt64(1))
+                        {
+                            isInMatch = true;
+                            idnum = 2;
+                            break;
+                        }
+                        thisMatchNum++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                query = $"UPDATE matchesEU1 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                await Context.Channel.SendMessageAsync($"Match #{thisMatchNum} is in room #{room}");
+            }
+            else await Context.Channel.SendMessageAsync($"Incorrect role order or roles has not been added.");
+            await Context.Message.DeleteAsync();
+        }
+
         [Command("superNA")]
         [Summary("Allows admin to report any match")]
         [RequireUserPermission(GuildPermission.Administrator)]
@@ -1953,6 +2072,7 @@ namespace BPR
 
             return allChange;
         }
+
 
     }
 
@@ -2505,6 +2625,145 @@ namespace BPR
                 Console.WriteLine($"Match #{thisMatchNum} has ended.");
             }
             else await Context.Channel.SendMessageAsync($"Incorrect role order or roles has not been added.");
+        }
+
+        [Command("room")]
+        [Summary("Adds room number to match info")]
+        public async Task AddRoomNumberAsync([Remainder] int room)
+        {
+            var userInfo = Context.User;
+            Console.WriteLine($"{userInfo.Username} is adding a room number");
+            int thisMatchNum = 1, idnum = 0;
+            bool isInMatch = false;
+
+            if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
+            {
+                string query = $"SELECT id1, id2, id3, id4 username1, username2 FROM matchesNA2;";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        if (userInfo.Id == reader.GetUInt64(0))
+                        {
+                            isInMatch = true;
+                            idnum = 1;
+                            break;
+                        }
+                        else if (userInfo.Id == reader.GetUInt64(1))
+                        {
+                            isInMatch = true;
+                            idnum = 2;
+                            break;
+                        }
+                        else if (userInfo.Id == reader.GetUInt64(2))
+                        {
+                            isInMatch = true;
+                            idnum = 3;
+                            break;
+                        }
+                        else if (userInfo.Id == reader.GetUInt64(3))
+                        {
+                            isInMatch = true;
+                            idnum = 4;
+                            break;
+                        }
+                        thisMatchNum++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                query = $"UPDATE matchesNA2 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                await Context.Channel.SendMessageAsync($"Match #{thisMatchNum} is in room #{room}");
+            }
+            else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
+            {
+                string query = $"SELECT id1, id2, id3, id4 username1, username2 FROM matchesEU2;";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        if (userInfo.Id == reader.GetUInt64(0))
+                        {
+                            isInMatch = true;
+                            idnum = 1;
+                            break;
+                        }
+                        else if (userInfo.Id == reader.GetUInt64(1))
+                        {
+                            isInMatch = true;
+                            idnum = 2;
+                            break;
+                        }
+                        else if (userInfo.Id == reader.GetUInt64(2))
+                        {
+                            isInMatch = true;
+                            idnum = 3;
+                            break;
+                        }
+                        else if (userInfo.Id == reader.GetUInt64(3))
+                        {
+                            isInMatch = true;
+                            idnum = 4;
+                            break;
+                        }
+                        thisMatchNum++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                query = $"UPDATE matchesEU2 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
+                await Context.Channel.SendMessageAsync($"Match #{thisMatchNum} is in room #{room}");
+            }
+            else await Context.Channel.SendMessageAsync($"Incorrect role order or roles has not been added.");
+            await Context.Message.DeleteAsync();
         }
 
         [Command("superNA")]
