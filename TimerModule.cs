@@ -77,7 +77,7 @@ public class TimerService
         };
 
         int i = 1;
-        string query = $"SELECT username, elo1 FROM leaderboardNA ORDER BY elo1 DESC;";
+        string query = $"SELECT username, elo1, wins1, loss1 FROM leaderboardNA ORDER BY elo1 DESC;";
         Globals.conn.Open();
         try
         {
@@ -90,7 +90,7 @@ public class TimerService
                 embed.AddField(x =>
                 {
                     x.Name = $"{i}: {reader.GetString(0)}";
-                    x.Value = $"{reader.GetInt16(1)} elo";
+                    x.Value = $"{reader.GetInt16(1)} elo\n{reader.GetInt16(3)} - {reader.GetInt16(3)}";
                 });
                 i++;
             }
@@ -117,7 +117,7 @@ public class TimerService
         };
 
         int i = 1;
-        string query = $"SELECT username, elo1 FROM leaderboardEU ORDER BY elo1 DESC;";
+        string query = $"SELECT username, elo1, wins1, loss1 FROM leaderboardEU ORDER BY elo1 DESC;";
         Globals.conn.Open();
         try
         {
@@ -130,7 +130,7 @@ public class TimerService
                 embed.AddField(x =>
                 {
                     x.Name = $"{i}: {reader.GetString(0)}";
-                    x.Value = $"{reader.GetInt16(1)} elo";
+                    x.Value = $"{reader.GetInt16(1)} elo\n{reader.GetInt16(3)} - {reader.GetInt16(3)}";
                 });
                 i++;
             }
@@ -340,7 +340,7 @@ public class TimerService
         };
 
         int i = 1;
-        string query = $"SELECT username, elo2 FROM leaderboardNA ORDER BY elo2 DESC;";
+        string query = $"SELECT username, elo2, wins2, loss2 FROM leaderboardNA ORDER BY elo2 DESC;";
         Globals.conn.Open();
         try
         {
@@ -353,7 +353,7 @@ public class TimerService
                 embed.AddField(x =>
                 {
                     x.Name = $"{i}: {reader.GetString(0)}";
-                    x.Value = $"{reader.GetInt16(1)} elo";
+                    x.Value = $"{reader.GetInt16(1)} elo\n{reader.GetInt16(3)} - {reader.GetInt16(3)}";
                 });
                 i++;
             }
@@ -380,7 +380,7 @@ public class TimerService
         };
 
         int i = 1;
-        string query = $"SELECT username, elo2 FROM leaderboardEU ORDER BY elo2 DESC;";
+        string query = $"SELECT username, elo2, wins2, loss2 FROM leaderboardEU ORDER BY elo2 DESC;";
         Globals.conn.Open();
         try
         {
@@ -393,7 +393,7 @@ public class TimerService
                 embed.AddField(x =>
                 {
                     x.Name = $"{i}: {reader.GetString(0)}";
-                    x.Value = $"{reader.GetInt16(1)} elo";
+                    x.Value = $"{reader.GetInt16(1)} elo\n{reader.GetInt16(3)} - {reader.GetInt16(3)}";
                 });
                 i++;
             }

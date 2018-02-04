@@ -1473,8 +1473,30 @@ namespace BPR
 
                 await Context.Channel.SendMessageAsync("", embed: embed);
 
+                string p1ResultString = "wins1";
+                string p2ResultString = "loss1";
+                if (!(bool)isP1)
+                {
+                    p1ResultString = "loss1";
+                    p2ResultString = "wins1";
+                }
+
                 Console.WriteLine($"Giving {p1Username} {results.Item1} elo, resulting in {new1}");
                 query = $"UPDATE leaderboardNA SET elo1 = {new1} WHERE id = {p1ID};";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                query = $"UPDATE leaderboardNA SET {p1ResultString} = {p1ResultString} + 1 WHERE id = {p1ID};";
                 Globals.conn.Open();
                 try
                 {
@@ -1491,6 +1513,20 @@ namespace BPR
                 Console.WriteLine($"Giving {p2Username} {results.Item2} elo, resulting in {new2}");
                 Globals.conn.Open();
                 query = $"UPDATE leaderboardNA SET elo1 = {new2} WHERE id = {p2ID};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                query = $"UPDATE leaderboardNA SET {p2ResultString} = {p2ResultString} + 1 WHERE id = {p2ID};";
+                Globals.conn.Open();
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1641,8 +1677,30 @@ namespace BPR
 
                 await Context.Channel.SendMessageAsync("", embed: embed);
 
+                string p1ResultString = "wins1";
+                string p2ResultString = "loss1";
+                if (!(bool)isP1)
+                {
+                    p1ResultString = "loss1";
+                    p2ResultString = "wins1";
+                }
+
                 Console.WriteLine($"Giving {p1Username} {results.Item1} elo, resulting in {new1}");
                 query = $"UPDATE leaderboardEU SET elo1 = {new1} WHERE id = {p1ID};";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                query = $"UPDATE leaderboardEU SET {p1ResultString} = {p1ResultString} + 1 WHERE id = {p1ID};";
                 Globals.conn.Open();
                 try
                 {
@@ -1659,6 +1717,20 @@ namespace BPR
                 Console.WriteLine($"Giving {p2Username} {results.Item2} elo, resulting in {new2}");
                 Globals.conn.Open();
                 query = $"UPDATE leaderboardEU SET elo1 = {new2} WHERE id = {p2ID};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                query = $"UPDATE leaderboardEU SET {p2ResultString} = {p2ResultString} + 1 WHERE id = {p2ID};";
+                Globals.conn.Open();
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2025,8 +2097,30 @@ namespace BPR
 
                 await Context.Channel.SendMessageAsync("", embed: embed);
 
+                string t1ResultString = "wins2";
+                string t2ResultString = "loss2";
+                if (!(bool)isT1)
+                {
+                    t1ResultString = "loss2";
+                    t2ResultString = "wins2";
+                }
+
                 Console.WriteLine($"Giving {p1Username} {results.Item1} elo, resulting in {new1}");
                 query = $"UPDATE leaderboardNA SET elo2 = {new1} WHERE id = {p1ID};";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                query = $"UPDATE leaderboardNA SET {t1ResultString} = {t1ResultString} + 1 WHERE id = {p1ID};";
                 Globals.conn.Open();
                 try
                 {
@@ -2055,8 +2149,36 @@ namespace BPR
                     throw;
                 }
                 Globals.conn.Close();
+                query = $"UPDATE leaderboardNA SET {t1ResultString} = {t1ResultString} + 1 WHERE id = {p2ID};";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
                 Console.WriteLine($"Giving {p3Username} {results.Item3} elo, resulting in {new3}");
                 query = $"UPDATE leaderboardNA SET elo2 = {new3} WHERE id = {p3ID};";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                query = $"UPDATE leaderboardNA SET {t2ResultString} = {t2ResultString} + 1 WHERE id = {p3ID};";
                 Globals.conn.Open();
                 try
                 {
@@ -2073,6 +2195,20 @@ namespace BPR
                 Console.WriteLine($"Giving {p4Username} {results.Item4} elo, resulting in {new4}");
                 Globals.conn.Open();
                 query = $"UPDATE leaderboardNA SET elo2 = {new4} WHERE id = {p4ID};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                query = $"UPDATE leaderboardNA SET {t2ResultString} = {t2ResultString} + 1 WHERE id = {p4ID};";
+                Globals.conn.Open();
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2227,8 +2363,30 @@ namespace BPR
 
                 await Context.Channel.SendMessageAsync("", embed: embed);
 
+                string t1ResultString = "wins2";
+                string t2ResultString = "loss2";
+                if (!(bool)isT1)
+                {
+                    t1ResultString = "loss2";
+                    t2ResultString = "wins2";
+                }
+
                 Console.WriteLine($"Giving {p1Username} {results.Item1} elo, resulting in {new1}");
                 query = $"UPDATE leaderboardEU SET elo2 = {new1} WHERE id = {p1ID};";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                query = $"UPDATE leaderboardEU SET {t1ResultString} = {t1ResultString} + 1 WHERE id = {p1ID};";
                 Globals.conn.Open();
                 try
                 {
@@ -2257,8 +2415,36 @@ namespace BPR
                     throw;
                 }
                 Globals.conn.Close();
+                query = $"UPDATE leaderboardEU SET {t1ResultString} = {t1ResultString} + 1 WHERE id = {p2ID};";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
                 Console.WriteLine($"Giving {p3Username} {results.Item3} elo, resulting in {new3}");
                 query = $"UPDATE leaderboardEU SET elo2 = {new3} WHERE id = {p3ID};";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                query = $"UPDATE leaderboardEU SET {t2ResultString} = {t2ResultString} + 1 WHERE id = {p3ID};";
                 Globals.conn.Open();
                 try
                 {
@@ -2275,6 +2461,20 @@ namespace BPR
                 Console.WriteLine($"Giving {p4Username} {results.Item4} elo, resulting in {new4}");
                 Globals.conn.Open();
                 query = $"UPDATE leaderboardEU SET elo2 = {new4} WHERE id = {p4ID};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                query = $"UPDATE leaderboardEU SET {t2ResultString} = {t2ResultString} + 1 WHERE id = {p4ID};";
+                Globals.conn.Open();
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2645,6 +2845,57 @@ namespace BPR
 
             await Context.Channel.SendMessageAsync($"{username} has been deleted from the leaderboards");
         }
+
+        [Command("wl")]
+        [Summary("Sets the win/loss ratio of a player")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task SetWinLossAsync(ulong id, int wins, int losses, [Remainder] string gamemode)
+        {
+            var user = Context.Guild.GetUser(id);
+            string username = "";
+            string query = $"SELECT username FROM leaderboardNA WHERE id = {id};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    username = reader.GetString(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            query = $"UPDATE leaderboardNA SET wins{gamemode} = {wins}, loss{gamemode} = {losses} WHERE id = {id};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    username = reader.GetString(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            await Context.Channel.SendMessageAsync($"{username} win/loss in {gamemode}s has been updated");
+        }
     }
 
     [Group("leaderboardEU")]
@@ -2755,6 +3006,57 @@ namespace BPR
             if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(396442764298158081));
 
             await Context.Channel.SendMessageAsync($"{username} has been deleted from the leaderboards");
+        }
+
+        [Command("wl")]
+        [Summary("Sets the win/loss ratio of a player")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task SetWinLossAsync(ulong id, int wins, int losses, [Remainder] string gamemode)
+        {
+            var user = Context.Guild.GetUser(id);
+            string username = "";
+            string query = $"SELECT username FROM leaderboardEU WHERE id = {id};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    username = reader.GetString(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            query = $"UPDATE leaderboardEU SET wins{gamemode} = {wins}, loss{gamemode} = {losses} WHERE id = {id};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    username = reader.GetString(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            await Context.Channel.SendMessageAsync($"{username} win/loss in {gamemode}s has been updated");
         }
     }
 }
