@@ -150,7 +150,22 @@ namespace BPR
                 if (isInQueue)
                 {
                     await Context.Channel.SendMessageAsync($"Player already in 1v1 queue tried to rejoin queue");
-                    Console.WriteLine($"{userInfo.Username} tried to join the queue twice");
+
+                    query = $"UPDATE queueNA1 SET time = {DateTime.Now.ToBinary()} WHERE id = {userInfo.Id};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                    Console.WriteLine($"{userInfo.Username} refreshed their queue timer");
                 }
                 else if (isInMatch)
                 {
@@ -265,8 +280,23 @@ namespace BPR
 
                 if (isInQueue)
                 {
-                    await Context.Channel.SendMessageAsync($"Player already in 1v1 queue tried to rejoin queue");
-                    Console.WriteLine($"{userInfo.Username} tried to join the queue twice");
+                    await Context.Channel.SendMessageAsync($"Player already in 1v1 queue tried to rejoin queue, queue timer refreshed");
+                    
+                    query = $"UPDATE queueEU1 SET time = {DateTime.Now.ToBinary()} WHERE id = {userInfo.Id};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                    Console.WriteLine($"{userInfo.Username} refreshed their queue timer");
                 }
                 else if (isInMatch)
                 {
@@ -509,7 +539,7 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            query = $"INSERT INTO matchesNA1(id1, id2, username1, username2) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}');";
+            query = $"INSERT INTO matchesNA1(id1, id2, username1, username2, time) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.Now.ToBinary()});";
             Globals.conn.Open();
             try
             {
@@ -590,7 +620,7 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            query = $"INSERT INTO matchesEU1(id1, id2, username1, username2) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}');";
+            query = $"INSERT INTO matchesEU1(id1, id2, username1, username2, time) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.Now.ToBinary()});";
             Globals.conn.Open();
             try
             {
@@ -720,7 +750,22 @@ namespace BPR
                 if (isInQueue)
                 {
                     await Context.Channel.SendMessageAsync($"Player already in 2v2 queue tried to rejoin queue");
-                    Console.WriteLine($"{userInfo.Username} tried to join the queue twice");
+
+                    query = $"UPDATE queueNA2 SET time = {DateTime.Now.ToBinary()} WHERE id = {userInfo.Id};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                    Console.WriteLine($"{userInfo.Username} refreshed their queue timer");
                 }
                 else if (isInMatch)
                 {
@@ -839,7 +884,22 @@ namespace BPR
                 if (isInQueue)
                 {
                     await Context.Channel.SendMessageAsync($"Player already in 2v2 queue tried to rejoin queue");
-                    Console.WriteLine($"{userInfo.Username} tried to join the queue twice");
+
+                    query = $"UPDATE queueEU2 SET time = {DateTime.Now.ToBinary()} WHERE id = {userInfo.Id};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                    Console.WriteLine($"{userInfo.Username} refreshed their queue timer");
                 }
                 else if (isInMatch)
                 {
@@ -1102,8 +1162,8 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            query = $"INSERT INTO matchesNA2(id1, id2, id3, id4, username1, username2, username3, username4) " +
-                $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}');";
+            query = $"INSERT INTO matchesNA2(id1, id2, id3, id4, username1, username2, username3, username4, time) " +
+                $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.Now.ToBinary()});";
             Globals.conn.Open();
             try
             {
@@ -1249,8 +1309,8 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            query = $"INSERT INTO matchesEU2(id1, id2, id3, id4, username1, username2, username3, username4) " +
-                $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}');";
+            query = $"INSERT INTO matchesEU2(id1, id2, id3, id4, username1, username2, username3, username4, time) " +
+                $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.Now.ToBinary()});";
             Globals.conn.Open();
             try
             {
