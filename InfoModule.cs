@@ -149,7 +149,7 @@ namespace BPR
 
                 if (isInQueue)
                 {
-                    await Context.Channel.SendMessageAsync($"Player already in 1v1 queue tried to rejoin queue");
+                    await Context.Channel.SendMessageAsync($"Player already in 1v1 queue has now refreshed their queue timer");
 
                     query = $"UPDATE queueNA1 SET time = {DateTime.Now.ToBinary()} WHERE id = {userInfo.Id};";
                     Globals.conn.Open();
@@ -280,7 +280,7 @@ namespace BPR
 
                 if (isInQueue)
                 {
-                    await Context.Channel.SendMessageAsync($"Player already in 1v1 queue tried to rejoin queue, queue timer refreshed");
+                    await Context.Channel.SendMessageAsync($"Player already in 1v1 queue has now refreshed their queue timer");
                     
                     query = $"UPDATE queueEU1 SET time = {DateTime.Now.ToBinary()} WHERE id = {userInfo.Id};";
                     Globals.conn.Open();
@@ -749,7 +749,7 @@ namespace BPR
 
                 if (isInQueue)
                 {
-                    await Context.Channel.SendMessageAsync($"Player already in 2v2 queue tried to rejoin queue");
+                    await Context.Channel.SendMessageAsync($"Player already in 2v2 queue has now refreshed their queue timer");
 
                     query = $"UPDATE queueNA2 SET time = {DateTime.Now.ToBinary()} WHERE id = {userInfo.Id};";
                     Globals.conn.Open();
@@ -883,7 +883,7 @@ namespace BPR
 
                 if (isInQueue)
                 {
-                    await Context.Channel.SendMessageAsync($"Player already in 2v2 queue tried to rejoin queue");
+                    await Context.Channel.SendMessageAsync($"Player already in 2v2 queue has now refreshed their queue timer");
 
                     query = $"UPDATE queueEU2 SET time = {DateTime.Now.ToBinary()} WHERE id = {userInfo.Id};";
                     Globals.conn.Open();
@@ -1885,7 +1885,7 @@ namespace BPR
                 }
                 Globals.conn.Close();
 
-                await Context.Channel.SendMessageAsync($"Match #{thisMatchNum} is in room #{room}");
+                await Context.Channel.SendMessageAsync($"NA 1v1 Match #{thisMatchNum} is in room #{room}");
             }
             else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
             {
@@ -1936,7 +1936,7 @@ namespace BPR
                 }
                 Globals.conn.Close();
 
-                await Context.Channel.SendMessageAsync($"Match #{thisMatchNum} is in room #{room}");
+                await Context.Channel.SendMessageAsync($"EU 1v1 Match #{thisMatchNum} is in room #{room}");
             }
             else await Context.Channel.SendMessageAsync($"Incorrect role order or roles has not been added.");
             await Context.Message.DeleteAsync();
@@ -2757,7 +2757,7 @@ namespace BPR
                 }
                 Globals.conn.Close();
 
-                await Context.Channel.SendMessageAsync($"Match #{thisMatchNum} is in room #{room}");
+                await Context.Channel.SendMessageAsync($"NA 2v2 Match #{thisMatchNum} is in room #{room}");
             }
             else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
             {
@@ -2820,7 +2820,7 @@ namespace BPR
                 }
                 Globals.conn.Close();
 
-                await Context.Channel.SendMessageAsync($"Match #{thisMatchNum} is in room #{room}");
+                await Context.Channel.SendMessageAsync($"EU 2v2 Match #{thisMatchNum} is in room #{room}");
             }
             else await Context.Channel.SendMessageAsync($"Incorrect role order or roles has not been added.");
             await Context.Message.DeleteAsync();
