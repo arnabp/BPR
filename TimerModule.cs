@@ -30,6 +30,11 @@ public class TimerService
                 await CheckQueueTimeoutEU1(general);
                 await CheckQueueTimeoutNA2(general);
                 await CheckQueueTimeoutEU2(general);
+
+                await CheckRoomNA1(general);
+                await CheckRoomEU1(general);
+                await CheckRoomNA2(general);
+                await CheckRoomEU2(general);
             }
 
             if (client.GetChannel(401167888762929153) is IMessageChannel queue1Info)
@@ -836,6 +841,222 @@ public class TimerService
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
                 cmd.ExecuteNonQuery();
                 await thisChannel.SendMessageAsync($"A player has timed out of test queue");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+        }
+    }
+
+    public async Task CheckRoomNA1(IMessageChannel thisChannel)
+    {
+        DateTime nowTime = DateTime.Now;
+
+        List<ulong> nullRooms = new List<ulong>(5);
+        string query = $"SELECT room, id1 FROM matchesNA1;";
+        Globals.conn.Open();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                if (reader.GetInt32(0) == 0)
+                {
+                    nullRooms.Add(reader.GetUInt64(1));
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            Globals.conn.Close();
+            throw;
+        }
+        Globals.conn.Close();
+
+        foreach (var id in nullRooms)
+        {
+            query = $"SELECT id1, id2 FROM matchesNA1 WHERE id1 = {id};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}> and <@{reader.GetInt64(1)}>! Add your room number!");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+        }
+    }
+
+    public async Task CheckRoomEU1(IMessageChannel thisChannel)
+    {
+        DateTime nowTime = DateTime.Now;
+
+        List<ulong> nullRooms = new List<ulong>(5);
+        string query = $"SELECT room, id1 FROM matchesEU1;";
+        Globals.conn.Open();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                if (reader.GetInt32(0) == 0)
+                {
+                    nullRooms.Add(reader.GetUInt64(1));
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            Globals.conn.Close();
+            throw;
+        }
+        Globals.conn.Close();
+
+        foreach (var id in nullRooms)
+        {
+            query = $"SELECT id1, id2 FROM matchesEU1 WHERE id1 = {id};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}> and <@{reader.GetInt64(1)}>! Add your room number!");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+        }
+    }
+
+    public async Task CheckRoomNA2(IMessageChannel thisChannel)
+    {
+        DateTime nowTime = DateTime.Now;
+
+        List<ulong> nullRooms = new List<ulong>(5);
+        string query = $"SELECT room, id1 FROM matchesNA2;";
+        Globals.conn.Open();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                if (reader.GetInt32(0) == 0)
+                {
+                    nullRooms.Add(reader.GetUInt64(1));
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            Globals.conn.Close();
+            throw;
+        }
+        Globals.conn.Close();
+
+        foreach (var id in nullRooms)
+        {
+            query = $"SELECT id1, id2, id3, id4 FROM matchesNA2 WHERE id1 = {id};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}>, <@{reader.GetInt64(1)}>, <@{reader.GetInt64(2)}>, and <@{reader.GetInt64(3)}>! Add your room number!");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+        }
+    }
+
+    public async Task CheckRoomEU2(IMessageChannel thisChannel)
+    {
+        DateTime nowTime = DateTime.Now;
+
+        List<ulong> nullRooms = new List<ulong>(5);
+        string query = $"SELECT room, id1 FROM matchesEU2;";
+        Globals.conn.Open();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                if (reader.GetInt32(0) == 0)
+                {
+                    nullRooms.Add(reader.GetUInt64(1));
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            Globals.conn.Close();
+            throw;
+        }
+        Globals.conn.Close();
+
+        foreach (var id in nullRooms)
+        {
+            query = $"SELECT id1, id2, id3, id4 FROM matchesEU2 WHERE id1 = {id};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}>, <@{reader.GetInt64(1)}>, <@{reader.GetInt64(2)}>, and <@{reader.GetInt64(3)}>! Add your room number!");
+                }
             }
             catch (Exception ex)
             {
