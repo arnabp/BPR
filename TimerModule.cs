@@ -31,10 +31,13 @@ public class TimerService
                 await CheckQueueTimeoutNA2(general);
                 await CheckQueueTimeoutEU2(general);
 
-                await CheckRoomNA1(general);
-                await CheckRoomEU1(general);
-                await CheckRoomNA2(general);
-                await CheckRoomEU2(general);
+                if(Globals.timerCount % 3 == 0)
+                {
+                    await CheckRoomNA1(general);
+                    await CheckRoomEU1(general);
+                    await CheckRoomNA2(general);
+                    await CheckRoomEU2(general);
+                }
             }
 
             if (client.GetChannel(401167888762929153) is IMessageChannel queue1Info)
@@ -68,6 +71,8 @@ public class TimerService
                 if (queueListm != null) await UpdateQueue2(queueListm);
 
             }
+
+            Globals.timerCount++;
         },
         null,
         TimeSpan.FromMinutes(0),  // 4) Time that message should fire after the timer is created
@@ -893,7 +898,7 @@ public class TimerService
 
                 while (reader.Read())
                 {
-                    await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}> and <@{reader.GetInt64(1)}>! Add your room number!");
+                    await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}> and <@{reader.GetInt64(1)}>, please add your room number so it can be streamed on ProBrawlhalla");
                 }
             }
             catch (Exception ex)
@@ -947,7 +952,7 @@ public class TimerService
 
                 while (reader.Read())
                 {
-                    await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}> and <@{reader.GetInt64(1)}>! Add your room number!");
+                    await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}> and <@{reader.GetInt64(1)}>, please add your room number so it can be streamed on ProBrawlhalla");
                 }
             }
             catch (Exception ex)
@@ -1001,7 +1006,7 @@ public class TimerService
 
                 while (reader.Read())
                 {
-                    await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}>, <@{reader.GetInt64(1)}>, <@{reader.GetInt64(2)}>, and <@{reader.GetInt64(3)}>! Add your room number!");
+                    await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}>, <@{reader.GetInt64(1)}>, <@{reader.GetInt64(2)}>, and <@{reader.GetInt64(3)}>, please add your room number so it can be streamed on ProBrawlhalla");
                 }
             }
             catch (Exception ex)
@@ -1055,7 +1060,7 @@ public class TimerService
 
                 while (reader.Read())
                 {
-                    await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}>, <@{reader.GetInt64(1)}>, <@{reader.GetInt64(2)}>, and <@{reader.GetInt64(3)}>! Add your room number!");
+                    await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}>, <@{reader.GetInt64(1)}>, <@{reader.GetInt64(2)}>, and <@{reader.GetInt64(3)}>, please add your room number so it can be streamed on ProBrawlhalla");
                 }
             }
             catch (Exception ex)

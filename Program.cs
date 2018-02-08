@@ -19,6 +19,7 @@ namespace BPR
     public static class Globals
     {
         public static MySqlConnection conn = new MySqlConnection("");
+        public static int timerCount = 0;
     }
 
     class Program
@@ -34,8 +35,8 @@ namespace BPR
 
         public async Task MainAsync()
         {
-            GlobalConfiguration.Configuration.Services.Replace(typeof(IExceptionHandler),
-                new OopsExceptionHandler(GlobalConfiguration.Configuration.Services.GetExceptionHandler()));
+            //GlobalConfiguration.Configuration.Services.Replace(typeof(IExceptionHandler),
+            //    new OopsExceptionHandler(GlobalConfiguration.Configuration.Services.GetExceptionHandler()));
 
             _client = new DiscordSocketClient();
             _commands = new CommandService();
