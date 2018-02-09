@@ -211,6 +211,7 @@ namespace BPR
                             Globals.conn.Close();
                             throw;
                         }
+                        Globals.conn.Close();
                         if (isInOtherQueue)
                         {
                             Globals.conn.Open();
@@ -380,6 +381,7 @@ namespace BPR
                             Globals.conn.Close();
                             throw;
                         }
+                        Globals.conn.Close();
                         if (isInOtherQueue)
                         {
                             Globals.conn.Open();
@@ -884,6 +886,7 @@ namespace BPR
                             Globals.conn.Close();
                             throw;
                         }
+                        Globals.conn.Close();
                         if (isInOtherQueue)
                         {
                             Globals.conn.Open();
@@ -1055,6 +1058,7 @@ namespace BPR
                             Globals.conn.Close();
                             throw;
                         }
+                        Globals.conn.Close();
                         if (isInOtherQueue)
                         {
                             Globals.conn.Open();
