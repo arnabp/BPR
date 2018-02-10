@@ -82,7 +82,7 @@ namespace BPR
 
             if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
             {
-                bool isInQueue = false, isInMatch = false, isInOtherQueue = false;
+                bool isInQueue = false, isInMatch = false;
                 int queueCount = 0;
                 string query = $"SELECT count(*) FROM queueNA1;";
                 Globals.conn.Open();
@@ -193,44 +193,6 @@ namespace BPR
 
                     if (queueCount == 1)
                     {
-                        query = $"SELECT id FROM queueEU2;";
-                        Globals.conn.Open();
-                        try
-                        {
-                            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                            MySqlDataReader reader = cmd.ExecuteReader();
-
-                            while (reader.Read())
-                            {
-                                if (reader.GetUInt64(0) == userInfo.Id) isInOtherQueue = true;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex.ToString());
-                            Globals.conn.Close();
-                            throw;
-                        }
-                        Globals.conn.Close();
-                        if (isInOtherQueue)
-                        {
-                            Globals.conn.Open();
-                            query = $"DELETE FROM queueEU2 WHERE id = {userInfo.Id};";
-                            try
-                            {
-                                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                                cmd.ExecuteNonQuery();
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine(ex.ToString());
-                                Globals.conn.Close();
-                                throw;
-                            }
-                            Globals.conn.Close();
-                            await Context.Channel.SendMessageAsync($"A player has left the NA 2v2 queue");
-                        }
-                        Globals.conn.Close();
                         await NewMatchNA(0, 1); // This should be modified when anti-smurfing mechanism is introduced
                         Globals.conn.Open();
                         query = $"TRUNCATE TABLE queueNA1;";
@@ -363,43 +325,6 @@ namespace BPR
 
                     if (queueCount == 1)
                     {
-                        query = $"SELECT id FROM queueNA2;";
-                        Globals.conn.Open();
-                        try
-                        {
-                            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                            MySqlDataReader reader = cmd.ExecuteReader();
-
-                            while (reader.Read())
-                            {
-                                if (reader.GetUInt64(0) == userInfo.Id) isInOtherQueue = true;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex.ToString());
-                            Globals.conn.Close();
-                            throw;
-                        }
-                        Globals.conn.Close();
-                        if (isInOtherQueue)
-                        {
-                            Globals.conn.Open();
-                            query = $"DELETE FROM queueNA2 WHERE id = {userInfo.Id};";
-                            try
-                            {
-                                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                                cmd.ExecuteNonQuery();
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine(ex.ToString());
-                                Globals.conn.Close();
-                                throw;
-                            }
-                            Globals.conn.Close();
-                            await Context.Channel.SendMessageAsync($"A player has left the EU 2v2 queue");
-                        }
                         await NewMatchEU(0, 1); // This should be modified when anti-smurfing mechanism is introduced
                         Globals.conn.Open();
                         query = $"TRUNCATE TABLE queueEU1;";
@@ -580,6 +505,7 @@ namespace BPR
             long p1time = 0, p2time = 0;
             string p1name = "", p2name = "";
             ulong p1id = 0, p2id = 0;
+            bool is1InQueue = false, is2InQueue = false;
             string query = $"SELECT time, username, id FROM queueNA1;";
             Globals.conn.Open();
             try
@@ -613,6 +539,64 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
+
+            query = $"SELECT id FROM queueNA2;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (reader.GetUInt64(0) == p1id) is1InQueue = true;
+                    if (reader.GetUInt64(0) == p2id) is2InQueue = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            if (is1InQueue)
+            {
+                Globals.conn.Open();
+                query = $"DELETE FROM queueNA2 WHERE id = {p1id};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                await Context.Channel.SendMessageAsync($"A player has left the NA 2v2 queue");
+            }
+
+            if (is2InQueue)
+            {
+                Globals.conn.Open();
+                query = $"DELETE FROM queueNA2 WHERE id = {p2id};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                await Context.Channel.SendMessageAsync($"A player has left the NA 2v2 queue");
+            }
 
             query = $"INSERT INTO matchesNA1(id1, id2, username1, username2, time) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.Now.ToBinary()});";
             Globals.conn.Open();
@@ -661,6 +645,7 @@ namespace BPR
             long p1time = 0, p2time = 0;
             string p1name = "", p2name = "";
             ulong p1id = 0, p2id = 0;
+            bool is1InQueue = false, is2InQueue = false;
             string query = $"SELECT time, username, id FROM queueEU1;";
             Globals.conn.Open();
             try
@@ -694,6 +679,64 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
+
+            query = $"SELECT id FROM queueEU2;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (reader.GetUInt64(0) == p1id) is1InQueue = true;
+                    if (reader.GetUInt64(0) == p2id) is2InQueue = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            if (is1InQueue)
+            {
+                Globals.conn.Open();
+                query = $"DELETE FROM queueEU2 WHERE id = {p1id};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                await Context.Channel.SendMessageAsync($"A player has left the EU 2v2 queue");
+            }
+
+            if (is2InQueue)
+            {
+                Globals.conn.Open();
+                query = $"DELETE FROM queueEU2 WHERE id = {p2id};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                await Context.Channel.SendMessageAsync($"A player has left the EU 2v2 queue");
+            }
 
             query = $"INSERT INTO matchesEU1(id1, id2, username1, username2, time) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.Now.ToBinary()});";
             Globals.conn.Open();
@@ -754,7 +797,7 @@ namespace BPR
 
             if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442734271004672)
             {
-                bool isInQueue = false, isInMatch = false, isInOtherQueue = false;
+                bool isInQueue = false, isInMatch = false;
                 int queueCount = 0;
                 string query = $"SELECT count(*) FROM queueNA2;";
                 Globals.conn.Open();
@@ -868,43 +911,6 @@ namespace BPR
 
                     if (queueCount == 3)
                     {
-                        query = $"SELECT id FROM queueNA1;";
-                        Globals.conn.Open();
-                        try
-                        {
-                            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                            MySqlDataReader reader = cmd.ExecuteReader();
-
-                            while (reader.Read())
-                            {
-                                if (reader.GetUInt64(0) == userInfo.Id) isInOtherQueue = true;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex.ToString());
-                            Globals.conn.Close();
-                            throw;
-                        }
-                        Globals.conn.Close();
-                        if (isInOtherQueue)
-                        {
-                            Globals.conn.Open();
-                            query = $"DELETE FROM queueNA1 WHERE id = {userInfo.Id};";
-                            try
-                            {
-                                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                                cmd.ExecuteNonQuery();
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine(ex.ToString());
-                                Globals.conn.Close();
-                                throw;
-                            }
-                            Globals.conn.Close();
-                            await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
-                        }
                         await NewMatchNA(0, 1, 2, 3); // This should be modified when anti-smurfing mechanism is introduced
                         Globals.conn.Open();
                         query = $"TRUNCATE TABLE queueNA2;";
@@ -925,7 +931,7 @@ namespace BPR
             }
             else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
             {
-                bool isInQueue = false, isInMatch = false, isInOtherQueue = false;
+                bool isInQueue = false, isInMatch = false;
                 int queueCount = 0;
                 string query = $"SELECT count(*) FROM queueEU2;";
                 Globals.conn.Open();
@@ -1040,43 +1046,6 @@ namespace BPR
 
                     if (queueCount == 3)
                     {
-                        query = $"SELECT id FROM queueEU1;";
-                        Globals.conn.Open();
-                        try
-                        {
-                            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                            MySqlDataReader reader = cmd.ExecuteReader();
-
-                            while (reader.Read())
-                            {
-                                if (reader.GetUInt64(0) == userInfo.Id) isInOtherQueue = true;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex.ToString());
-                            Globals.conn.Close();
-                            throw;
-                        }
-                        Globals.conn.Close();
-                        if (isInOtherQueue)
-                        {
-                            Globals.conn.Open();
-                            query = $"DELETE FROM queueEU1 WHERE id = {userInfo.Id};";
-                            try
-                            {
-                                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                                cmd.ExecuteNonQuery();
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine(ex.ToString());
-                                Globals.conn.Close();
-                                throw;
-                            }
-                            Globals.conn.Close();
-                            await Context.Channel.SendMessageAsync($"A player has left the EU 1v1 queue");
-                        }
                         await NewMatchEU(0, 1, 2, 3); // This should be modified when anti-smurfing mechanism is introduced
                         Globals.conn.Open();
                         query = $"TRUNCATE TABLE queueEU2;";
@@ -1265,6 +1234,7 @@ namespace BPR
             long p1time = 0, p2time = 0, p3time = 0, p4time = 0;
             string p1name = "", p2name = "", p3name = "", p4name = "";
             ulong p1id = 0, p2id = 0, p3id = 0, p4id = 0;
+            bool is1InQueue = false, is2InQueue = false, is3InQueue = false, is4InQueue = false;
             string query = $"SELECT time, username, id FROM queueNA2;";
             Globals.conn.Open();
             try
@@ -1310,6 +1280,101 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
+
+            query = $"SELECT id FROM queueNA1;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (reader.GetUInt64(0) == p1id) is1InQueue = true;
+                    if (reader.GetUInt64(0) == p2id) is2InQueue = true;
+                    if (reader.GetUInt64(0) == p1id) is3InQueue = true;
+                    if (reader.GetUInt64(0) == p2id) is4InQueue = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            if (is1InQueue)
+            {
+                Globals.conn.Open();
+                query = $"DELETE FROM queueNA1 WHERE id = {p1id};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
+            }
+            if (is2InQueue)
+            {
+                Globals.conn.Open();
+                query = $"DELETE FROM queueNA1 WHERE id = {p2id};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
+            }
+            if (is3InQueue)
+            {
+                Globals.conn.Open();
+                query = $"DELETE FROM queueNA1 WHERE id = {p1id};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
+            }
+            if (is4InQueue)
+            {
+                Globals.conn.Open();
+                query = $"DELETE FROM queueNA1 WHERE id = {p2id};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
+            }
 
             query = $"INSERT INTO matchesNA2(id1, id2, id3, id4, username1, username2, username3, username4, time) " +
                 $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.Now.ToBinary()});";
@@ -1412,6 +1477,7 @@ namespace BPR
             long p1time = 0, p2time = 0, p3time = 0, p4time = 0;
             string p1name = "", p2name = "", p3name = "", p4name = "";
             ulong p1id = 0, p2id = 0, p3id = 0, p4id = 0;
+            bool is1InQueue = false, is2InQueue = false, is3InQueue = false, is4InQueue = false;
             string query = $"SELECT time, username, id FROM queueEU2;";
             Globals.conn.Open();
             try
@@ -1457,6 +1523,101 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
+
+            query = $"SELECT id FROM queueEU1;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (reader.GetUInt64(0) == p1id) is1InQueue = true;
+                    if (reader.GetUInt64(0) == p2id) is2InQueue = true;
+                    if (reader.GetUInt64(0) == p1id) is3InQueue = true;
+                    if (reader.GetUInt64(0) == p2id) is4InQueue = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            if (is1InQueue)
+            {
+                Globals.conn.Open();
+                query = $"DELETE FROM queueEU1 WHERE id = {p1id};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                await Context.Channel.SendMessageAsync($"A player has left the EU 1v1 queue");
+            }
+            if (is2InQueue)
+            {
+                Globals.conn.Open();
+                query = $"DELETE FROM queueEU1 WHERE id = {p2id};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                await Context.Channel.SendMessageAsync($"A player has left the EU 1v1 queue");
+            }
+            if (is3InQueue)
+            {
+                Globals.conn.Open();
+                query = $"DELETE FROM queueEU1 WHERE id = {p1id};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                await Context.Channel.SendMessageAsync($"A player has left the EU 1v1 queue");
+            }
+            if (is4InQueue)
+            {
+                Globals.conn.Open();
+                query = $"DELETE FROM queueEU1 WHERE id = {p2id};";
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+                await Context.Channel.SendMessageAsync($"A player has left the EU 1v1 queue");
+            }
 
             query = $"INSERT INTO matchesEU2(id1, id2, id3, id4, username1, username2, username3, username4, time) " +
                 $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.Now.ToBinary()});";
