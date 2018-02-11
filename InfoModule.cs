@@ -1825,6 +1825,23 @@ namespace BPR
                     throw;
                 }
                 Globals.conn.Close();
+
+                query = $"INSERT INTO matchesHistory1(id1, id2, oldElo1, oldElo2, isP1, region, username1, username2) " +
+                    $"VALUES({p1ID}, {p2ID}, {p1elo}, {p2elo}, {isP1}, 'NA', '{p1Username}', '{p2Username}');";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
                 results = EloConvert(p1elo, p2elo, (bool)isP1);
 
                 double new1 = p1elo + results.Item1;
@@ -2029,6 +2046,23 @@ namespace BPR
                     throw;
                 }
                 Globals.conn.Close();
+
+                query = $"INSERT INTO matchesHistory1(id1, id2, oldElo1, oldElo2, isP1, region, username1, username2) " +
+                    $"VALUES({p1ID}, {p2ID}, {p1elo}, {p2elo}, {isP1}, 'EU', '{p1Username}', '{p2Username}');";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
                 results = EloConvert(p1elo, p2elo, (bool)isP1);
 
                 double new1 = p1elo + results.Item1;
@@ -2252,6 +2286,220 @@ namespace BPR
             await Context.Message.DeleteAsync();
         }
 
+        [Command("revert")]
+        [Summary("Reverts the last reported match for a player")]
+        public async Task RevertMatchAsync()
+        {
+            var userInfo = Context.User;
+            Console.WriteLine($"{userInfo.Username} is adding a room number");
+            int thisMatchNum = 1, revertRequests = 0, thisPlayerNum = 0;
+            bool hasAlreadyReverted = false;
+
+            string query = $"SELECT id1, id2, revert1, revert2 FROM matchesHistory1;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (userInfo.Id == reader.GetUInt64(0))
+                    {
+                        revertRequests += reader.GetInt16(2);
+                        revertRequests += reader.GetInt16(3);
+                        if (reader.GetInt16(3) == 1) hasAlreadyReverted = true;
+                        thisPlayerNum = 1;
+                        break;
+                    }
+                    else if (userInfo.Id == reader.GetUInt64(1))
+                    {
+                        revertRequests += reader.GetInt16(2);
+                        revertRequests += reader.GetInt16(3);
+                        if (reader.GetInt16(4) == 1) hasAlreadyReverted = true;
+                        thisPlayerNum = 2;
+                        break;
+                    }
+                    thisMatchNum++;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            if (hasAlreadyReverted)
+            {
+                await Context.Channel.SendMessageAsync("A player tried to revert the match twice.");
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync($"{revertRequests + 1}/2 players have requested the last 1v1 match to be reverted");
+
+                if (revertRequests < 1)
+                {
+                    query = $"UPDATE matchesHistory1 SET revert{thisPlayerNum} = 1 WHERE id{thisPlayerNum} = {userInfo.Id};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                }
+                else
+                {
+                    ulong p1ID = 0, p2ID = 0;
+                    double p1elo = 0, p2elo = 0;
+                    int isP1 = 0;
+                    string region = "", p1Username = "", p2Username = "";
+
+                    query = $"SELECT id1, id2, oldElo1, oldElo2, isP1, region, username1, username2 FROM matchesHistory1 WHERE id{thisPlayerNum} = {userInfo.Id};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        MySqlDataReader reader = cmd.ExecuteReader();
+
+                        while (reader.Read())
+                        {
+                            p1ID = reader.GetUInt64(0);
+                            p2ID = reader.GetUInt64(1);
+                            p1elo = reader.GetDouble(3);
+                            p2elo = reader.GetDouble(4);
+                            isP1 = reader.GetInt16(5);
+                            region = reader.GetString(6);
+                            p1Username = reader.GetString(7);
+                            p2Username = reader.GetString(8);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+
+                    query = $"UPDATE leaderboard{region} SET elo1 = {p1elo} WHERE id = {p1ID};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+
+                    query = $"UPDATE leaderboard{region} SET elo1 = {p2elo} WHERE id = {p2ID};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+
+                    query = $"INSERT INTO matches{region}1(id1, id2, username1, username2, time) VALUES({p1ID}, {p2ID}, '{p1Username}', '{p2Username}', {DateTime.Now.ToBinary()});";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+
+                    string p1ResultString = "wins1";
+                    string p2ResultString = "loss1";
+                    if (isP1 == 0)
+                    {
+                        p1ResultString = "loss1";
+                        p2ResultString = "wins1";
+                    }
+
+                    query = $"UPDATE leaderboard{region} SET {p1ResultString} = {p1ResultString} - 1 WHERE id = {p1ID};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                    query = $"UPDATE leaderboard{region} SET {p2ResultString} = {p2ResultString} - 1 WHERE id = {p2ID};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+
+                    await Context.Channel.SendMessageAsync("The last 1v1 match has been reverted. Please report the match correctly now.");
+                }
+            }
+        }
+
+        [Command("clearhistory")]
+        [Summary("Truncates the matchesHistory1 table")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task ClearHistoryAsync()
+        {
+            string query = $"TRUNCATE TABLE matchesHistory1;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            await Context.Channel.SendMessageAsync("Match history cleared.");
+        }
+
         [Command("superNA")]
         [Summary("Allows admin to report any match")]
         [RequireUserPermission(GuildPermission.Administrator)]
@@ -2442,8 +2690,7 @@ namespace BPR
 
             return allChange;
         }
-
-
+        
     }
 
     [Group("match2")]
@@ -2553,6 +2800,23 @@ namespace BPR
                     throw;
                 }
                 Globals.conn.Close();
+
+                query = $"INSERT INTO matchesHistory2(id1, id2, id3, id4, oldElo1, oldElo2, oldElo3, oldElo4, isT1, region, username1, username2, username3, username4) " +
+                    $"VALUES({p1ID}, {p2ID}, {p3ID}, {p4ID}, {p1elo}, {p2elo}, {p3elo}, {p4elo}, {isT1}, 'NA', '{p1Username}', '{p2Username}', '{p3Username}', '{p4Username}');";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
                 results = EloConvert(p1elo, p2elo, p3elo, p4elo, (bool)isT1);
 
                 double new1 = p1elo + results.Item1;
@@ -2819,6 +3083,23 @@ namespace BPR
                     throw;
                 }
                 Globals.conn.Close();
+
+                query = $"INSERT INTO matchesHistory2(id1, id2, id3, id4, oldElo1, oldElo2, oldElo3, oldElo4, isT1, region, username1, username2, username3, username4) " +
+                    $"VALUES({p1ID}, {p2ID}, {p3ID}, {p4ID}, {p1elo}, {p2elo}, {p3elo}, {p4elo}, {isT1}, 'EU', '{p1Username}', '{p2Username}', '{p3Username}', '{p4Username}');";
+                Globals.conn.Open();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Globals.conn.Close();
+                    throw;
+                }
+                Globals.conn.Close();
+
                 results = EloConvert(p1elo, p2elo, p3elo, p4elo, (bool)isT1);
 
                 double new1 = p1elo + results.Item1;
@@ -2995,6 +3276,310 @@ namespace BPR
                 Console.WriteLine($"Match #{thisMatchNum} has ended.");
             }
             else await Context.Channel.SendMessageAsync($"Incorrect role order or roles has not been added.");
+        }
+
+        [Command("revert")]
+        [Summary("Reverts the last reported match for a player")]
+        public async Task RevertMatchAsync()
+        {
+            var userInfo = Context.User;
+            Console.WriteLine($"{userInfo.Username} is adding a room number");
+            int thisMatchNum = 1, revertRequests = 0, thisPlayerNum = 0;
+            bool hasAlreadyReverted = false;
+
+            string query = $"SELECT id1, id2, id3, id4, revert1, revert2, revert3, revert4 FROM matchesHistory2;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (userInfo.Id == reader.GetUInt64(0))
+                    {
+                        revertRequests += reader.GetInt16(4);
+                        revertRequests += reader.GetInt16(5);
+                        revertRequests += reader.GetInt16(6);
+                        revertRequests += reader.GetInt16(7);
+                        if (reader.GetInt16(4) == 1) hasAlreadyReverted = true;
+                        thisPlayerNum = 1;
+                        break;
+                    }
+                    else if (userInfo.Id == reader.GetUInt64(1))
+                    {
+                        revertRequests += reader.GetInt16(4);
+                        revertRequests += reader.GetInt16(5);
+                        revertRequests += reader.GetInt16(6);
+                        revertRequests += reader.GetInt16(7);
+                        if (reader.GetInt16(5) == 1) hasAlreadyReverted = true;
+                        thisPlayerNum = 2;
+                        break;
+                    }
+                    else if (userInfo.Id == reader.GetUInt64(2))
+                    {
+                        revertRequests += reader.GetInt16(4);
+                        revertRequests += reader.GetInt16(5);
+                        revertRequests += reader.GetInt16(6);
+                        revertRequests += reader.GetInt16(7);
+                        if (reader.GetInt16(6) == 1) hasAlreadyReverted = true;
+                        thisPlayerNum = 3;
+                        break;
+                    }
+                    else if (userInfo.Id == reader.GetUInt64(3))
+                    {
+                        revertRequests += reader.GetInt16(4);
+                        revertRequests += reader.GetInt16(5);
+                        revertRequests += reader.GetInt16(6);
+                        revertRequests += reader.GetInt16(7);
+                        if (reader.GetInt16(7) == 1) hasAlreadyReverted = true;
+                        thisPlayerNum = 4;
+                        break;
+                    }
+                    thisMatchNum++;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            if (hasAlreadyReverted)
+            {
+                await Context.Channel.SendMessageAsync("A player tried to revert the match twice.");
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync($"{revertRequests + 1}/3 players have requested the last 1v1 match to be reverted");
+
+                if (revertRequests < 2)
+                {
+                    query = $"UPDATE matchesHistory2 SET revert{thisPlayerNum} = 1 WHERE id{thisPlayerNum} = {userInfo.Id};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                }
+                else
+                {
+                    ulong p1ID = 0, p2ID = 0, p3ID = 0, p4ID = 0;
+                    double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
+                    int isT1 = 0;
+                    string region = "", p1Username = "", p2Username = "", p3Username = "", p4Username = "";
+
+                    query = $"SELECT id1, id2, id3, id4, oldElo1, oldElo2, oldElo3, oldElo4, isT1, region, username1, username2, username3, username4 " +
+                        $"FROM matchesHistory1 WHERE id{thisPlayerNum} = {userInfo.Id};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        MySqlDataReader reader = cmd.ExecuteReader();
+
+                        while (reader.Read())
+                        {
+                            p1ID = reader.GetUInt64(0);
+                            p2ID = reader.GetUInt64(1);
+                            p3ID = reader.GetUInt64(2);
+                            p4ID = reader.GetUInt64(3);
+                            p1elo = reader.GetDouble(4);
+                            p2elo = reader.GetDouble(5);
+                            p3elo = reader.GetDouble(6);
+                            p4elo = reader.GetDouble(7);
+                            isT1 = reader.GetInt16(8);
+                            region = reader.GetString(9);
+                            p1Username = reader.GetString(10);
+                            p2Username = reader.GetString(11);
+                            p3Username = reader.GetString(12);
+                            p4Username = reader.GetString(13);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+
+                    query = $"UPDATE leaderboard{region} SET elo2 = {p1elo} WHERE id = {p1ID};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+
+                    query = $"UPDATE leaderboard{region} SET elo2 = {p2elo} WHERE id = {p2ID};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+
+                    query = $"UPDATE leaderboard{region} SET elo2 = {p3elo} WHERE id = {p3ID};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+
+                    query = $"UPDATE leaderboard{region} SET elo2 = {p4elo} WHERE id = {p4ID};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+
+                    query = $"INSERT INTO matches{region}2(id1, id2, id3, id4, username1, username2, username3, username4, time) " +
+                        $"VALUES({p1ID}, {p2ID}, {p3ID}, {p4ID}, '{p1Username}', '{p2Username}', '{p3Username}', '{p4Username}', {DateTime.Now.ToBinary()});";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+
+                    string t1ResultString = "wins2";
+                    string t2ResultString = "loss2";
+                    if (isT1 == 0)
+                    {
+                        t1ResultString = "loss2";
+                        t2ResultString = "wins2";
+                    }
+
+                    query = $"UPDATE leaderboard{region} SET {t1ResultString} = {t1ResultString} - 1 WHERE id = {p1ID};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                    query = $"UPDATE leaderboard{region} SET {t1ResultString} = {t1ResultString} - 1 WHERE id = {p2ID};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                    query = $"UPDATE leaderboard{region} SET {t2ResultString} = {t2ResultString} - 1 WHERE id = {p3ID};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+                    query = $"UPDATE leaderboard{region} SET {t2ResultString} = {t2ResultString} - 1 WHERE id = {p4ID};";
+                    Globals.conn.Open();
+                    try
+                    {
+                        MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                        Globals.conn.Close();
+                        throw;
+                    }
+                    Globals.conn.Close();
+
+                    await Context.Channel.SendMessageAsync("The last 2v2 match has been reverted. Please report the match correctly now.");
+                }
+            }
+        }
+
+        [Command("clearhistory")]
+        [Summary("Truncates the matchesHistory2 table")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task ClearHistoryAsync()
+        {
+            string query = $"TRUNCATE TABLE matchesHistory2;";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            await Context.Channel.SendMessageAsync("Match history cleared.");
         }
 
         [Command("room")]
