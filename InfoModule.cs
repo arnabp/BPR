@@ -1292,8 +1292,8 @@ namespace BPR
                 {
                     if (reader.GetUInt64(0) == p1id) is1InQueue = true;
                     if (reader.GetUInt64(0) == p2id) is2InQueue = true;
-                    if (reader.GetUInt64(0) == p1id) is3InQueue = true;
-                    if (reader.GetUInt64(0) == p2id) is4InQueue = true;
+                    if (reader.GetUInt64(0) == p3id) is3InQueue = true;
+                    if (reader.GetUInt64(0) == p4id) is4InQueue = true;
                 }
             }
             catch (Exception ex)
@@ -1535,8 +1535,8 @@ namespace BPR
                 {
                     if (reader.GetUInt64(0) == p1id) is1InQueue = true;
                     if (reader.GetUInt64(0) == p2id) is2InQueue = true;
-                    if (reader.GetUInt64(0) == p1id) is3InQueue = true;
-                    if (reader.GetUInt64(0) == p2id) is4InQueue = true;
+                    if (reader.GetUInt64(0) == p3id) is3InQueue = true;
+                    if (reader.GetUInt64(0) == p4id) is4InQueue = true;
                 }
             }
             catch (Exception ex)
