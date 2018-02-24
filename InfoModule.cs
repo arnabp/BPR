@@ -587,7 +587,9 @@ namespace BPR
 
                 if (queueCount == 3)
                 {
-                    await NewMatchNA(0, 1, 2, 3); // This should be modified when anti-smurfing mechanism is introduced
+                    if (region == "NA") await NewMatchNA(0, 1, 2, 3); // This should be modified when anti-smurfing mechanism is introduced
+                    else if (region == "EU") await NewMatchEU(0, 1, 2, 3);
+                    else Console.WriteLine("Wrong region detected, role error");
                     query = $"TRUNCATE TABLE queue{region}2;";
                     HelperFunctions.ExecuteSQLQuery(query);
                 }
