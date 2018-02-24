@@ -1342,7 +1342,7 @@ namespace BPR
             if (is3InQueue)
             {
                 Globals.conn.Open();
-                query = $"DELETE FROM queueNA1 WHERE id = {p1id};";
+                query = $"DELETE FROM queueNA1 WHERE id = {p3id};";
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1360,7 +1360,7 @@ namespace BPR
             if (is4InQueue)
             {
                 Globals.conn.Open();
-                query = $"DELETE FROM queueNA1 WHERE id = {p2id};";
+                query = $"DELETE FROM queueNA1 WHERE id = {p4id};";
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1585,7 +1585,7 @@ namespace BPR
             if (is3InQueue)
             {
                 Globals.conn.Open();
-                query = $"DELETE FROM queueEU1 WHERE id = {p1id};";
+                query = $"DELETE FROM queueEU1 WHERE id = {p3id};";
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1603,7 +1603,7 @@ namespace BPR
             if (is4InQueue)
             {
                 Globals.conn.Open();
-                query = $"DELETE FROM queueEU1 WHERE id = {p2id};";
+                query = $"DELETE FROM queueEU1 WHERE id = {p4id};";
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
