@@ -197,7 +197,7 @@ namespace BPR
             }
             else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
             {
-                bool isInQueue = false, isInMatch = false, isInOtherQueue = false;
+                bool isInQueue = false, isInMatch = false;
                 int queueCount = 0;
                 string query = $"SELECT count(*) FROM queueEU1;";
                 Globals.conn.Open();
@@ -1707,11 +1707,18 @@ namespace BPR
                     throw;
                 }
                 Globals.conn.Close();
-                
-                query = $"UPDATE matchesNA1 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
-                HelperFunctions.ExecuteSQLQuery(query);
 
-                await Context.Channel.SendMessageAsync($"NA 1v1 Match #{thisMatchNum} is in room #{room}");
+                if (isInMatch)
+                {
+                    query = $"UPDATE matchesNA1 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
+                    HelperFunctions.ExecuteSQLQuery(query);
+
+                    await Context.Channel.SendMessageAsync($"NA 1v1 Match #{thisMatchNum} is in room #{room}");
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("You are not currently in an NA 1v1 match.");
+                }
             }
             else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
             {
@@ -1747,10 +1754,17 @@ namespace BPR
                 }
                 Globals.conn.Close();
 
-                query = $"UPDATE matchesEU1 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                if (isInMatch)
+                {
+                    query = $"UPDATE matchesEU1 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
+                    HelperFunctions.ExecuteSQLQuery(query);
 
-                await Context.Channel.SendMessageAsync($"EU 1v1 Match #{thisMatchNum} is in room #{room}");
+                    await Context.Channel.SendMessageAsync($"EU 1v1 Match #{thisMatchNum} is in room #{room}");
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("You are not currently in an EU 1v1 match.");
+                }
             }
             else await Context.Channel.SendMessageAsync($"Incorrect role order or roles has not been added.");
             await Context.Message.DeleteAsync();
@@ -2609,10 +2623,18 @@ namespace BPR
                 }
                 Globals.conn.Close();
 
-                query = $"UPDATE matchesNA2 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                if (isInMatch)
+                {
+                    query = $"UPDATE matchesNA2 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
+                    HelperFunctions.ExecuteSQLQuery(query);
 
-                await Context.Channel.SendMessageAsync($"NA 2v2 Match #{thisMatchNum} is in room #{room}");
+                    await Context.Channel.SendMessageAsync($"NA 2v2 Match #{thisMatchNum} is in room #{room}");
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("You are not currently in an NA 2v2 match.");
+                }
+                
             }
             else if (Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id == 396442764298158081)
             {
@@ -2660,10 +2682,17 @@ namespace BPR
                 }
                 Globals.conn.Close();
 
-                query = $"UPDATE matchesEU2 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                if (isInMatch)
+                {
+                    query = $"UPDATE matchesEU2 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
+                    HelperFunctions.ExecuteSQLQuery(query);
 
-                await Context.Channel.SendMessageAsync($"EU 2v2 Match #{thisMatchNum} is in room #{room}");
+                    await Context.Channel.SendMessageAsync($"EU 2v2 Match #{thisMatchNum} is in room #{room}");
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("You are not currently in an EU 2v2 match.");
+                }
             }
             else await Context.Channel.SendMessageAsync($"Incorrect role order or roles has not been added.");
             await Context.Message.DeleteAsync();
