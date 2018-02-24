@@ -347,7 +347,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"A player has left the NA 2v2 queue");
             }
 
-            query = $"INSERT INTO matchesNA1(id1, id2, username1, username2, time) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.Now.ToBinary()});";
+            query = $"INSERT INTO matchesNA1(id1, id2, username1, username2, time, reverted) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.Now.ToBinary()}, 0);";
             HelperFunctions.ExecuteSQLQuery(query);
 
             int matchCount = 0;
@@ -451,7 +451,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"A player has left the EU 2v2 queue");
             }
 
-            query = $"INSERT INTO matchesEU1(id1, id2, username1, username2, time) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.Now.ToBinary()});";
+            query = $"INSERT INTO matchesEU1(id1, id2, username1, username2, time, reverted) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.Now.ToBinary()}, 0);";
             HelperFunctions.ExecuteSQLQuery(query);
 
             int matchCount = 0;
@@ -772,8 +772,8 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
             }
 
-            query = $"INSERT INTO matchesNA2(id1, id2, id3, id4, username1, username2, username3, username4, time) " +
-                $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.Now.ToBinary()});";
+            query = $"INSERT INTO matchesNA2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
+                $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.Now.ToBinary()}, 0);";
             HelperFunctions.ExecuteSQLQuery(query);
 
             int matchCount = 0;
@@ -955,8 +955,8 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"A player has left the EU 1v1 queue");
             }
 
-            query = $"INSERT INTO matchesEU2(id1, id2, id3, id4, username1, username2, username3, username4, time) " +
-                $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.Now.ToBinary()});";
+            query = $"INSERT INTO matchesEU2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
+                $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.Now.ToBinary()}, 0);";
             HelperFunctions.ExecuteSQLQuery(query);
 
             int matchCount = 0;
@@ -1044,14 +1044,13 @@ namespace BPR
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is reporting a result");
             bool? isP1 = null;
-            ulong p1ID = 0;
-            ulong p2ID = 0;
+            ulong p1ID = 0, p2ID = 0, reverter = 0;
             string p1Username = "";
             string p2Username = "";
             int thisMatchNum = 1;
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
-            string query = $"SELECT id1, id2, username1, username2 FROM matches{region}1;";
+            string query = $"SELECT id1, id2, username1, username2, reverted FROM matches{region}1;";
             Globals.conn.Open();
             try
             {
@@ -1067,6 +1066,7 @@ namespace BPR
                         p2ID = reader.GetUInt64(1);
                         p1Username = reader.GetString(2);
                         p2Username = reader.GetString(3);
+                        reverter = reader.GetUInt64(4);
                         break;
                     }
                     else if (userInfo.Id == reader.GetUInt64(1))
@@ -1076,6 +1076,7 @@ namespace BPR
                         p2ID = reader.GetUInt64(1);
                         p1Username = reader.GetString(2);
                         p2Username = reader.GetString(3);
+                        reverter = reader.GetUInt64(4);
                         break;
                     }
                     thisMatchNum++;
@@ -1149,8 +1150,13 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            query = $"INSERT INTO matchesHistory1(id1, id2, oldElo1, oldElo2, isP1, region, username1, username2) " +
-                $"VALUES({p1ID}, {p2ID}, {p1elo}, {p2elo}, {isP1}, '{region}', '{p1Username}', '{p2Username}');";
+            query = $"DELETE FROM matchesHistory1 WHERE id1 = {p1ID};";
+            HelperFunctions.ExecuteSQLQuery(query);
+            query = $"DELETE FROM matchesHistory1 WHERE id2 = {p2ID};";
+            HelperFunctions.ExecuteSQLQuery(query);
+
+            query = $"INSERT INTO matchesHistory1(id1, id2, oldElo1, oldElo2, isP1, region, username1, username2, reporter) " +
+                $"VALUES({p1ID}, {p2ID}, {p1elo}, {p2elo}, {isP1}, '{region}', '{p1Username}', '{p2Username}', {userInfo.Id});";
             HelperFunctions.ExecuteSQLQuery(query);
 
             results = EloConvert(p1elo, p2elo, (bool)isP1);
@@ -1194,6 +1200,12 @@ namespace BPR
             HelperFunctions.ExecuteSQLQuery(query);
             query = $"UPDATE leaderboard{region} SET {p2ResultString} = {p2ResultString} + 1 WHERE id = {p2ID};";
             HelperFunctions.ExecuteSQLQuery(query);
+
+            if(reverter != 0)
+            {
+                query = $"UPDATE leaderboard{region} SET elo1 = elo1 - 20 WHERE id = {reverter};";
+                HelperFunctions.ExecuteSQLQuery(query);
+            }
                 
             query = $"DELETE FROM matches{region}1 WHERE id1 = {p1ID};";
             HelperFunctions.ExecuteSQLQuery(query);
@@ -1316,12 +1328,12 @@ namespace BPR
                 }
                 else
                 {
-                    ulong p1ID = 0, p2ID = 0;
+                    ulong p1ID = 0, p2ID = 0, reporter = 0;
                     double p1elo = 0, p2elo = 0;
                     int isP1 = 0;
                     string region = "", p1Username = "", p2Username = "";
 
-                    query = $"SELECT id1, id2, oldElo1, oldElo2, isP1, region, username1, username2 FROM matchesHistory1 WHERE id{thisPlayerNum} = {userInfo.Id};";
+                    query = $"SELECT id1, id2, oldElo1, oldElo2, isP1, region, username1, username2, reporter FROM matchesHistory1 WHERE id{thisPlayerNum} = {userInfo.Id};";
                     Globals.conn.Open();
                     try
                     {
@@ -1332,12 +1344,13 @@ namespace BPR
                         {
                             p1ID = reader.GetUInt64(0);
                             p2ID = reader.GetUInt64(1);
-                            p1elo = reader.GetDouble(3);
-                            p2elo = reader.GetDouble(4);
-                            isP1 = reader.GetInt16(5);
-                            region = reader.GetString(6);
-                            p1Username = reader.GetString(7);
-                            p2Username = reader.GetString(8);
+                            p1elo = reader.GetDouble(2);
+                            p2elo = reader.GetDouble(3);
+                            isP1 = reader.GetInt16(4);
+                            region = reader.GetString(5);
+                            p1Username = reader.GetString(6);
+                            p2Username = reader.GetString(7);
+                            reporter = reader.GetUInt64(8);
                         }
                     }
                     catch (Exception ex)
@@ -1354,7 +1367,7 @@ namespace BPR
                     query = $"UPDATE leaderboard{region} SET elo1 = {p2elo} WHERE id = {p2ID};";
                     HelperFunctions.ExecuteSQLQuery(query);
 
-                    query = $"INSERT INTO matches{region}1(id1, id2, username1, username2, time) VALUES({p1ID}, {p2ID}, '{p1Username}', '{p2Username}', {DateTime.Now.ToBinary()});";
+                    query = $"INSERT INTO matches{region}1(id1, id2, username1, username2, time, reverted) VALUES({p1ID}, {p2ID}, '{p1Username}', '{p2Username}', {DateTime.Now.ToBinary()}, {reporter});";
                     HelperFunctions.ExecuteSQLQuery(query);
 
                     string p1ResultString = "wins1";
@@ -1543,12 +1556,12 @@ namespace BPR
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is reporting a result");
             bool? isT1 = null;
-            ulong p1ID = 0, p2ID = 0, p3ID = 0, p4ID = 0;
+            ulong p1ID = 0, p2ID = 0, p3ID = 0, p4ID = 0, reverter = 0;
             string p1Username = "", p2Username = "", p3Username = "", p4Username = "";
             int thisMatchNum = 1;
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
-            string query = $"SELECT id1, id2, id3, id4, username1, username2, username3, username4 FROM matches{region}2;";
+            string query = $"SELECT id1, id2, id3, id4, username1, username2, username3, username4, reverted FROM matches{region}2;";
             Globals.conn.Open();
             try
             {
@@ -1568,6 +1581,7 @@ namespace BPR
                         p2Username = reader.GetString(5);
                         p3Username = reader.GetString(6);
                         p4Username = reader.GetString(7);
+                        reverter = reader.GetUInt64(8);
                         break;
                     }
                     else if (userInfo.Id == reader.GetUInt64(2) || userInfo.Id == reader.GetUInt64(3))
@@ -1581,6 +1595,7 @@ namespace BPR
                         p2Username = reader.GetString(5);
                         p3Username = reader.GetString(6);
                         p4Username = reader.GetString(7);
+                        reverter = reader.GetUInt64(8);
                         break;
                     }
                     thisMatchNum++;
@@ -1638,8 +1653,17 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            query = $"INSERT INTO matchesHistory2(id1, id2, id3, id4, oldElo1, oldElo2, oldElo3, oldElo4, isT1, region, username1, username2, username3, username4) " +
-                $"VALUES({p1ID}, {p2ID}, {p3ID}, {p4ID}, {p1elo}, {p2elo}, {p3elo}, {p4elo}, {isT1}, '{region}', '{p1Username}', '{p2Username}', '{p3Username}', '{p4Username}');";
+            query = $"DELETE FROM matchesHistory2 WHERE id1 = {p1ID};";
+            HelperFunctions.ExecuteSQLQuery(query);
+            query = $"DELETE FROM matchesHistory2 WHERE id2 = {p2ID};";
+            HelperFunctions.ExecuteSQLQuery(query);
+            query = $"DELETE FROM matchesHistory2 WHERE id3 = {p3ID};";
+            HelperFunctions.ExecuteSQLQuery(query);
+            query = $"DELETE FROM matchesHistory2 WHERE id4 = {p4ID};";
+            HelperFunctions.ExecuteSQLQuery(query);
+
+            query = $"INSERT INTO matchesHistory2(id1, id2, id3, id4, oldElo1, oldElo2, oldElo3, oldElo4, isT1, region, username1, username2, username3, username4, reporter) " +
+                $"VALUES({p1ID}, {p2ID}, {p3ID}, {p4ID}, {p1elo}, {p2elo}, {p3elo}, {p4elo}, {isT1}, '{region}', '{p1Username}', '{p2Username}', '{p3Username}', '{p4Username}', {userInfo.Id});";
             HelperFunctions.ExecuteSQLQuery(query);
 
             results = EloConvert(p1elo, p2elo, p3elo, p4elo, (bool)isT1);
@@ -1707,6 +1731,12 @@ namespace BPR
             HelperFunctions.ExecuteSQLQuery(query);
             query = $"UPDATE leaderboard{region} SET {t2ResultString} = {t2ResultString} + 1 WHERE id = {p4ID};";
             HelperFunctions.ExecuteSQLQuery(query);
+
+            if(reverter != 0)
+            {
+                query = $"UPDATE leaderboard{region} SET elo2 = elo2 - 20 WHERE id = {reverter};";
+                HelperFunctions.ExecuteSQLQuery(query);
+            }
                 
             query = $"DELETE FROM matches{region}2 WHERE id1 = {p1ID};";
             HelperFunctions.ExecuteSQLQuery(query);
@@ -1798,12 +1828,12 @@ namespace BPR
                 else
                 {
                     ulong p1ID = 0, p2ID = 0, p3ID = 0, p4ID = 0;
-                    double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
+                    double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0, reporter = 0;
                     int isT1 = 0;
                     string region = "", p1Username = "", p2Username = "", p3Username = "", p4Username = "";
 
-                    query = $"SELECT id1, id2, id3, id4, oldElo1, oldElo2, oldElo3, oldElo4, isT1, region, username1, username2, username3, username4 " +
-                        $"FROM matchesHistory1 WHERE id{thisPlayerNum} = {userInfo.Id};";
+                    query = $"SELECT id1, id2, id3, id4, oldElo1, oldElo2, oldElo3, oldElo4, isT1, region, username1, username2, username3, username4, reporter " +
+                        $"FROM matchesHistory2 WHERE id{thisPlayerNum} = {userInfo.Id};";
                     Globals.conn.Open();
                     try
                     {
@@ -1826,6 +1856,7 @@ namespace BPR
                             p2Username = reader.GetString(11);
                             p3Username = reader.GetString(12);
                             p4Username = reader.GetString(13);
+                            reporter = reader.GetUInt64(14);
                         }
                     }
                     catch (Exception ex)
@@ -1848,8 +1879,8 @@ namespace BPR
                     query = $"UPDATE leaderboard{region} SET elo2 = {p4elo} WHERE id = {p4ID};";
                     HelperFunctions.ExecuteSQLQuery(query);
 
-                    query = $"INSERT INTO matches{region}2(id1, id2, id3, id4, username1, username2, username3, username4, time) " +
-                        $"VALUES({p1ID}, {p2ID}, {p3ID}, {p4ID}, '{p1Username}', '{p2Username}', '{p3Username}', '{p4Username}', {DateTime.Now.ToBinary()});";
+                    query = $"INSERT INTO matches{region}2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
+                        $"VALUES({p1ID}, {p2ID}, {p3ID}, {p4ID}, '{p1Username}', '{p2Username}', '{p3Username}', '{p4Username}', {DateTime.Now.ToBinary()}, {reporter});";
                     HelperFunctions.ExecuteSQLQuery(query);
 
                     string t1ResultString = "wins2";
