@@ -1150,9 +1150,9 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            query = $"DELETE FROM matchesHistory1 WHERE id1 = {p1ID};";
+            query = $"DELETE FROM matchesHistory1 WHERE id1 = {p1ID} OR id2 = {p1ID};";
             HelperFunctions.ExecuteSQLQuery(query);
-            query = $"DELETE FROM matchesHistory1 WHERE id2 = {p2ID};";
+            query = $"DELETE FROM matchesHistory1 WHERE id1 = {p2ID} OR id2 = {p2ID};";
             HelperFunctions.ExecuteSQLQuery(query);
 
             query = $"INSERT INTO matchesHistory1(id1, id2, oldElo1, oldElo2, isP1, region, username1, username2, reporter) " +
@@ -1653,13 +1653,13 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            query = $"DELETE FROM matchesHistory2 WHERE id1 = {p1ID};";
+            query = $"DELETE FROM matchesHistory2 WHERE id1 = {p1ID} OR id2 = {p1ID} OR id3 = {p1ID} OR id4 = {p1ID};";
             HelperFunctions.ExecuteSQLQuery(query);
-            query = $"DELETE FROM matchesHistory2 WHERE id2 = {p2ID};";
+            query = $"DELETE FROM matchesHistory2 WHERE id1 = {p2ID} OR id2 = {p2ID} OR id3 = {p2ID} OR id4 = {p2ID};";
             HelperFunctions.ExecuteSQLQuery(query);
-            query = $"DELETE FROM matchesHistory2 WHERE id3 = {p3ID};";
+            query = $"DELETE FROM matchesHistory2 WHERE id1 = {p3ID} OR id2 = {p3ID} OR id3 = {p3ID} OR id4 = {p3ID};";
             HelperFunctions.ExecuteSQLQuery(query);
-            query = $"DELETE FROM matchesHistory2 WHERE id4 = {p4ID};";
+            query = $"DELETE FROM matchesHistory2 WHERE id1 = {p4ID} OR id2 = {p4ID} OR id3 = {p4ID} OR id4 = {p4ID};";
             HelperFunctions.ExecuteSQLQuery(query);
 
             query = $"INSERT INTO matchesHistory2(id1, id2, id3, id4, oldElo1, oldElo2, oldElo3, oldElo4, isT1, region, username1, username2, username3, username4, reporter) " +
