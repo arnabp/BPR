@@ -1290,7 +1290,7 @@ namespace BPR
                     {
                         revertRequests += reader.GetInt16(2);
                         revertRequests += reader.GetInt16(3);
-                        if (reader.GetInt16(3) == 1) hasAlreadyReverted = true;
+                        if (reader.GetInt16(2) == 1) hasAlreadyReverted = true;
                         thisPlayerNum = 1;
                         break;
                     }
@@ -1298,7 +1298,7 @@ namespace BPR
                     {
                         revertRequests += reader.GetInt16(2);
                         revertRequests += reader.GetInt16(3);
-                        if (reader.GetInt16(4) == 1) hasAlreadyReverted = true;
+                        if (reader.GetInt16(3) == 1) hasAlreadyReverted = true;
                         thisPlayerNum = 2;
                         break;
                     }
