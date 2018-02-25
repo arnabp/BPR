@@ -94,7 +94,7 @@ namespace BPR
 
         [Command("ChangeName")]
         [Summary("Changes the bot's name")]
-        public async Task ChangeName(string newName)
+        public async Task ChangeName([Remainder] string newName)
         {
             await Context.Client.CurrentUser.ModifyAsync(u => u.Username = newName);
         }
