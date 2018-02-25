@@ -91,6 +91,13 @@ namespace BPR
             else await Context.Channel.SendMessageAsync($"This user does not exist");
 
         }
+
+        [Command("ChangeName")]
+        [Summary("Changes the bot's name")]
+        public async Task ChangeName(string newName)
+        {
+            await Context.Client.CurrentUser.ModifyAsync(u => u.Username = newName);
+        }
     }
 
     [Group("queue1")]
