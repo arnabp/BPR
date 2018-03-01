@@ -115,6 +115,11 @@ namespace BPR
             Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue");
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            if (region == "EU")
+            {
+                await Context.Channel.SendMessageAsync("The season has ended for EU");
+                return;
+            }
             bool isInQueue = false, isInMatch = false;
             int queueCount = 0;
             string query = $"SELECT count(*) FROM queue{region}1;";
@@ -504,6 +509,11 @@ namespace BPR
             Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue");
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            if (region == "EU")
+            {
+                await Context.Channel.SendMessageAsync("The season has ended for EU");
+                return;
+            }
             bool isInQueue = false, isInMatch = false;
             int queueCount = 0;
             string query = $"SELECT count(*) FROM queue{region}2;";
@@ -2128,53 +2138,6 @@ namespace BPR
     [Group("leaderboardNA")]
     public class LeaderboardNAModule : ModuleBase<SocketCommandContext>
     {
-        [Command("join")]
-        [Alias("register")]
-        [Summary("Join the leaderboard")]
-        public async Task JoinDBAsync()
-        {
-            await Context.Message.DeleteAsync();
-            var userInfo = Context.User;
-            var user = Context.Guild.GetUser(userInfo.Id);
-
-            int count = 0;
-            string query = $"SELECT count(*) FROM leaderboardNA;";
-            Globals.conn.Open();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    count = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
-                throw;
-            }
-            Globals.conn.Close();
-
-            if (count < 30)
-            {
-                query = $"INSERT INTO leaderboardNA(id, username) VALUES({userInfo.Id}, '{userInfo.Username}');";
-                HelperFunctions.ExecuteSQLQuery(query);
-
-                await user.AddRoleAsync(Context.Guild.GetRole(396442734271004672));
-
-                await Context.Channel.SendMessageAsync($"{userInfo.Username} has been succesfully registered to the NA leaderboard! You have 2500 elo.");
-                Console.WriteLine($"{userInfo.Username} has been registered");
-            }
-            else
-            {
-                await Context.Channel.SendMessageAsync("The NA leaderboard has been filled up. Please try again next season.");
-                Console.WriteLine($"{userInfo.Username} tried to join a filled up leaderboard.");
-            }
-        }
-
         [Command("delete")]
         [Summary("Allows admin to delete user from leaderboard")]
         [RequireUserPermission(GuildPermission.Administrator)]
@@ -2265,53 +2228,6 @@ namespace BPR
     [Group("leaderboardEU")]
     public class LeaderboardEUModule : ModuleBase<SocketCommandContext>
     {
-        [Command("join")]
-        [Alias("register")]
-        [Summary("Join the leaderboard")]
-        public async Task JoinDBAsync()
-        {
-            await Context.Message.DeleteAsync();
-            var userInfo = Context.User;
-            var user = Context.Guild.GetUser(userInfo.Id);
-
-            int count = 0;
-            string query = $"SELECT count(*) FROM leaderboardEU;";
-            Globals.conn.Open();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    count = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
-                throw;
-            }
-            Globals.conn.Close();
-
-            if (count < 30)
-            {
-                query = $"INSERT INTO leaderboardEU(id, username) VALUES({userInfo.Id}, '{userInfo.Username}');";
-                HelperFunctions.ExecuteSQLQuery(query);
-
-                await user.AddRoleAsync(Context.Guild.GetRole(396442764298158081));
-
-                await Context.Channel.SendMessageAsync($"{userInfo.Username} has been succesfully registered to the EU leaderboard! You have 2500 elo.");
-                Console.WriteLine($"{userInfo.Username} has been registered");
-            }
-            else
-            {
-                await Context.Channel.SendMessageAsync("The EU leaderboard has been filled up. Please try again next season.");
-                Console.WriteLine($"{userInfo.Username} tried to join a filled up leaderboard.");
-            }
-        }
-
         [Command("delete")]
         [Summary("Allows admin to delete user from leaderboard")]
         [RequireUserPermission(GuildPermission.Administrator)]
