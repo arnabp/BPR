@@ -2148,6 +2148,23 @@ namespace BPR
     [Group("leaderboardNA1")]
     public class LeaderboardNA1Module : ModuleBase<SocketCommandContext>
     {
+        [Command("add")]
+        [Summary("Adds new users to the leaderboard")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task AddLeaderbardAsync(ulong id)
+        {
+            var user = Context.Guild.GetUser(id);
+            await Context.Message.DeleteAsync();
+
+            string query = $"INSERT INTO leaderboardNA1(id, username, decaytimer) VALUES({id}, {user.Username}, {DateTime.Now.ToBinary()});";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await user.AddRoleAsync(Context.Guild.GetRole(419355178680975370));
+
+            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the NA 1v1 leaderboard!");
+            Console.WriteLine($"{user.Username} has been registered");
+        }
+
         [Command("delete")]
         [Summary("Allows admin to delete user from leaderboard")]
         [RequireUserPermission(GuildPermission.Administrator)]
@@ -2178,7 +2195,7 @@ namespace BPR
             query = $"DELETE FROM leaderboardNA1 WHERE id = {id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(396442734271004672));
+            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(419355178680975370));
 
             await Context.Channel.SendMessageAsync($"{username} has been deleted from the 1v1 leaderboards");
         }
@@ -2238,6 +2255,23 @@ namespace BPR
     [Group("leaderboardNA2")]
     public class LeaderboardNA2Module : ModuleBase<SocketCommandContext>
     {
+        [Command("add")]
+        [Summary("Adds new users to the leaderboard")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task AddLeaderbardAsync(ulong id)
+        {
+            var user = Context.Guild.GetUser(id);
+            await Context.Message.DeleteAsync();
+
+            string query = $"INSERT INTO leaderboardNA2(id, username, decaytimer) VALUES({id}, {user.Username}, {DateTime.Now.ToBinary()});";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await user.AddRoleAsync(Context.Guild.GetRole(419355321061081088));
+
+            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the NA 2v2 leaderboard!");
+            Console.WriteLine($"{user.Username} has been registered");
+        }
+
         [Command("delete")]
         [Summary("Allows admin to delete user from leaderboard")]
         [RequireUserPermission(GuildPermission.Administrator)]
@@ -2268,9 +2302,9 @@ namespace BPR
             query = $"DELETE FROM leaderboardNA2 WHERE id = {id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(396442734271004672));
+            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(419355321061081088));
 
-            await Context.Channel.SendMessageAsync($"{username} has been deleted from the 2v2 leaderboards");
+            await Context.Channel.SendMessageAsync($"{username} has been deleted from the NA 2v2 leaderboards");
         }
 
         [Command("wl")]
@@ -2328,6 +2362,23 @@ namespace BPR
     [Group("leaderboardEU1")]
     public class LeaderboardEU1Module : ModuleBase<SocketCommandContext>
     {
+        [Command("add")]
+        [Summary("Adds new users to the leaderboard")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task AddLeaderbardAsync(ulong id)
+        {
+            var user = Context.Guild.GetUser(id);
+            await Context.Message.DeleteAsync();
+
+            string query = $"INSERT INTO leaderboardEU1(id, username, decaytimer) VALUES({id}, {user.Username}, {DateTime.Now.ToBinary()});";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await user.AddRoleAsync(Context.Guild.GetRole(419355374529937408));
+
+            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the EU 1v1 leaderboard!");
+            Console.WriteLine($"{user.Username} has been registered");
+        }
+
         [Command("delete")]
         [Summary("Allows admin to delete user from leaderboard")]
         [RequireUserPermission(GuildPermission.Administrator)]
@@ -2359,9 +2410,9 @@ namespace BPR
             query = $"DELETE FROM leaderboardEU1 WHERE id = {id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(396442764298158081));
+            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(419355374529937408));
 
-            await Context.Channel.SendMessageAsync($"{username} has been deleted from the 1v1 leaderboards");
+            await Context.Channel.SendMessageAsync($"{username} has been deleted from the EU 1v1 leaderboards");
         }
 
         [Command("wl")]
@@ -2419,6 +2470,23 @@ namespace BPR
     [Group("leaderboardEU2")]
     public class LeaderboardEU2Module : ModuleBase<SocketCommandContext>
     {
+        [Command("add")]
+        [Summary("Adds new users to the leaderboard")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task AddLeaderbardAsync(ulong id)
+        {
+            var user = Context.Guild.GetUser(id);
+            await Context.Message.DeleteAsync();
+
+            string query = $"INSERT INTO leaderboardEU2(id, username, decaytimer) VALUES({id}, {user.Username}, {DateTime.Now.ToBinary()});";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await user.AddRoleAsync(Context.Guild.GetRole(419355453550624768));
+
+            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the EU 2v2 leaderboard!");
+            Console.WriteLine($"{user.Username} has been registered");
+        }
+
         [Command("delete")]
         [Summary("Allows admin to delete user from leaderboard")]
         [RequireUserPermission(GuildPermission.Administrator)]
@@ -2450,9 +2518,9 @@ namespace BPR
             query = $"DELETE FROM leaderboardEU2 WHERE id = {id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(396442764298158081));
+            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(419355453550624768));
 
-            await Context.Channel.SendMessageAsync($"{username} has been deleted from the 2v2 leaderboards");
+            await Context.Channel.SendMessageAsync($"{username} has been deleted from the EU 2v2 leaderboards");
         }
 
         [Command("wl")]
