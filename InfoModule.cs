@@ -1181,9 +1181,14 @@ namespace BPR
             double new1 = p1elo + results.Item1;
             double new2 = p2elo + results.Item2;
 
+            Color embedColor = Color.Blue;
+            if (region == "NA") embedColor = Color.Blue;
+            else embedColor = Color.Green;
+
             var embed = new EmbedBuilder
             {
-                Title = "Match Result"
+                Title = "Match Result",
+                Color = embedColor
             };
             embed.AddField(x =>
             {
@@ -1690,9 +1695,14 @@ namespace BPR
             double new3 = p3elo + results.Item3;
             double new4 = p4elo + results.Item4;
 
+            Color embedColor = Color.Blue;
+            if (region == "NA") embedColor = Color.Blue;
+            else embedColor = Color.Green;
+
             var embed = new EmbedBuilder
             {
-                Title = "Match Result"
+                Title = "Match Result",
+                Color = embedColor
             };
             embed.AddField(x =>
             {

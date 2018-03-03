@@ -83,7 +83,8 @@ public class TimerService
     {
         var embed = new EmbedBuilder
         {
-            Title = "NA Leaderboard"
+            Title = "NA Leaderboard",
+            Color = Color.Blue
         };
 
         int i = 1;
@@ -123,7 +124,8 @@ public class TimerService
     {
         var embed = new EmbedBuilder
         {
-            Title = "EU Leaderboard"
+            Title = "EU Leaderboard",
+            Color = Color.Green
         };
 
         int i = 1;
@@ -346,7 +348,8 @@ public class TimerService
     {
         var embed = new EmbedBuilder
         {
-            Title = "NA Leaderboard"
+            Title = "NA Leaderboard",
+            Color = Color.Blue
         };
 
         int i = 1;
@@ -386,7 +389,8 @@ public class TimerService
     {
         var embed = new EmbedBuilder
         {
-            Title = "EU Leaderboard"
+            Title = "EU Leaderboard",
+            Color = Color.Green
         };
 
         int i = 1;
