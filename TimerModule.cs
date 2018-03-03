@@ -31,12 +31,20 @@ public class TimerService
                 await CheckQueueTimeoutNA2(general);
                 await CheckQueueTimeoutEU2(general);
 
-                if(Globals.timerCount % 3 == 0)
+                if(Globals.timerCount % 4 == 0)
                 {
                     await CheckRoomNA1(general);
                     await CheckRoomEU1(general);
                     await CheckRoomNA2(general);
                     await CheckRoomEU2(general);
+                }
+
+                if(Globals.timerCount % 120 == 0)
+                {
+                    await EloDecayNA1(general);
+                    await EloDecayNA2(general);
+                    await EloDecayEU1(general);
+                    await EloDecayEU2(general);
                 }
             }
 
@@ -1066,6 +1074,378 @@ public class TimerService
                 {
                     await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}>, <@{reader.GetInt64(1)}>, <@{reader.GetInt64(2)}>, and <@{reader.GetInt64(3)}>, please add your room number so it can be streamed on ProBrawlhalla");
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+        }
+    }
+
+    public async Task EloDecayNA1(IMessageChannel thisChannel)
+    {
+        DateTime nowTime = DateTime.Now;
+
+        List<ulong> decayWarning = new List<ulong>(30);
+        List<ulong> decayIDs = new List<ulong>(30);
+        List<int> decayDays = new List<int>(30);
+        string query = $"SELECT decaytimer, decayed, id FROM leaderboardNA1;";
+        Globals.conn.Open();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                int decayed = reader.GetInt16(1);
+                ulong id = reader.GetUInt64(2);
+                if (timeDif.TotalDays == 2 && decayed == -1)
+                {
+                    decayWarning.Add(id);
+                }
+
+                if(timeDif.TotalDays - decayed == 3 && decayed > -1)
+                {
+                    decayIDs.Add(id);
+                    decayDays.Add((int)timeDif.TotalDays);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            Globals.conn.Close();
+            throw;
+        }
+        Globals.conn.Close();
+
+        foreach (var id in decayWarning)
+        {
+            Globals.conn.Open();
+            query = $"UPDATE leaderboardNA1 SET decayed = 0 WHERE id = {id};";
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+                var user = thisChannel.GetUserAsync(id);
+                await thisChannel.SendMessageAsync($"Hey <@{id}> your elo decay will be starting tomorrow. Play a 1v1 game in the next 24 hours to prevent this from happening.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+        }
+
+        for(int i = 0; i < decayIDs.Count; i++)
+        {
+            query = $"UPDATE leaderboardNA1 SET elo = elo - {decayDays[i] + 2} WHERE id = {decayIDs[i]};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            query = $"UPDATE leaderboardNA1 SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+        }
+    }
+
+    public async Task EloDecayNA2(IMessageChannel thisChannel)
+    {
+        DateTime nowTime = DateTime.Now;
+
+        List<ulong> decayWarning = new List<ulong>(30);
+        List<ulong> decayIDs = new List<ulong>(30);
+        List<int> decayDays = new List<int>(30);
+        string query = $"SELECT decaytimer, decayed, id FROM leaderboardNA2;";
+        Globals.conn.Open();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                int decayed = reader.GetInt16(1);
+                ulong id = reader.GetUInt64(2);
+                if (timeDif.TotalDays == 2 && decayed == -1)
+                {
+                    decayWarning.Add(id);
+                }
+
+                if (timeDif.TotalDays - decayed == 3 && decayed > -1)
+                {
+                    decayIDs.Add(id);
+                    decayDays.Add((int)timeDif.TotalDays);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            Globals.conn.Close();
+            throw;
+        }
+        Globals.conn.Close();
+
+        foreach (var id in decayWarning)
+        {
+            Globals.conn.Open();
+            query = $"UPDATE leaderboardNA2 SET decayed = 0 WHERE id = {id};";
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+                var user = thisChannel.GetUserAsync(id);
+                await thisChannel.SendMessageAsync($"Hey <@{id}> your elo decay will be starting tomorrow. Play a 2v2 game in the next 24 hours to prevent this from happening.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+        }
+
+        for (int i = 0; i < decayIDs.Count; i++)
+        {
+            query = $"UPDATE leaderboardNA2 SET elo = elo - {decayDays[i] + 2} WHERE id = {decayIDs[i]};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            query = $"UPDATE leaderboardNA2 SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+        }
+    }
+
+    public async Task EloDecayEU1(IMessageChannel thisChannel)
+    {
+        DateTime nowTime = DateTime.Now;
+
+        List<ulong> decayWarning = new List<ulong>(30);
+        List<ulong> decayIDs = new List<ulong>(30);
+        List<int> decayDays = new List<int>(30);
+        string query = $"SELECT decaytimer, decayed, id FROM leaderboardEU1;";
+        Globals.conn.Open();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                int decayed = reader.GetInt16(1);
+                ulong id = reader.GetUInt64(2);
+                if (timeDif.TotalDays == 2 && decayed == -1)
+                {
+                    decayWarning.Add(id);
+                }
+
+                if (timeDif.TotalDays - decayed == 3 && decayed > -1)
+                {
+                    decayIDs.Add(id);
+                    decayDays.Add((int)timeDif.TotalDays);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            Globals.conn.Close();
+            throw;
+        }
+        Globals.conn.Close();
+
+        foreach (var id in decayWarning)
+        {
+            Globals.conn.Open();
+            query = $"UPDATE leaderboardEU1 SET decayed = 0 WHERE id = {id};";
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+                var user = thisChannel.GetUserAsync(id);
+                await thisChannel.SendMessageAsync($"Hey <@{id}> your elo decay will be starting tomorrow. Play a 1v1 game in the next 24 hours to prevent this from happening.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+        }
+
+        for (int i = 0; i < decayIDs.Count; i++)
+        {
+            query = $"UPDATE leaderboardEU1 SET elo = elo - {decayDays[i] + 2} WHERE id = {decayIDs[i]};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            query = $"UPDATE leaderboardEU1 SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+        }
+    }
+
+    public async Task EloDecayEU2(IMessageChannel thisChannel)
+    {
+        DateTime nowTime = DateTime.Now;
+
+        List<ulong> decayWarning = new List<ulong>(30);
+        List<ulong> decayIDs = new List<ulong>(30);
+        List<int> decayDays = new List<int>(30);
+        string query = $"SELECT decaytimer, decayed, id FROM leaderboardEU2;";
+        Globals.conn.Open();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                int decayed = reader.GetInt16(1);
+                ulong id = reader.GetUInt64(2);
+                if (timeDif.TotalDays == 2 && decayed == -1)
+                {
+                    decayWarning.Add(id);
+                }
+
+                if (timeDif.TotalDays - decayed == 3 && decayed > -1)
+                {
+                    decayIDs.Add(id);
+                    decayDays.Add((int)timeDif.TotalDays);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            Globals.conn.Close();
+            throw;
+        }
+        Globals.conn.Close();
+
+        foreach (var id in decayWarning)
+        {
+            Globals.conn.Open();
+            query = $"UPDATE leaderboardEU2 SET decayed = 0 WHERE id = {id};";
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+                var user = thisChannel.GetUserAsync(id);
+                await thisChannel.SendMessageAsync($"Hey <@{id}> your elo decay will be starting tomorrow. Play a 2v2 game in the next 24 hours to prevent this from happening.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+        }
+
+        for (int i = 0; i < decayIDs.Count; i++)
+        {
+            query = $"UPDATE leaderboardEU2 SET elo = elo - {decayDays[i] + 2} WHERE id = {decayIDs[i]};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            query = $"UPDATE leaderboardEU2 SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                cmd.ExecuteNonQuery();
             }
             catch (Exception ex)
             {
