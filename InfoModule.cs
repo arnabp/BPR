@@ -816,7 +816,7 @@ namespace BPR
 
             double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
 
-            query = $"SELECT id, elo2 FROM leaderboardNA;";
+            query = $"SELECT id, elo FROM leaderboardNA2;";
             Globals.conn.Open();
             try
             {
@@ -999,7 +999,7 @@ namespace BPR
 
             double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
 
-            query = $"SELECT id, elo2 FROM leaderboardEU;";
+            query = $"SELECT id, elo FROM leaderboardEU2;";
             Globals.conn.Open();
             try
             {
@@ -1128,7 +1128,7 @@ namespace BPR
 
             var results = new Tuple<double, double>(0, 0);
             double p1elo = 0, p2elo = 0;
-            query = $"SELECT elo1 FROM leaderboard{region} WHERE id = {p1ID};";
+            query = $"SELECT elo FROM leaderboard{region}1 WHERE id = {p1ID};";
             Globals.conn.Open();
             try
             {
@@ -1147,7 +1147,7 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
-            query = $"SELECT elo1 FROM leaderboard{region} WHERE id = {p2ID};";
+            query = $"SELECT elo FROM leaderboard{region}1 WHERE id = {p2ID};";
             Globals.conn.Open();
             try
             {
@@ -1198,29 +1198,29 @@ namespace BPR
 
             await Context.Channel.SendMessageAsync("", embed: embed);
 
-            string p1ResultString = "wins1";
-            string p2ResultString = "loss1";
+            string p1ResultString = "wins";
+            string p2ResultString = "loss";
             if (!(bool)isP1)
             {
-                p1ResultString = "loss1";
-                p2ResultString = "wins1";
+                p1ResultString = "loss";
+                p2ResultString = "wins";
             }
 
             Console.WriteLine($"Giving {p1Username} {results.Item1} elo, resulting in {new1}");
-            query = $"UPDATE leaderboard{region} SET elo1 = {new1} WHERE id = {p1ID};";
+            query = $"UPDATE leaderboard{region}1 SET elo = {new1} WHERE id = {p1ID};";
             HelperFunctions.ExecuteSQLQuery(query);
-            query = $"UPDATE leaderboard{region} SET {p1ResultString} = {p1ResultString} + 1 WHERE id = {p1ID};";
+            query = $"UPDATE leaderboard{region}1 SET {p1ResultString} = {p1ResultString} + 1 WHERE id = {p1ID};";
             HelperFunctions.ExecuteSQLQuery(query);
 
             Console.WriteLine($"Giving {p2Username} {results.Item2} elo, resulting in {new2}");
-            query = $"UPDATE leaderboard{region} SET elo1 = {new2} WHERE id = {p2ID};";
+            query = $"UPDATE leaderboard{region}1 SET elo = {new2} WHERE id = {p2ID};";
             HelperFunctions.ExecuteSQLQuery(query);
-            query = $"UPDATE leaderboard{region} SET {p2ResultString} = {p2ResultString} + 1 WHERE id = {p2ID};";
+            query = $"UPDATE leaderboard{region}1 SET {p2ResultString} = {p2ResultString} + 1 WHERE id = {p2ID};";
             HelperFunctions.ExecuteSQLQuery(query);
 
             if(reverter != 0)
             {
-                query = $"UPDATE leaderboard{region} SET elo1 = elo1 - 20 WHERE id = {reverter};";
+                query = $"UPDATE leaderboard{region}1 SET elo = elo - 20 WHERE id = {reverter};";
                 HelperFunctions.ExecuteSQLQuery(query);
             }
                 
@@ -1276,7 +1276,7 @@ namespace BPR
                 query = $"UPDATE matches{region}1 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
                 HelperFunctions.ExecuteSQLQuery(query);
 
-                await Context.Channel.SendMessageAsync($"NA 1v1 Match #{thisMatchNum} is in room #{room}");
+                await Context.Channel.SendMessageAsync($"{region} 1v1 Match #{thisMatchNum} is in room #{room}");
             }
             else
             {
@@ -1378,26 +1378,26 @@ namespace BPR
                     }
                     Globals.conn.Close();
 
-                    query = $"UPDATE leaderboard{region} SET elo1 = {p1elo} WHERE id = {p1ID};";
+                    query = $"UPDATE leaderboard{region}1 SET elo = {p1elo} WHERE id = {p1ID};";
                     HelperFunctions.ExecuteSQLQuery(query);
 
-                    query = $"UPDATE leaderboard{region} SET elo1 = {p2elo} WHERE id = {p2ID};";
+                    query = $"UPDATE leaderboard{region}1 SET elo = {p2elo} WHERE id = {p2ID};";
                     HelperFunctions.ExecuteSQLQuery(query);
 
                     query = $"INSERT INTO matches{region}1(id1, id2, username1, username2, time, reverted) VALUES({p1ID}, {p2ID}, '{p1Username}', '{p2Username}', {DateTime.Now.ToBinary()}, {reporter});";
                     HelperFunctions.ExecuteSQLQuery(query);
 
-                    string p1ResultString = "wins1";
-                    string p2ResultString = "loss1";
+                    string p1ResultString = "wins";
+                    string p2ResultString = "loss";
                     if (isP1 == 0)
                     {
-                        p1ResultString = "loss1";
-                        p2ResultString = "wins1";
+                        p1ResultString = "loss";
+                        p2ResultString = "wins";
                     }
 
-                    query = $"UPDATE leaderboard{region} SET {p1ResultString} = {p1ResultString} - 1 WHERE id = {p1ID};";
+                    query = $"UPDATE leaderboard{region}1 SET {p1ResultString} = {p1ResultString} - 1 WHERE id = {p1ID};";
                     HelperFunctions.ExecuteSQLQuery(query);
-                    query = $"UPDATE leaderboard{region} SET {p2ResultString} = {p2ResultString} - 1 WHERE id = {p2ID};";
+                    query = $"UPDATE leaderboard{region}1 SET {p2ResultString} = {p2ResultString} - 1 WHERE id = {p2ID};";
                     HelperFunctions.ExecuteSQLQuery(query);
 
                     await Context.Channel.SendMessageAsync("The last 1v1 match has been reverted. Please report the match correctly now.");
@@ -1428,7 +1428,7 @@ namespace BPR
 
             var results = new Tuple<double, double>(0, 0);
             double p1elo = 0, p2elo = 0;
-            string query = $"SELECT elo1 FROM leaderboardNA WHERE id = {p1ID};";
+            string query = $"SELECT elo FROM leaderboardNA1 WHERE id = {p1ID};";
             Globals.conn.Open();
             try
             {
@@ -1447,7 +1447,7 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
-            query = $"SELECT elo1 FROM leaderboardNA WHERE id = {p2ID};";
+            query = $"SELECT elo FROM leaderboardNA1 WHERE id = {p2ID};";
             Globals.conn.Open();
             try
             {
@@ -1471,10 +1471,10 @@ namespace BPR
             double new1 = p1elo + results.Item1;
             double new2 = p2elo + results.Item2;
 
-            query = $"UPDATE leaderboardNA SET elo1 = {new1} WHERE id = {p1ID};";
+            query = $"UPDATE leaderboardNA1 SET elo = {new1} WHERE id = {p1ID};";
             HelperFunctions.ExecuteSQLQuery(query);
             
-            query = $"UPDATE leaderboardNA SET elo1 = {new2} WHERE id = {p2ID};";
+            query = $"UPDATE leaderboardNA1 SET elo = {new2} WHERE id = {p2ID};";
             HelperFunctions.ExecuteSQLQuery(query);
 
             await Context.Channel.SendMessageAsync($"Match hard updated");
@@ -1494,7 +1494,7 @@ namespace BPR
 
             var results = new Tuple<double, double>(0, 0);
             double p1elo = 0, p2elo = 0;
-            string query = $"SELECT elo1 FROM leaderboardEU WHERE id = {p1ID};";
+            string query = $"SELECT elo FROM leaderboardEU1 WHERE id = {p1ID};";
             Globals.conn.Open();
             try
             {
@@ -1513,7 +1513,7 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
-            query = $"SELECT elo1 FROM leaderboardEU WHERE id = {p2ID};";
+            query = $"SELECT elo FROM leaderboardEU1 WHERE id = {p2ID};";
             Globals.conn.Open();
             try
             {
@@ -1537,10 +1537,10 @@ namespace BPR
             double new1 = p1elo + results.Item1;
             double new2 = p2elo + results.Item2;
 
-            query = $"UPDATE leaderboardEU SET elo1 = {new1} WHERE id = {p1ID};";
+            query = $"UPDATE leaderboardEU1 SET elo = {new1} WHERE id = {p1ID};";
             HelperFunctions.ExecuteSQLQuery(query);
             
-            query = $"UPDATE leaderboardEU SET elo1 = {new2} WHERE id = {p2ID};";
+            query = $"UPDATE leaderboardEU1 SET elo = {new2} WHERE id = {p2ID};";
             HelperFunctions.ExecuteSQLQuery(query);
 
             await Context.Channel.SendMessageAsync($"Match hard updated");
@@ -1551,8 +1551,8 @@ namespace BPR
             double expected1 = 1 / (1 + System.Math.Pow(10, ((p2 - p1) / 400)));
             double expected2 = 1 / (1 + System.Math.Pow(10, ((p1 - p2) / 400)));
 
-            double change1 = (32 * (Convert.ToDouble(isP1) - expected1)) + 2;
-            double change2 = (32 * (Convert.ToDouble(!isP1) - expected2)) + 2;
+            double change1 = (32 * (Convert.ToDouble(isP1) - expected1));
+            double change2 = (32 * (Convert.ToDouble(!isP1) - expected2));
 
             var allChange = Tuple.Create(change1, change2);
 
@@ -1647,7 +1647,7 @@ namespace BPR
 
             var results = new Tuple<double, double, double, double>(0, 0, 0, 0);
             double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
-            query = $"SELECT id, elo2 FROM leaderboard{region};";
+            query = $"SELECT id, elo FROM leaderboard{region}2;";
             Globals.conn.Open();
             try
             {
@@ -1717,41 +1717,41 @@ namespace BPR
 
             await Context.Channel.SendMessageAsync("", embed: embed);
 
-            string t1ResultString = "wins2";
-            string t2ResultString = "loss2";
+            string t1ResultString = "wins";
+            string t2ResultString = "loss";
             if (!(bool)isT1)
             {
-                t1ResultString = "loss2";
-                t2ResultString = "wins2";
+                t1ResultString = "loss";
+                t2ResultString = "wins";
             }
 
             Console.WriteLine($"Giving {p1Username} {results.Item1} elo, resulting in {new1}");
-            query = $"UPDATE leaderboard{region} SET elo2 = {new1} WHERE id = {p1ID};";
+            query = $"UPDATE leaderboard{region}2 SET elo = {new1} WHERE id = {p1ID};";
             HelperFunctions.ExecuteSQLQuery(query);
-            query = $"UPDATE leaderboard{region} SET {t1ResultString} = {t1ResultString} + 1 WHERE id = {p1ID};";
+            query = $"UPDATE leaderboard{region}2 SET {t1ResultString} = {t1ResultString} + 1 WHERE id = {p1ID};";
             HelperFunctions.ExecuteSQLQuery(query);
 
             Console.WriteLine($"Giving {p2Username} {results.Item2} elo, resulting in {new2}");
-            query = $"UPDATE leaderboard{region} SET elo2 = {new2} WHERE id = {p2ID};";
+            query = $"UPDATE leaderboard{region}2 SET elo = {new2} WHERE id = {p2ID};";
             HelperFunctions.ExecuteSQLQuery(query);
-            query = $"UPDATE leaderboard{region} SET {t1ResultString} = {t1ResultString} + 1 WHERE id = {p2ID};";
+            query = $"UPDATE leaderboard{region}2 SET {t1ResultString} = {t1ResultString} + 1 WHERE id = {p2ID};";
             HelperFunctions.ExecuteSQLQuery(query);
 
             Console.WriteLine($"Giving {p3Username} {results.Item3} elo, resulting in {new3}");
-            query = $"UPDATE leaderboard{region} SET elo2 = {new3} WHERE id = {p3ID};";
+            query = $"UPDATE leaderboard{region}2 SET elo = {new3} WHERE id = {p3ID};";
             HelperFunctions.ExecuteSQLQuery(query);
-            query = $"UPDATE leaderboard{region} SET {t2ResultString} = {t2ResultString} + 1 WHERE id = {p3ID};";
+            query = $"UPDATE leaderboard{region}2 SET {t2ResultString} = {t2ResultString} + 1 WHERE id = {p3ID};";
             HelperFunctions.ExecuteSQLQuery(query);
 
             Console.WriteLine($"Giving {p4Username} {results.Item4} elo, resulting in {new4}");
-            query = $"UPDATE leaderboard{region} SET elo2 = {new4} WHERE id = {p4ID};";
+            query = $"UPDATE leaderboard{region}2 SET elo = {new4} WHERE id = {p4ID};";
             HelperFunctions.ExecuteSQLQuery(query);
-            query = $"UPDATE leaderboard{region} SET {t2ResultString} = {t2ResultString} + 1 WHERE id = {p4ID};";
+            query = $"UPDATE leaderboard{region}2 SET {t2ResultString} = {t2ResultString} + 1 WHERE id = {p4ID};";
             HelperFunctions.ExecuteSQLQuery(query);
 
             if(reverter != 0)
             {
-                query = $"UPDATE leaderboard{region} SET elo2 = elo2 - 20 WHERE id = {reverter};";
+                query = $"UPDATE leaderboard{region}2 SET elo = elo - 20 WHERE id = {reverter};";
                 HelperFunctions.ExecuteSQLQuery(query);
             }
                 
@@ -1884,37 +1884,37 @@ namespace BPR
                     }
                     Globals.conn.Close();
 
-                    query = $"UPDATE leaderboard{region} SET elo2 = {p1elo} WHERE id = {p1ID};";
+                    query = $"UPDATE leaderboard{region}2 SET elo = {p1elo} WHERE id = {p1ID};";
                     HelperFunctions.ExecuteSQLQuery(query);
 
-                    query = $"UPDATE leaderboard{region} SET elo2 = {p2elo} WHERE id = {p2ID};";
+                    query = $"UPDATE leaderboard{region}2 SET elo = {p2elo} WHERE id = {p2ID};";
                     HelperFunctions.ExecuteSQLQuery(query);
 
-                    query = $"UPDATE leaderboard{region} SET elo2 = {p3elo} WHERE id = {p3ID};";
+                    query = $"UPDATE leaderboard{region}2 SET elo = {p3elo} WHERE id = {p3ID};";
                     HelperFunctions.ExecuteSQLQuery(query);
 
-                    query = $"UPDATE leaderboard{region} SET elo2 = {p4elo} WHERE id = {p4ID};";
+                    query = $"UPDATE leaderboard{region}2 SET elo = {p4elo} WHERE id = {p4ID};";
                     HelperFunctions.ExecuteSQLQuery(query);
 
                     query = $"INSERT INTO matches{region}2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
                         $"VALUES({p1ID}, {p2ID}, {p3ID}, {p4ID}, '{p1Username}', '{p2Username}', '{p3Username}', '{p4Username}', {DateTime.Now.ToBinary()}, {reporter});";
                     HelperFunctions.ExecuteSQLQuery(query);
 
-                    string t1ResultString = "wins2";
-                    string t2ResultString = "loss2";
+                    string t1ResultString = "wins";
+                    string t2ResultString = "loss";
                     if (isT1 == 0)
                     {
-                        t1ResultString = "loss2";
-                        t2ResultString = "wins2";
+                        t1ResultString = "loss";
+                        t2ResultString = "wins";
                     }
 
-                    query = $"UPDATE leaderboard{region} SET {t1ResultString} = {t1ResultString} - 1 WHERE id = {p1ID};";
+                    query = $"UPDATE leaderboard{region}2 SET {t1ResultString} = {t1ResultString} - 1 WHERE id = {p1ID};";
                     HelperFunctions.ExecuteSQLQuery(query);
-                    query = $"UPDATE leaderboard{region} SET {t1ResultString} = {t1ResultString} - 1 WHERE id = {p2ID};";
+                    query = $"UPDATE leaderboard{region}2 SET {t1ResultString} = {t1ResultString} - 1 WHERE id = {p2ID};";
                     HelperFunctions.ExecuteSQLQuery(query);
-                    query = $"UPDATE leaderboard{region} SET {t2ResultString} = {t2ResultString} - 1 WHERE id = {p3ID};";
+                    query = $"UPDATE leaderboard{region}2 SET {t2ResultString} = {t2ResultString} - 1 WHERE id = {p3ID};";
                     HelperFunctions.ExecuteSQLQuery(query);
-                    query = $"UPDATE leaderboard{region} SET {t2ResultString} = {t2ResultString} - 1 WHERE id = {p4ID};";
+                    query = $"UPDATE leaderboard{region}2 SET {t2ResultString} = {t2ResultString} - 1 WHERE id = {p4ID};";
                     HelperFunctions.ExecuteSQLQuery(query);
 
                     await Context.Channel.SendMessageAsync("The last 2v2 match has been reverted. Please report the match correctly now.");
@@ -2012,7 +2012,7 @@ namespace BPR
 
             var results = new Tuple<double, double, double, double>(0, 0, 0, 0);
             double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
-            string query = $"SELECT id, elo2 FROM leaderboardNA;";
+            string query = $"SELECT id, elo FROM leaderboardNA2;";
             Globals.conn.Open();
             try
             {
@@ -2041,15 +2041,15 @@ namespace BPR
             double new3 = p3elo + results.Item3;
             double new4 = p4elo + results.Item4;
 
-            query = $"UPDATE leaderboardNA SET elo2 = {new1} WHERE id = {p1ID};";
+            query = $"UPDATE leaderboardNA2 SET elo = {new1} WHERE id = {p1ID};";
             HelperFunctions.ExecuteSQLQuery(query);
             
-            query = $"UPDATE leaderboardNA SET elo2 = {new2} WHERE id = {p2ID};";
+            query = $"UPDATE leaderboardNA2 SET elo = {new2} WHERE id = {p2ID};";
             HelperFunctions.ExecuteSQLQuery(query);
-            query = $"UPDATE leaderboardNA SET elo3 = {new3} WHERE id = {p3ID};";
+            query = $"UPDATE leaderboardNA2 SET elo = {new3} WHERE id = {p3ID};";
             HelperFunctions.ExecuteSQLQuery(query);
             
-            query = $"UPDATE leaderboardNA SET elo4 = {new4} WHERE id = {p4ID};";
+            query = $"UPDATE leaderboardNA2 SET elo = {new4} WHERE id = {p4ID};";
             HelperFunctions.ExecuteSQLQuery(query);
 
             await Context.Channel.SendMessageAsync($"Match hard updated");
@@ -2066,7 +2066,7 @@ namespace BPR
 
             var results = new Tuple<double, double, double, double>(0, 0, 0, 0);
             double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
-            string query = $"SELECT id, elo2 FROM leaderboardEU;";
+            string query = $"SELECT id, elo FROM leaderboardEU2;";
             Globals.conn.Open();
             try
             {
@@ -2095,15 +2095,15 @@ namespace BPR
             double new3 = p3elo + results.Item3;
             double new4 = p4elo + results.Item4;
 
-            query = $"UPDATE leaderboardEU SET elo2 = {new1} WHERE id = {p1ID};";
+            query = $"UPDATE leaderboardEU2 SET elo = {new1} WHERE id = {p1ID};";
             HelperFunctions.ExecuteSQLQuery(query);
             
-            query = $"UPDATE leaderboardEU SET elo2 = {new2} WHERE id = {p2ID};";
+            query = $"UPDATE leaderboardEU2 SET elo = {new2} WHERE id = {p2ID};";
             HelperFunctions.ExecuteSQLQuery(query);
-            query = $"UPDATE leaderboardEU SET elo3 = {new3} WHERE id = {p3ID};";
+            query = $"UPDATE leaderboardEU2 SET elo = {new3} WHERE id = {p3ID};";
             HelperFunctions.ExecuteSQLQuery(query);
             
-            query = $"UPDATE leaderboardEU SET elo4 = {new4} WHERE id = {p4ID};";
+            query = $"UPDATE leaderboardEU2 SET elo = {new4} WHERE id = {p4ID};";
             HelperFunctions.ExecuteSQLQuery(query);
 
             await Context.Channel.SendMessageAsync($"Match hard updated");
@@ -2124,10 +2124,10 @@ namespace BPR
             double expected3 = 1 / (1 + System.Math.Pow(10, ((t1avg - p3) / 400)));
             double expected4 = 1 / (1 + System.Math.Pow(10, ((t1avg - p4) / 400)));
 
-            double change1 = (32 * (Convert.ToDouble(isT1) - expected1)) + 2;
-            double change2 = (32 * (Convert.ToDouble(isT1) - expected2)) + 2;
-            double change3 = (32 * (Convert.ToDouble(!isT1) - expected3)) + 2;
-            double change4 = (32 * (Convert.ToDouble(!isT1) - expected4)) + 2;
+            double change1 = (32 * (Convert.ToDouble(isT1) - expected1));
+            double change2 = (32 * (Convert.ToDouble(isT1) - expected2));
+            double change3 = (32 * (Convert.ToDouble(!isT1) - expected3));
+            double change4 = (32 * (Convert.ToDouble(!isT1) - expected4));
 
             var allChange = Tuple.Create(change1, change2, change3, change4);
 
@@ -2135,8 +2135,8 @@ namespace BPR
         }
     }
 
-    [Group("leaderboardNA")]
-    public class LeaderboardNAModule : ModuleBase<SocketCommandContext>
+    [Group("leaderboardNA1")]
+    public class LeaderboardNA1Module : ModuleBase<SocketCommandContext>
     {
         [Command("delete")]
         [Summary("Allows admin to delete user from leaderboard")]
@@ -2145,7 +2145,7 @@ namespace BPR
         {
             var user = Context.Guild.GetUser(id);
             string username = "";
-            string query = $"SELECT username FROM leaderboardNA WHERE id = {id};";
+            string query = $"SELECT username FROM leaderboardNA1 WHERE id = {id};";
             Globals.conn.Open();
             try
             {
@@ -2165,22 +2165,22 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
-            query = $"DELETE FROM leaderboardNA WHERE id = {id};";
+            query = $"DELETE FROM leaderboardNA1 WHERE id = {id};";
             HelperFunctions.ExecuteSQLQuery(query);
 
             if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(396442734271004672));
 
-            await Context.Channel.SendMessageAsync($"{username} has been deleted from the leaderboards");
+            await Context.Channel.SendMessageAsync($"{username} has been deleted from the 1v1 leaderboards");
         }
 
         [Command("wl")]
         [Summary("Sets the win/loss ratio of a player")]
         [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task SetWinLossAsync(ulong id, int wins, int losses, [Remainder] string gamemode)
+        public async Task SetWinLossAsync(ulong id, int wins, int losses)
         {
             var user = Context.Guild.GetUser(id);
             string username = "";
-            string query = $"SELECT username FROM leaderboardNA WHERE id = {id};";
+            string query = $"SELECT username FROM leaderboardNA1 WHERE id = {id};";
             Globals.conn.Open();
             try
             {
@@ -2200,7 +2200,7 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
-            query = $"UPDATE leaderboardNA SET wins{gamemode} = {wins}, loss{gamemode} = {losses} WHERE id = {id};";
+            query = $"UPDATE leaderboardNA1 SET wins1 = {wins}, loss1 = {losses} WHERE id = {id};";
             Globals.conn.Open();
             try
             {
@@ -2221,12 +2221,102 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            await Context.Channel.SendMessageAsync($"{username} win/loss in {gamemode}s has been updated");
+            await Context.Channel.SendMessageAsync($"{username} win/loss in 1v1 has been updated");
         }
     }
 
-    [Group("leaderboardEU")]
-    public class LeaderboardEUModule : ModuleBase<SocketCommandContext>
+    [Group("leaderboardNA2")]
+    public class LeaderboardNA2Module : ModuleBase<SocketCommandContext>
+    {
+        [Command("delete")]
+        [Summary("Allows admin to delete user from leaderboard")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task DeleteLeaderboardAsync([Remainder] ulong id)
+        {
+            var user = Context.Guild.GetUser(id);
+            string username = "";
+            string query = $"SELECT username FROM leaderboardNA2 WHERE id = {id};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    username = reader.GetString(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            query = $"DELETE FROM leaderboardNA2 WHERE id = {id};";
+            HelperFunctions.ExecuteSQLQuery(query);
+
+            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(396442734271004672));
+
+            await Context.Channel.SendMessageAsync($"{username} has been deleted from the 2v2 leaderboards");
+        }
+
+        [Command("wl")]
+        [Summary("Sets the win/loss ratio of a player")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task SetWinLossAsync(ulong id, int wins, int losses)
+        {
+            var user = Context.Guild.GetUser(id);
+            string username = "";
+            string query = $"SELECT username FROM leaderboardNA2 WHERE id = {id};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    username = reader.GetString(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            query = $"UPDATE leaderboardNA2 SET wins2 = {wins}, loss2 = {losses} WHERE id = {id};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    username = reader.GetString(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            await Context.Channel.SendMessageAsync($"{username} win/loss in 2v2 has been updated");
+        }
+    }
+
+    [Group("leaderboardEU1")]
+    public class LeaderboardEU1Module : ModuleBase<SocketCommandContext>
     {
         [Command("delete")]
         [Summary("Allows admin to delete user from leaderboard")]
@@ -2236,7 +2326,7 @@ namespace BPR
             var user = Context.Guild.GetUser(id);
             await Context.Message.DeleteAsync();
             string username = "";
-            string query = $"SELECT username FROM leaderboardEU WHERE id = {id};";
+            string query = $"SELECT username FROM leaderboardEU1 WHERE id = {id};";
             Globals.conn.Open();
             try
             {
@@ -2256,12 +2346,12 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
-            query = $"DELETE FROM leaderboardEU WHERE id = {id};";
+            query = $"DELETE FROM leaderboardEU1 WHERE id = {id};";
             HelperFunctions.ExecuteSQLQuery(query);
 
             if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(396442764298158081));
 
-            await Context.Channel.SendMessageAsync($"{username} has been deleted from the leaderboards");
+            await Context.Channel.SendMessageAsync($"{username} has been deleted from the 1v1 leaderboards");
         }
 
         [Command("wl")]
@@ -2271,7 +2361,7 @@ namespace BPR
         {
             var user = Context.Guild.GetUser(id);
             string username = "";
-            string query = $"SELECT username FROM leaderboardEU WHERE id = {id};";
+            string query = $"SELECT username FROM leaderboardEU1 WHERE id = {id};";
             Globals.conn.Open();
             try
             {
@@ -2291,7 +2381,7 @@ namespace BPR
                 throw;
             }
             Globals.conn.Close();
-            query = $"UPDATE leaderboardEU SET wins{gamemode} = {wins}, loss{gamemode} = {losses} WHERE id = {id};";
+            query = $"UPDATE leaderboardEU1 SET wins1 = {wins}, loss1 = {losses} WHERE id = {id};";
             Globals.conn.Open();
             try
             {
@@ -2312,7 +2402,98 @@ namespace BPR
             }
             Globals.conn.Close();
 
-            await Context.Channel.SendMessageAsync($"{username} win/loss in {gamemode}s has been updated");
+            await Context.Channel.SendMessageAsync($"{username} win/loss in 1v1 has been updated");
+        }
+    }
+
+    [Group("leaderboardEU2")]
+    public class LeaderboardEU2Module : ModuleBase<SocketCommandContext>
+    {
+        [Command("delete")]
+        [Summary("Allows admin to delete user from leaderboard")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task DeleteLeaderboardAsync([Remainder] ulong id)
+        {
+            var user = Context.Guild.GetUser(id);
+            await Context.Message.DeleteAsync();
+            string username = "";
+            string query = $"SELECT username FROM leaderboardEU2 WHERE id = {id};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    username = reader.GetString(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            query = $"DELETE FROM leaderboardEU2 WHERE id = {id};";
+            HelperFunctions.ExecuteSQLQuery(query);
+
+            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(396442764298158081));
+
+            await Context.Channel.SendMessageAsync($"{username} has been deleted from the 2v2 leaderboards");
+        }
+
+        [Command("wl")]
+        [Summary("Sets the win/loss ratio of a player")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task SetWinLossAsync(ulong id, int wins, int losses, [Remainder] string gamemode)
+        {
+            var user = Context.Guild.GetUser(id);
+            string username = "";
+            string query = $"SELECT username FROM leaderboardEU2 WHERE id = {id};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    username = reader.GetString(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+            query = $"UPDATE leaderboardEU2 SET wins2 = {wins}, loss2 = {losses} WHERE id = {id};";
+            Globals.conn.Open();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    username = reader.GetString(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Globals.conn.Close();
+                throw;
+            }
+            Globals.conn.Close();
+
+            await Context.Channel.SendMessageAsync($"{username} win/loss in 2v2 has been updated");
         }
     }
 }
