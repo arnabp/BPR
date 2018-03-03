@@ -14,9 +14,9 @@ namespace BPR
 {
     public class HelperFunctions
     {
-        public static void ExecuteSQLQuery(string query)
+        public static async Task ExecuteSQLQueryAsync(string query)
         {
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -25,10 +25,10 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
 
         public static string GetRoleRegion(ulong roleID)
@@ -123,7 +123,7 @@ namespace BPR
             bool isInQueue = false, isInMatch = false;
             int queueCount = 0;
             string query = $"SELECT count(*) FROM queue{region}1;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -137,15 +137,15 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             if (queueCount > 0)
             {
                 query = $"SELECT id FROM queue{region}1;";
-                Globals.conn.Open();
+                await Globals.conn.OpenAsync();
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -159,14 +159,14 @@ namespace BPR
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.ToString());
-                    Globals.conn.Close();
+                    await Globals.conn.CloseAsync();
                     throw;
                 }
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
             }
 
             query = $"SELECT id1, id2 FROM matches{region}1;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -180,17 +180,17 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             if (isInQueue)
             {
                 await Context.Channel.SendMessageAsync($"Player already in {region} 1v1 queue has now refreshed their queue timer");
 
                 query = $"UPDATE queue{region}1 SET time = {DateTime.Now.ToBinary()} WHERE id = {userInfo.Id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
                 Console.WriteLine($"{userInfo.Username} refreshed their queue timer");
             }
             else if (isInMatch)
@@ -201,7 +201,7 @@ namespace BPR
             else
             {
                 query = $"INSERT INTO queue{region}1(time, username, id) VALUES({DateTime.Now.ToBinary()}, '{userInfo.Username}', {userInfo.Id});";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                 await Context.Channel.SendMessageAsync($"A player has been added to {region} 1v1 queue");
 
@@ -212,7 +212,7 @@ namespace BPR
                     else Console.WriteLine("Wrong region detected, role error");
 
                     query = $"TRUNCATE TABLE queue{region}1;";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
                 }
             }
         }
@@ -229,7 +229,7 @@ namespace BPR
             bool isInQueue = false;
             int queueCount = 0;
             string query = $"SELECT count(*) FROM queue{region}1;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -243,15 +243,15 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             if (queueCount > 0)
             {
                 query = $"SELECT id FROM queue{region}1;";
-                Globals.conn.Open();
+                await Globals.conn.OpenAsync();
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -265,16 +265,16 @@ namespace BPR
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.ToString());
-                    Globals.conn.Close();
+                    await Globals.conn.CloseAsync();
                     throw;
                 }
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
             }
 
             if (isInQueue)
             {
                 query = $"DELETE FROM queue{region}1 WHERE id = {userInfo.Id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the {region} 1v1 queue");
             }
             else
@@ -292,7 +292,7 @@ namespace BPR
             ulong p1id = 0, p2id = 0;
             bool is1InQueue = false, is2InQueue = false;
             string query = $"SELECT time, username, id FROM queueNA1;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -320,13 +320,13 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             query = $"SELECT id FROM queueNA2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -341,30 +341,30 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             if (is1InQueue)
             {
                 query = $"DELETE FROM queueNA2 WHERE id = {p1id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the NA 2v2 queue");
             }
 
             if (is2InQueue)
             {
                 query = $"DELETE FROM queueNA2 WHERE id = {p2id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the NA 2v2 queue");
             }
 
             query = $"INSERT INTO matchesNA1(id1, id2, username1, username2, time, reverted) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.Now.ToBinary()}, 0);";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             int matchCount = 0;
             query = $"SELECT count(*) FROM matchesNA1;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -378,10 +378,10 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}> and <@{p2id}>");
             Console.WriteLine($"NA 1v1 Match #{matchCount} has started.");
@@ -396,7 +396,7 @@ namespace BPR
             ulong p1id = 0, p2id = 0;
             bool is1InQueue = false, is2InQueue = false;
             string query = $"SELECT time, username, id FROM queueEU1;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -424,13 +424,13 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             query = $"SELECT id FROM queueEU2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -445,30 +445,30 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             if (is1InQueue)
             {
                 query = $"DELETE FROM queueEU2 WHERE id = {p1id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the EU 2v2 queue");
             }
 
             if (is2InQueue)
             {
                 query = $"DELETE FROM queueEU2 WHERE id = {p2id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the EU 2v2 queue");
             }
 
             query = $"INSERT INTO matchesEU1(id1, id2, username1, username2, time, reverted) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.Now.ToBinary()}, 0);";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             int matchCount = 0;
             query = $"SELECT count(*) FROM matchesEU1;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -482,10 +482,10 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             await Context.Channel.SendMessageAsync($"New 1v1 match has started between <@{p1id}> and <@{p2id}>");
             Console.WriteLine($"EU 1v1 Match #{matchCount} has started.");
@@ -517,7 +517,7 @@ namespace BPR
             bool isInQueue = false, isInMatch = false;
             int queueCount = 0;
             string query = $"SELECT count(*) FROM queue{region}2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -531,15 +531,15 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             if (queueCount > 0)
             {
                 query = $"SELECT id FROM queue{region}2;";
-                Globals.conn.Open();
+                await Globals.conn.OpenAsync();
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -553,14 +553,14 @@ namespace BPR
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.ToString());
-                    Globals.conn.Close();
+                    await Globals.conn.CloseAsync();
                     throw;
                 }
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
             }
 
             query = $"SELECT id1, id2, id3, id4 FROM matches{region}2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -577,17 +577,17 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             if (isInQueue)
             {
                 await Context.Channel.SendMessageAsync($"Player already in {region} 2v2 queue has now refreshed their queue timer");
 
                 query = $"UPDATE queue{region}2 SET time = {DateTime.Now.ToBinary()} WHERE id = {userInfo.Id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
                 Console.WriteLine($"{userInfo.Username} refreshed their queue timer");
             }
             else if (isInMatch)
@@ -598,7 +598,7 @@ namespace BPR
             else
             {
                 query = $"INSERT INTO queue{region}2(time, username, id) VALUES({DateTime.Now.ToBinary()}, '{userInfo.Username}', {userInfo.Id});";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                 await Context.Channel.SendMessageAsync($"A player has been added to {region} 2v2 queue");
 
@@ -608,7 +608,7 @@ namespace BPR
                     else if (region == "EU") await NewMatchEU(0, 1, 2, 3);
                     else Console.WriteLine("Wrong region detected, role error");
                     query = $"TRUNCATE TABLE queue{region}2;";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
                 }
             }
         }
@@ -625,7 +625,7 @@ namespace BPR
             bool isInQueue = false;
             int queueCount = 0;
             string query = $"SELECT count(*) FROM queue{region}2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -639,15 +639,15 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             if (queueCount > 0)
             {
                 query = $"SELECT id FROM queue{region}2;";
-                Globals.conn.Open();
+                await Globals.conn.OpenAsync();
                 try
                 {
                     MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -661,16 +661,16 @@ namespace BPR
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.ToString());
-                    Globals.conn.Close();
+                    await Globals.conn.CloseAsync();
                     throw;
                 }
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
             }
 
             if (isInQueue)
             {
                 query = $"DELETE FROM queue{region}2 WHERE id = {userInfo.Id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the {region} 2v2 queue");
             }
             else
@@ -697,7 +697,7 @@ namespace BPR
             ulong p1id = 0, p2id = 0, p3id = 0, p4id = 0;
             bool is1InQueue = false, is2InQueue = false, is3InQueue = false, is4InQueue = false;
             string query = $"SELECT time, username, id FROM queueNA2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -737,13 +737,13 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             query = $"SELECT id FROM queueNA1;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -760,42 +760,42 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             if (is1InQueue)
             {
                 query = $"DELETE FROM queueNA1 WHERE id = {p1id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
             }
             if (is2InQueue)
             {
                 query = $"DELETE FROM queueNA1 WHERE id = {p2id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
             }
             if (is3InQueue)
             {
                 query = $"DELETE FROM queueNA1 WHERE id = {p3id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
             }
             if (is4InQueue)
             {
                 query = $"DELETE FROM queueNA1 WHERE id = {p4id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
             }
 
             query = $"INSERT INTO matchesNA2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
                 $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.Now.ToBinary()}, 0);";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             int matchCount = 0;
             query = $"SELECT count(*) FROM matchesNA2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -809,15 +809,15 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
 
             query = $"SELECT id, elo FROM leaderboardNA2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -846,10 +846,10 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             if(p1elo + p2elo > p3elo + p4elo)
             {
@@ -880,7 +880,7 @@ namespace BPR
             ulong p1id = 0, p2id = 0, p3id = 0, p4id = 0;
             bool is1InQueue = false, is2InQueue = false, is3InQueue = false, is4InQueue = false;
             string query = $"SELECT time, username, id FROM queueEU2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -920,13 +920,13 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             query = $"SELECT id FROM queueEU1;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -943,42 +943,42 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             if (is1InQueue)
             {
                 query = $"DELETE FROM queueEU1 WHERE id = {p1id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the EU 1v1 queue");
             }
             if (is2InQueue)
             {
                 query = $"DELETE FROM queueEU1 WHERE id = {p2id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the EU 1v1 queue");
             }
             if (is3InQueue)
             {
                 query = $"DELETE FROM queueEU1 WHERE id = {p3id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the EU 1v1 queue");
             }
             if (is4InQueue)
             {
                 query = $"DELETE FROM queueEU1 WHERE id = {p4id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the EU 1v1 queue");
             }
 
             query = $"INSERT INTO matchesEU2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
                 $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.Now.ToBinary()}, 0);";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             int matchCount = 0;
             query = $"SELECT count(*) FROM matchesEU2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -992,15 +992,15 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
 
             query = $"SELECT id, elo FROM leaderboardEU2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1029,10 +1029,10 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             if (p1elo + p2elo > p3elo + p4elo)
             {
@@ -1068,7 +1068,7 @@ namespace BPR
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
             string query = $"SELECT id1, id2, username1, username2, reverted FROM matches{region}1;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1102,10 +1102,10 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             if (isP1 == null)
             {
                 await Context.Channel.SendMessageAsync($"You are currently not in a match against anyone");
@@ -1129,7 +1129,7 @@ namespace BPR
             var results = new Tuple<double, double>(0, 0);
             double p1elo = 0, p2elo = 0;
             query = $"SELECT elo FROM leaderboard{region}1 WHERE id = {p1ID};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1143,12 +1143,12 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             query = $"SELECT elo FROM leaderboard{region}1 WHERE id = {p2ID};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1162,19 +1162,19 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             query = $"DELETE FROM matchesHistory1 WHERE id1 = {p1ID} OR id2 = {p1ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             query = $"DELETE FROM matchesHistory1 WHERE id1 = {p2ID} OR id2 = {p2ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             query = $"INSERT INTO matchesHistory1(id1, id2, oldElo1, oldElo2, isP1, region, username1, username2, reporter) " +
                 $"VALUES({p1ID}, {p2ID}, {p1elo}, {p2elo}, {isP1}, '{region}', '{p1Username}', '{p2Username}', {userInfo.Id});";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             results = EloConvert(p1elo, p2elo, (bool)isP1);
 
@@ -1213,24 +1213,24 @@ namespace BPR
 
             Console.WriteLine($"Giving {p1Username} {results.Item1} elo, resulting in {new1}");
             query = $"UPDATE leaderboard{region}1 SET elo = {new1} WHERE id = {p1ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             query = $"UPDATE leaderboard{region}1 SET {p1ResultString} = {p1ResultString} + 1 WHERE id = {p1ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             Console.WriteLine($"Giving {p2Username} {results.Item2} elo, resulting in {new2}");
             query = $"UPDATE leaderboard{region}1 SET elo = {new2} WHERE id = {p2ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             query = $"UPDATE leaderboard{region}1 SET {p2ResultString} = {p2ResultString} + 1 WHERE id = {p2ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             if(reverter != 0)
             {
                 query = $"UPDATE leaderboard{region}1 SET elo = elo - 20 WHERE id = {reverter};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
             }
                 
             query = $"DELETE FROM matches{region}1 WHERE id1 = {p1ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             Console.WriteLine($"{region} 1v1 Match #{thisMatchNum} has ended.");
         }
 
@@ -1245,7 +1245,7 @@ namespace BPR
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
             string query = $"SELECT id1, id2, username1, username2 FROM matches{region}1;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1271,15 +1271,15 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             if (isInMatch)
             {
                 query = $"UPDATE matches{region}1 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                 await Context.Channel.SendMessageAsync($"{region} 1v1 Match #{thisMatchNum} is in room #{room}");
             }
@@ -1300,7 +1300,7 @@ namespace BPR
             bool hasAlreadyReverted = false;
 
             string query = $"SELECT id1, id2, revert1, revert2 FROM matchesHistory1;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1330,10 +1330,10 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             if (hasAlreadyReverted)
             {
@@ -1346,7 +1346,7 @@ namespace BPR
                 if (revertRequests < 1)
                 {
                     query = $"UPDATE matchesHistory1 SET revert{thisPlayerNum} = 1 WHERE id{thisPlayerNum} = {userInfo.Id};";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
                 }
                 else
                 {
@@ -1356,7 +1356,7 @@ namespace BPR
                     string region = "", p1Username = "", p2Username = "";
 
                     query = $"SELECT id1, id2, oldElo1, oldElo2, isP1, region, username1, username2, reporter FROM matchesHistory1 WHERE id{thisPlayerNum} = {userInfo.Id};";
-                    Globals.conn.Open();
+                    await Globals.conn.OpenAsync();
                     try
                     {
                         MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1378,19 +1378,19 @@ namespace BPR
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex.ToString());
-                        Globals.conn.Close();
+                        await Globals.conn.CloseAsync();
                         throw;
                     }
-                    Globals.conn.Close();
+                    await Globals.conn.CloseAsync();
 
                     query = $"UPDATE leaderboard{region}1 SET elo = {p1elo} WHERE id = {p1ID};";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     query = $"UPDATE leaderboard{region}1 SET elo = {p2elo} WHERE id = {p2ID};";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     query = $"INSERT INTO matches{region}1(id1, id2, username1, username2, time, reverted) VALUES({p1ID}, {p2ID}, '{p1Username}', '{p2Username}', {DateTime.Now.ToBinary()}, {reporter});";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     string p1ResultString = "wins";
                     string p2ResultString = "loss";
@@ -1401,9 +1401,9 @@ namespace BPR
                     }
 
                     query = $"UPDATE leaderboard{region}1 SET {p1ResultString} = {p1ResultString} - 1 WHERE id = {p1ID};";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
                     query = $"UPDATE leaderboard{region}1 SET {p2ResultString} = {p2ResultString} - 1 WHERE id = {p2ID};";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     await Context.Channel.SendMessageAsync("The last 1v1 match has been reverted. Please report the match correctly now.");
                 }
@@ -1416,7 +1416,7 @@ namespace BPR
         public async Task ClearHistoryAsync()
         {
             string query = $"TRUNCATE TABLE matchesHistory1;";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("Match history cleared.");
         }
@@ -1434,7 +1434,7 @@ namespace BPR
             var results = new Tuple<double, double>(0, 0);
             double p1elo = 0, p2elo = 0;
             string query = $"SELECT elo FROM leaderboardNA1 WHERE id = {p1ID};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1448,12 +1448,12 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             query = $"SELECT elo FROM leaderboardNA1 WHERE id = {p2ID};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1467,20 +1467,20 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             results = EloConvert(p1elo, p2elo, isP1);
 
             double new1 = p1elo + results.Item1;
             double new2 = p2elo + results.Item2;
 
             query = $"UPDATE leaderboardNA1 SET elo = {new1} WHERE id = {p1ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             
             query = $"UPDATE leaderboardNA1 SET elo = {new2} WHERE id = {p2ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync($"Match hard updated");
         }
@@ -1500,7 +1500,7 @@ namespace BPR
             var results = new Tuple<double, double>(0, 0);
             double p1elo = 0, p2elo = 0;
             string query = $"SELECT elo FROM leaderboardEU1 WHERE id = {p1ID};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1514,12 +1514,12 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             query = $"SELECT elo FROM leaderboardEU1 WHERE id = {p2ID};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1533,20 +1533,20 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             results = EloConvert(p1elo, p2elo, isP1);
 
             double new1 = p1elo + results.Item1;
             double new2 = p2elo + results.Item2;
 
             query = $"UPDATE leaderboardEU1 SET elo = {new1} WHERE id = {p1ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             
             query = $"UPDATE leaderboardEU1 SET elo = {new2} WHERE id = {p2ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync($"Match hard updated");
         }
@@ -1584,7 +1584,7 @@ namespace BPR
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
             string query = $"SELECT id1, id2, id3, id4, username1, username2, username3, username4, reverted FROM matches{region}2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1626,10 +1626,10 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             if (isT1 == null)
             {
                 await Context.Channel.SendMessageAsync($"You are currently not in a match against anyone");
@@ -1653,7 +1653,7 @@ namespace BPR
             var results = new Tuple<double, double, double, double>(0, 0, 0, 0);
             double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
             query = $"SELECT id, elo FROM leaderboard{region}2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1670,23 +1670,23 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             query = $"DELETE FROM matchesHistory2 WHERE id1 = {p1ID} OR id2 = {p1ID} OR id3 = {p1ID} OR id4 = {p1ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             query = $"DELETE FROM matchesHistory2 WHERE id1 = {p2ID} OR id2 = {p2ID} OR id3 = {p2ID} OR id4 = {p2ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             query = $"DELETE FROM matchesHistory2 WHERE id1 = {p3ID} OR id2 = {p3ID} OR id3 = {p3ID} OR id4 = {p3ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             query = $"DELETE FROM matchesHistory2 WHERE id1 = {p4ID} OR id2 = {p4ID} OR id3 = {p4ID} OR id4 = {p4ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             query = $"INSERT INTO matchesHistory2(id1, id2, id3, id4, oldElo1, oldElo2, oldElo3, oldElo4, isT1, region, username1, username2, username3, username4, reporter) " +
                 $"VALUES({p1ID}, {p2ID}, {p3ID}, {p4ID}, {p1elo}, {p2elo}, {p3elo}, {p4elo}, {isT1}, '{region}', '{p1Username}', '{p2Username}', '{p3Username}', '{p4Username}', {userInfo.Id});";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             results = EloConvert(p1elo, p2elo, p3elo, p4elo, (bool)isT1);
 
@@ -1737,36 +1737,36 @@ namespace BPR
 
             Console.WriteLine($"Giving {p1Username} {results.Item1} elo, resulting in {new1}");
             query = $"UPDATE leaderboard{region}2 SET elo = {new1} WHERE id = {p1ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             query = $"UPDATE leaderboard{region}2 SET {t1ResultString} = {t1ResultString} + 1 WHERE id = {p1ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             Console.WriteLine($"Giving {p2Username} {results.Item2} elo, resulting in {new2}");
             query = $"UPDATE leaderboard{region}2 SET elo = {new2} WHERE id = {p2ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             query = $"UPDATE leaderboard{region}2 SET {t1ResultString} = {t1ResultString} + 1 WHERE id = {p2ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             Console.WriteLine($"Giving {p3Username} {results.Item3} elo, resulting in {new3}");
             query = $"UPDATE leaderboard{region}2 SET elo = {new3} WHERE id = {p3ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             query = $"UPDATE leaderboard{region}2 SET {t2ResultString} = {t2ResultString} + 1 WHERE id = {p3ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             Console.WriteLine($"Giving {p4Username} {results.Item4} elo, resulting in {new4}");
             query = $"UPDATE leaderboard{region}2 SET elo = {new4} WHERE id = {p4ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             query = $"UPDATE leaderboard{region}2 SET {t2ResultString} = {t2ResultString} + 1 WHERE id = {p4ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             if(reverter != 0)
             {
                 query = $"UPDATE leaderboard{region}2 SET elo = elo - 20 WHERE id = {reverter};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
             }
                 
             query = $"DELETE FROM matches{region}2 WHERE id1 = {p1ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             Console.WriteLine($"Match #{thisMatchNum} has ended.");
         }
 
@@ -1780,7 +1780,7 @@ namespace BPR
             bool hasAlreadyReverted = false;
 
             string query = $"SELECT id1, id2, id3, id4, revert1, revert2, revert3, revert4 FROM matchesHistory2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1834,10 +1834,10 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             if (hasAlreadyReverted)
             {
@@ -1850,7 +1850,7 @@ namespace BPR
                 if (revertRequests < 2)
                 {
                     query = $"UPDATE matchesHistory2 SET revert{thisPlayerNum} = 1 WHERE id{thisPlayerNum} = {userInfo.Id};";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
                 }
                 else
                 {
@@ -1861,7 +1861,7 @@ namespace BPR
 
                     query = $"SELECT id1, id2, id3, id4, oldElo1, oldElo2, oldElo3, oldElo4, isT1, region, username1, username2, username3, username4, reporter " +
                         $"FROM matchesHistory2 WHERE id{thisPlayerNum} = {userInfo.Id};";
-                    Globals.conn.Open();
+                    await Globals.conn.OpenAsync();
                     try
                     {
                         MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1889,26 +1889,26 @@ namespace BPR
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex.ToString());
-                        Globals.conn.Close();
+                        await Globals.conn.CloseAsync();
                         throw;
                     }
-                    Globals.conn.Close();
+                    await Globals.conn.CloseAsync();
 
                     query = $"UPDATE leaderboard{region}2 SET elo = {p1elo} WHERE id = {p1ID};";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     query = $"UPDATE leaderboard{region}2 SET elo = {p2elo} WHERE id = {p2ID};";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     query = $"UPDATE leaderboard{region}2 SET elo = {p3elo} WHERE id = {p3ID};";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     query = $"UPDATE leaderboard{region}2 SET elo = {p4elo} WHERE id = {p4ID};";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     query = $"INSERT INTO matches{region}2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
                         $"VALUES({p1ID}, {p2ID}, {p3ID}, {p4ID}, '{p1Username}', '{p2Username}', '{p3Username}', '{p4Username}', {DateTime.Now.ToBinary()}, {reporter});";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     string t1ResultString = "wins";
                     string t2ResultString = "loss";
@@ -1919,13 +1919,13 @@ namespace BPR
                     }
 
                     query = $"UPDATE leaderboard{region}2 SET {t1ResultString} = {t1ResultString} - 1 WHERE id = {p1ID};";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
                     query = $"UPDATE leaderboard{region}2 SET {t1ResultString} = {t1ResultString} - 1 WHERE id = {p2ID};";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
                     query = $"UPDATE leaderboard{region}2 SET {t2ResultString} = {t2ResultString} - 1 WHERE id = {p3ID};";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
                     query = $"UPDATE leaderboard{region}2 SET {t2ResultString} = {t2ResultString} - 1 WHERE id = {p4ID};";
-                    HelperFunctions.ExecuteSQLQuery(query);
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     await Context.Channel.SendMessageAsync("The last 2v2 match has been reverted. Please report the match correctly now.");
                 }
@@ -1938,7 +1938,7 @@ namespace BPR
         public async Task ClearHistoryAsync()
         {
             string query = $"TRUNCATE TABLE matchesHistory2;";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("Match history cleared.");
         }
@@ -1954,7 +1954,7 @@ namespace BPR
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
             string query = $"SELECT id1, id2, id3, id4 username1, username2 FROM matches{region}2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1992,15 +1992,15 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             if (isInMatch)
             {
                 query = $"UPDATE matches{region}2 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
-                HelperFunctions.ExecuteSQLQuery(query);
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                 await Context.Channel.SendMessageAsync($"{region} 2v2 Match #{thisMatchNum} is in room #{room}");
             }
@@ -2023,7 +2023,7 @@ namespace BPR
             var results = new Tuple<double, double, double, double>(0, 0, 0, 0);
             double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
             string query = $"SELECT id, elo FROM leaderboardNA2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2040,10 +2040,10 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             results = EloConvert(p1elo, p2elo, p3elo, p4elo, isT1);
 
             double new1 = p1elo + results.Item1;
@@ -2052,15 +2052,15 @@ namespace BPR
             double new4 = p4elo + results.Item4;
 
             query = $"UPDATE leaderboardNA2 SET elo = {new1} WHERE id = {p1ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             
             query = $"UPDATE leaderboardNA2 SET elo = {new2} WHERE id = {p2ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             query = $"UPDATE leaderboardNA2 SET elo = {new3} WHERE id = {p3ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             
             query = $"UPDATE leaderboardNA2 SET elo = {new4} WHERE id = {p4ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync($"Match hard updated");
         }
@@ -2077,7 +2077,7 @@ namespace BPR
             var results = new Tuple<double, double, double, double>(0, 0, 0, 0);
             double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
             string query = $"SELECT id, elo FROM leaderboardEU2;";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2094,10 +2094,10 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             results = EloConvert(p1elo, p2elo, p3elo, p4elo, isT1);
 
             double new1 = p1elo + results.Item1;
@@ -2106,15 +2106,15 @@ namespace BPR
             double new4 = p4elo + results.Item4;
 
             query = $"UPDATE leaderboardEU2 SET elo = {new1} WHERE id = {p1ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             
             query = $"UPDATE leaderboardEU2 SET elo = {new2} WHERE id = {p2ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             query = $"UPDATE leaderboardEU2 SET elo = {new3} WHERE id = {p3ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
             
             query = $"UPDATE leaderboardEU2 SET elo = {new4} WHERE id = {p4ID};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync($"Match hard updated");
         }
@@ -2156,7 +2156,7 @@ namespace BPR
             var user = Context.Guild.GetUser(id);
             string username = "";
             string query = $"SELECT username FROM leaderboardNA1 WHERE id = {id};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2171,12 +2171,12 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             query = $"DELETE FROM leaderboardNA1 WHERE id = {id};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(396442734271004672));
 
@@ -2191,7 +2191,7 @@ namespace BPR
             var user = Context.Guild.GetUser(id);
             string username = "";
             string query = $"SELECT username FROM leaderboardNA1 WHERE id = {id};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2206,12 +2206,12 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             query = $"UPDATE leaderboardNA1 SET wins1 = {wins}, loss1 = {losses} WHERE id = {id};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2226,10 +2226,10 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             await Context.Channel.SendMessageAsync($"{username} win/loss in 1v1 has been updated");
         }
@@ -2246,7 +2246,7 @@ namespace BPR
             var user = Context.Guild.GetUser(id);
             string username = "";
             string query = $"SELECT username FROM leaderboardNA2 WHERE id = {id};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2261,12 +2261,12 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             query = $"DELETE FROM leaderboardNA2 WHERE id = {id};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(396442734271004672));
 
@@ -2281,7 +2281,7 @@ namespace BPR
             var user = Context.Guild.GetUser(id);
             string username = "";
             string query = $"SELECT username FROM leaderboardNA2 WHERE id = {id};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2296,12 +2296,12 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             query = $"UPDATE leaderboardNA2 SET wins2 = {wins}, loss2 = {losses} WHERE id = {id};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2316,10 +2316,10 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             await Context.Channel.SendMessageAsync($"{username} win/loss in 2v2 has been updated");
         }
@@ -2337,7 +2337,7 @@ namespace BPR
             await Context.Message.DeleteAsync();
             string username = "";
             string query = $"SELECT username FROM leaderboardEU1 WHERE id = {id};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2352,12 +2352,12 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             query = $"DELETE FROM leaderboardEU1 WHERE id = {id};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(396442764298158081));
 
@@ -2372,7 +2372,7 @@ namespace BPR
             var user = Context.Guild.GetUser(id);
             string username = "";
             string query = $"SELECT username FROM leaderboardEU1 WHERE id = {id};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2387,12 +2387,12 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             query = $"UPDATE leaderboardEU1 SET wins1 = {wins}, loss1 = {losses} WHERE id = {id};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2407,10 +2407,10 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             await Context.Channel.SendMessageAsync($"{username} win/loss in 1v1 has been updated");
         }
@@ -2428,7 +2428,7 @@ namespace BPR
             await Context.Message.DeleteAsync();
             string username = "";
             string query = $"SELECT username FROM leaderboardEU2 WHERE id = {id};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2443,12 +2443,12 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             query = $"DELETE FROM leaderboardEU2 WHERE id = {id};";
-            HelperFunctions.ExecuteSQLQuery(query);
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(396442764298158081));
 
@@ -2463,7 +2463,7 @@ namespace BPR
             var user = Context.Guild.GetUser(id);
             string username = "";
             string query = $"SELECT username FROM leaderboardEU2 WHERE id = {id};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2478,12 +2478,12 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             query = $"UPDATE leaderboardEU2 SET wins2 = {wins}, loss2 = {losses} WHERE id = {id};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -2498,10 +2498,10 @@ namespace BPR
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             await Context.Channel.SendMessageAsync($"{username} win/loss in 2v2 has been updated");
         }
