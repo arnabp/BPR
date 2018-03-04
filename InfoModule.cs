@@ -538,7 +538,7 @@ namespace BPR
             bool isInQueue = false, isInMatch = false;
             int queueCount = 0, inLeaderboard = 0;
 
-            string query = $"SELECT count(*) FROM leaderboard{region}1 WHERE id = {userInfo.Id};";
+            string query = $"SELECT count(*) FROM leaderboard{region}2 WHERE id = {userInfo.Id};";
             await Globals.conn.OpenAsync();
             try
             {
