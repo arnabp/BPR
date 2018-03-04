@@ -110,16 +110,14 @@ namespace BPR
         [Summary("Joins the 1v1 queue")]
         public async Task JoinAsync()
         {
+            await Context.Channel.SendMessageAsync("Not yet...");
+            return;
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue");
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
-            if (region == "EU")
-            {
-                await Context.Channel.SendMessageAsync("The season has ended for EU");
-                return;
-            }
+                
             bool isInQueue = false, isInMatch = false;
             int queueCount = 0;
             string query = $"SELECT count(*) FROM queue{region}1;";
@@ -222,6 +220,8 @@ namespace BPR
         [Summary("Leaves the 1v1 queue")]
         public async Task QueueLeaveAsync()
         {
+            await Context.Channel.SendMessageAsync("Not yet...");
+            return;
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is attempting to leave 1v1 queue");
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
@@ -504,6 +504,8 @@ namespace BPR
         [Summary("Joins the 2v2 queue")]
         public async Task JoinAsync()
         {
+            await Context.Channel.SendMessageAsync("Not yet...");
+            return;
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue");
@@ -618,6 +620,8 @@ namespace BPR
         [Summary("Leaves the 2v2 queue")]
         public async Task QueueLeaveAsync()
         {
+            await Context.Channel.SendMessageAsync("Not yet...");
+            return;
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is attempting to leave 2v2 queue");
 
@@ -2146,11 +2150,11 @@ namespace BPR
     }
 
     [Group("leaderboardNA1")]
+    [RequireUserPermission(GuildPermission.Administrator)]
     public class LeaderboardNA1Module : ModuleBase<SocketCommandContext>
     {
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
-        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task AddLeaderbardAsync(ulong id)
         {
             var user = Context.Guild.GetUser(id);
@@ -2167,7 +2171,6 @@ namespace BPR
 
         [Command("delete")]
         [Summary("Allows admin to delete user from leaderboard")]
-        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
         {
             var user = Context.Guild.GetUser(id);
@@ -2202,7 +2205,6 @@ namespace BPR
 
         [Command("wl")]
         [Summary("Sets the win/loss ratio of a player")]
-        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task SetWinLossAsync(ulong id, int wins, int losses)
         {
             var user = Context.Guild.GetUser(id);
@@ -2253,11 +2255,11 @@ namespace BPR
     }
 
     [Group("leaderboardNA2")]
+    [RequireUserPermission(GuildPermission.Administrator)]
     public class LeaderboardNA2Module : ModuleBase<SocketCommandContext>
     {
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
-        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task AddLeaderbardAsync(ulong id)
         {
             var user = Context.Guild.GetUser(id);
@@ -2274,7 +2276,6 @@ namespace BPR
 
         [Command("delete")]
         [Summary("Allows admin to delete user from leaderboard")]
-        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
         {
             var user = Context.Guild.GetUser(id);
@@ -2309,7 +2310,6 @@ namespace BPR
 
         [Command("wl")]
         [Summary("Sets the win/loss ratio of a player")]
-        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task SetWinLossAsync(ulong id, int wins, int losses)
         {
             var user = Context.Guild.GetUser(id);
@@ -2360,11 +2360,11 @@ namespace BPR
     }
 
     [Group("leaderboardEU1")]
+    [RequireUserPermission(GuildPermission.Administrator)]
     public class LeaderboardEU1Module : ModuleBase<SocketCommandContext>
     {
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
-        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task AddLeaderbardAsync(ulong id)
         {
             var user = Context.Guild.GetUser(id);
@@ -2381,7 +2381,6 @@ namespace BPR
 
         [Command("delete")]
         [Summary("Allows admin to delete user from leaderboard")]
-        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
         {
             var user = Context.Guild.GetUser(id);
@@ -2417,7 +2416,6 @@ namespace BPR
 
         [Command("wl")]
         [Summary("Sets the win/loss ratio of a player")]
-        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task SetWinLossAsync(ulong id, int wins, int losses, [Remainder] string gamemode)
         {
             var user = Context.Guild.GetUser(id);
@@ -2468,11 +2466,11 @@ namespace BPR
     }
 
     [Group("leaderboardEU2")]
+    [RequireUserPermission(GuildPermission.Administrator)]
     public class LeaderboardEU2Module : ModuleBase<SocketCommandContext>
     {
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
-        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task AddLeaderbardAsync(ulong id)
         {
             var user = Context.Guild.GetUser(id);
@@ -2489,7 +2487,6 @@ namespace BPR
 
         [Command("delete")]
         [Summary("Allows admin to delete user from leaderboard")]
-        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
         {
             var user = Context.Guild.GetUser(id);
@@ -2525,7 +2522,6 @@ namespace BPR
 
         [Command("wl")]
         [Summary("Sets the win/loss ratio of a player")]
-        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task SetWinLossAsync(ulong id, int wins, int losses, [Remainder] string gamemode)
         {
             var user = Context.Guild.GetUser(id);
