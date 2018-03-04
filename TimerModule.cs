@@ -270,6 +270,11 @@ public class TimerService
         }
         await Globals.conn.CloseAsync();
 
+        if (matchCountNA + matchCountEU != 0)
+        {
+            embed.Color = Color.Red;
+        }
+
         await thisMessage.ModifyAsync(x => {
             x.Content = "";
             x.Embed = embed.Build();
@@ -345,6 +350,11 @@ public class TimerService
             x.Name = "EU Queue";
             x.Value = $"{queueCountEU} {pluralizerEU} in queue";
         });
+
+        if(totalCount != 0)
+        {
+            embed.Color = Color.Red;
+        }
 
         await thisMessage.ModifyAsync(x => {
             x.Content = "";
@@ -535,6 +545,11 @@ public class TimerService
         }
         await Globals.conn.CloseAsync();
 
+        if (matchCountNA + matchCountEU != 0)
+        {
+            embed.Color = Color.Red;
+        }
+
         await thisMessage.ModifyAsync(x => {
             x.Content = "";
             x.Embed = embed.Build();
@@ -610,6 +625,11 @@ public class TimerService
             x.Name = "EU Queue";
             x.Value = $"{queueCountEU} {pluralizerEU} in queue";
         });
+
+        if (totalCount != 0)
+        {
+            embed.Color = Color.Red;
+        }
 
         await thisMessage.ModifyAsync(x => {
             x.Content = "";
