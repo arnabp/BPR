@@ -119,8 +119,35 @@ namespace BPR
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
                 
             bool isInQueue = false, isInMatch = false;
-            int queueCount = 0;
-            string query = $"SELECT count(*) FROM queue{region}1;";
+            int queueCount = 0, inLeaderboard = 0;
+
+            string query = $"SELECT count(*) FROM leaderboard{region}1 WHERE id = {userInfo.Id};";
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    inLeaderboard = reader.GetInt16(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            if (inLeaderboard == 0)
+            {
+                await Context.Channel.SendMessageAsync("You are not qualified to play this game mode.");
+                return;
+            }
+
+            query = $"SELECT count(*) FROM queue{region}1;";
             await Globals.conn.OpenAsync();
             try
             {
@@ -509,8 +536,35 @@ namespace BPR
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
 
             bool isInQueue = false, isInMatch = false;
-            int queueCount = 0;
-            string query = $"SELECT count(*) FROM queue{region}2;";
+            int queueCount = 0, inLeaderboard = 0;
+
+            string query = $"SELECT count(*) FROM leaderboard{region}1 WHERE id = {userInfo.Id};";
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    inLeaderboard = reader.GetInt16(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            if (inLeaderboard == 0)
+            {
+                await Context.Channel.SendMessageAsync("You are not qualified to play this game mode.");
+                return;
+            }
+
+            query = $"SELECT count(*) FROM queue{region}2;";
             await Globals.conn.OpenAsync();
             try
             {
