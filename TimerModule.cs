@@ -361,7 +361,7 @@ public class TimerService
         };
 
         int i = 1;
-        string query = $"SELECT username, elo, wins, loss FROM leaderboardNA ORDER BY elo2 DESC;";
+        string query = $"SELECT username, elo, wins, loss FROM leaderboardNA2 ORDER BY elo DESC;";
         Globals.conn.Open();
         try
         {
@@ -402,7 +402,7 @@ public class TimerService
         };
 
         int i = 1;
-        string query = $"SELECT username, elo, wins, loss FROM leaderboardEU ORDER BY elo2 DESC;";
+        string query = $"SELECT username, elo, wins, loss FROM leaderboardEU2 ORDER BY elo DESC;";
         Globals.conn.Open();
         try
         {
