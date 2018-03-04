@@ -110,8 +110,6 @@ namespace BPR
         [Summary("Joins the 1v1 queue")]
         public async Task JoinAsync()
         {
-            await Context.Channel.SendMessageAsync("Not yet...");
-            return;
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue");
@@ -220,8 +218,6 @@ namespace BPR
         [Summary("Leaves the 1v1 queue")]
         public async Task QueueLeaveAsync()
         {
-            await Context.Channel.SendMessageAsync("Not yet...");
-            return;
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is attempting to leave 1v1 queue");
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
@@ -504,8 +500,6 @@ namespace BPR
         [Summary("Joins the 2v2 queue")]
         public async Task JoinAsync()
         {
-            await Context.Channel.SendMessageAsync("Not yet...");
-            return;
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue");
@@ -620,8 +614,6 @@ namespace BPR
         [Summary("Leaves the 2v2 queue")]
         public async Task QueueLeaveAsync()
         {
-            await Context.Channel.SendMessageAsync("Not yet...");
-            return;
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is attempting to leave 2v2 queue");
 
