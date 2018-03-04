@@ -2160,7 +2160,7 @@ namespace BPR
             var user = Context.Guild.GetUser(id);
             await Context.Message.DeleteAsync();
 
-            string query = $"INSERT INTO leaderboardNA1(id, username, decaytimer) VALUES({id}, {user.Username}, {DateTime.Now.ToBinary()});";
+            string query = $"INSERT INTO leaderboardNA1(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.Now.ToBinary()});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await user.AddRoleAsync(Context.Guild.GetRole(419355178680975370));
@@ -2265,7 +2265,7 @@ namespace BPR
             var user = Context.Guild.GetUser(id);
             await Context.Message.DeleteAsync();
 
-            string query = $"INSERT INTO leaderboardNA2(id, username, decaytimer) VALUES({id}, {user.Username}, {DateTime.Now.ToBinary()});";
+            string query = $"INSERT INTO leaderboardNA2(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.Now.ToBinary()});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await user.AddRoleAsync(Context.Guild.GetRole(419355321061081088));
@@ -2370,7 +2370,7 @@ namespace BPR
             var user = Context.Guild.GetUser(id);
             await Context.Message.DeleteAsync();
 
-            string query = $"INSERT INTO leaderboardEU1(id, username, decaytimer) VALUES({id}, {user.Username}, {DateTime.Now.ToBinary()});";
+            string query = $"INSERT INTO leaderboardEU1(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.Now.ToBinary()});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await user.AddRoleAsync(Context.Guild.GetRole(419355374529937408));
@@ -2476,7 +2476,7 @@ namespace BPR
             var user = Context.Guild.GetUser(id);
             await Context.Message.DeleteAsync();
 
-            string query = $"INSERT INTO leaderboardEU2(id, username, decaytimer) VALUES({id}, {user.Username}, {DateTime.Now.ToBinary()});";
+            string query = $"INSERT INTO leaderboardEU2(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.Now.ToBinary()});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await user.AddRoleAsync(Context.Guild.GetRole(419355453550624768));
