@@ -33,8 +33,10 @@ namespace BPR
 
         public static string GetRoleRegion(ulong roleID)
         {
-            if (roleID == 396442734271004672) return "NA";
-            else if (roleID == 396442764298158081) return "EU";
+            if (roleID == 419355178680975370) return "NA";
+            else if (roleID == 419355321061081088) return "NA";
+            else if (roleID == 419355374529937408) return "EU";
+            else if (roleID == 419355453550624768) return "EU";
             else return "";
         }
     }
@@ -220,8 +222,8 @@ namespace BPR
         {
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is attempting to leave 1v1 queue");
-            string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
-            
+            string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);;
+
             bool isInQueue = false;
             int queueCount = 0;
             string query = $"SELECT count(*) FROM queue{region}1;";
@@ -505,11 +507,7 @@ namespace BPR
             Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue");
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
-            if (region == "EU")
-            {
-                await Context.Channel.SendMessageAsync("The season has ended for EU");
-                return;
-            }
+
             bool isInQueue = false, isInMatch = false;
             int queueCount = 0;
             string query = $"SELECT count(*) FROM queue{region}2;";
