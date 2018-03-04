@@ -97,7 +97,7 @@ public class TimerService
 
         int i = 1;
         string query = $"SELECT username, elo, wins, loss FROM leaderboardNA1 ORDER BY elo DESC;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -117,10 +117,10 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         await thisMessage.ModifyAsync(x => {
             x.Content = "";
@@ -138,7 +138,7 @@ public class TimerService
 
         int i = 1;
         string query = $"SELECT username, elo, wins, loss FROM leaderboardEU1 ORDER BY elo DESC;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -158,10 +158,10 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         await thisMessage.ModifyAsync(x => {
             x.Content = "";
@@ -174,7 +174,7 @@ public class TimerService
         string pluralizer;
         int matchCountNA = 0, matchCountEU = 0;
         string query = $"SELECT count(*) FROM matchesNA1;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -188,12 +188,12 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
         query = $"SELECT count(*) FROM matchesEU1;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -207,10 +207,10 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
         if (matchCountNA + matchCountEU != 1) pluralizer = "es";
         else pluralizer = "";
         var embed = new EmbedBuilder
@@ -219,7 +219,7 @@ public class TimerService
             Description = $"{matchCountNA + matchCountEU} match{pluralizer} ongoing"
         };
         query = $"SELECT username1, username2, room FROM matchesNA1;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -239,13 +239,13 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         query = $"SELECT username1, username2, room FROM matchesEU1;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -265,10 +265,10 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         await thisMessage.ModifyAsync(x => {
             x.Content = "";
@@ -280,7 +280,7 @@ public class TimerService
     {
         int queueCountNA = 0, queueCountEU = 0;
         string query = $"SELECT count(*) FROM queueNA1;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -294,13 +294,13 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         query = $"SELECT count(*) FROM queueEU1;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -314,10 +314,10 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         string pluralizer, pluralizerNA, pluralizerEU;
         int totalCount = queueCountNA + queueCountEU;
@@ -362,7 +362,7 @@ public class TimerService
 
         int i = 1;
         string query = $"SELECT username, elo, wins, loss FROM leaderboardNA2 ORDER BY elo DESC;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -382,10 +382,10 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         await thisMessage.ModifyAsync(x => {
             x.Content = "";
@@ -403,7 +403,7 @@ public class TimerService
 
         int i = 1;
         string query = $"SELECT username, elo, wins, loss FROM leaderboardEU2 ORDER BY elo DESC;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -423,10 +423,10 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         await thisMessage.ModifyAsync(x => {
             x.Content = "";
@@ -439,7 +439,7 @@ public class TimerService
         string pluralizer;
         int matchCountNA = 0, matchCountEU = 0;
         string query = $"SELECT count(*) FROM matchesNA2;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -453,12 +453,12 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
         query = $"SELECT count(*) FROM matchesEU2;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -472,10 +472,10 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
         if (matchCountNA + matchCountEU != 1) pluralizer = "es";
         else pluralizer = "";
         var embed = new EmbedBuilder
@@ -484,7 +484,7 @@ public class TimerService
             Description = $"{matchCountNA + matchCountEU} match{pluralizer} ongoing"
         };
         query = $"SELECT username1, username2, username3, username4, room FROM matchesNA2;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -504,13 +504,13 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         query = $"SELECT username1, username2, username3, username4, room FROM matchesEU2;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -530,10 +530,10 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         await thisMessage.ModifyAsync(x => {
             x.Content = "";
@@ -545,7 +545,7 @@ public class TimerService
     {
         int queueCountNA = 0, queueCountEU = 0;
         string query = $"SELECT count(*) FROM queueNA2;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -559,13 +559,13 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         query = $"SELECT count(*) FROM queueEU2;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -579,10 +579,10 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         string pluralizer, pluralizerNA, pluralizerEU;
         int totalCount = queueCountNA + queueCountEU;
@@ -623,7 +623,7 @@ public class TimerService
 
         List<ulong> timeOuts = new List<ulong>(5);
         string query = $"SELECT time, id FROM queueNA1;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -642,14 +642,14 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         foreach (var id in timeOuts)
         {
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             query = $"DELETE FROM queueNA1 WHERE id = {id};";
             try
             {
@@ -660,10 +660,10 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
     }
 
@@ -673,7 +673,7 @@ public class TimerService
 
         List<ulong> timeOuts = new List<ulong>(5);
         string query = $"SELECT time, id FROM queueEU1;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -692,14 +692,14 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         foreach (var id in timeOuts)
         {
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             query = $"DELETE FROM queueEU1 WHERE id = {id};";
             try
             {
@@ -710,10 +710,10 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
     }
 
@@ -723,7 +723,7 @@ public class TimerService
 
         List<ulong> timeOuts = new List<ulong>(5);
         string query = $"SELECT time, id FROM queueNA2;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -742,14 +742,14 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         foreach (var id in timeOuts)
         {
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             query = $"DELETE FROM queueNA2 WHERE id = {id};";
             try
             {
@@ -760,10 +760,10 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
     }
 
@@ -773,7 +773,7 @@ public class TimerService
 
         List<ulong> timeOuts = new List<ulong>(5);
         string query = $"SELECT time, id FROM queueEU2;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -792,14 +792,14 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         foreach (var id in timeOuts)
         {
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             query = $"DELETE FROM queueEU2 WHERE id = {id};";
             try
             {
@@ -810,10 +810,10 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
     }
 
@@ -823,7 +823,7 @@ public class TimerService
 
         List<ulong> timeOuts = new List<ulong>(5);
         string query = $"SELECT time, id, username FROM queuetest;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -844,14 +844,14 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         foreach(var id in timeOuts)
         {
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             query = $"DELETE FROM queuetest WHERE id = {id};";
             try
             {
@@ -862,10 +862,10 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
     }
 
@@ -875,7 +875,7 @@ public class TimerService
 
         List<ulong> nullRooms = new List<ulong>(5);
         string query = $"SELECT room, id1 FROM matchesNA1;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -894,15 +894,15 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         foreach (var id in nullRooms)
         {
             query = $"SELECT id1, id2 FROM matchesNA1 WHERE id1 = {id};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -916,10 +916,10 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
     }
 
@@ -929,7 +929,7 @@ public class TimerService
 
         List<ulong> nullRooms = new List<ulong>(5);
         string query = $"SELECT room, id1 FROM matchesEU1;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -948,15 +948,15 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         foreach (var id in nullRooms)
         {
             query = $"SELECT id1, id2 FROM matchesEU1 WHERE id1 = {id};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -970,10 +970,10 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
     }
 
@@ -983,7 +983,7 @@ public class TimerService
 
         List<ulong> nullRooms = new List<ulong>(5);
         string query = $"SELECT room, id1 FROM matchesNA2;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1002,15 +1002,15 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         foreach (var id in nullRooms)
         {
             query = $"SELECT id1, id2, id3, id4 FROM matchesNA2 WHERE id1 = {id};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1024,10 +1024,10 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
     }
 
@@ -1037,7 +1037,7 @@ public class TimerService
 
         List<ulong> nullRooms = new List<ulong>(5);
         string query = $"SELECT room, id1 FROM matchesEU2;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1056,15 +1056,15 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         foreach (var id in nullRooms)
         {
             query = $"SELECT id1, id2, id3, id4 FROM matchesEU2 WHERE id1 = {id};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1078,10 +1078,10 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
     }
 
@@ -1093,7 +1093,7 @@ public class TimerService
         List<ulong> decayIDs = new List<ulong>(30);
         List<int> decayDays = new List<int>(30);
         string query = $"SELECT decaytimer, decayed, id FROM leaderboardNA1;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1119,14 +1119,14 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         foreach (var id in decayWarning)
         {
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             query = $"UPDATE leaderboardNA1 SET decayed = 0 WHERE id = {id};";
             try
             {
@@ -1138,16 +1138,16 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
 
         for(int i = 0; i < decayIDs.Count; i++)
         {
             query = $"UPDATE leaderboardNA1 SET elo = elo - {decayDays[i] + 2} WHERE id = {decayIDs[i]};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1156,13 +1156,13 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             query = $"UPDATE leaderboardNA1 SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1171,10 +1171,10 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
     }
 
@@ -1186,7 +1186,7 @@ public class TimerService
         List<ulong> decayIDs = new List<ulong>(30);
         List<int> decayDays = new List<int>(30);
         string query = $"SELECT decaytimer, decayed, id FROM leaderboardNA2;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1212,14 +1212,14 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         foreach (var id in decayWarning)
         {
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             query = $"UPDATE leaderboardNA2 SET decayed = 0 WHERE id = {id};";
             try
             {
@@ -1231,16 +1231,16 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
 
         for (int i = 0; i < decayIDs.Count; i++)
         {
             query = $"UPDATE leaderboardNA2 SET elo = elo - {decayDays[i] + 2} WHERE id = {decayIDs[i]};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1249,13 +1249,13 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             query = $"UPDATE leaderboardNA2 SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1264,10 +1264,10 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
     }
 
@@ -1279,7 +1279,7 @@ public class TimerService
         List<ulong> decayIDs = new List<ulong>(30);
         List<int> decayDays = new List<int>(30);
         string query = $"SELECT decaytimer, decayed, id FROM leaderboardEU1;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1305,14 +1305,14 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         foreach (var id in decayWarning)
         {
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             query = $"UPDATE leaderboardEU1 SET decayed = 0 WHERE id = {id};";
             try
             {
@@ -1324,16 +1324,16 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
 
         for (int i = 0; i < decayIDs.Count; i++)
         {
             query = $"UPDATE leaderboardEU1 SET elo = elo - {decayDays[i] + 2} WHERE id = {decayIDs[i]};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1342,13 +1342,13 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             query = $"UPDATE leaderboardEU1 SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1357,10 +1357,10 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
     }
 
@@ -1372,7 +1372,7 @@ public class TimerService
         List<ulong> decayIDs = new List<ulong>(30);
         List<int> decayDays = new List<int>(30);
         string query = $"SELECT decaytimer, decayed, id FROM leaderboardEU2;";
-        Globals.conn.Open();
+        await Globals.conn.OpenAsync();
         try
         {
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1398,14 +1398,14 @@ public class TimerService
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
             throw;
         }
-        Globals.conn.Close();
+        await Globals.conn.CloseAsync();
 
         foreach (var id in decayWarning)
         {
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             query = $"UPDATE leaderboardEU2 SET decayed = 0 WHERE id = {id};";
             try
             {
@@ -1417,16 +1417,16 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
 
         for (int i = 0; i < decayIDs.Count; i++)
         {
             query = $"UPDATE leaderboardEU2 SET elo = elo - {decayDays[i] + 2} WHERE id = {decayIDs[i]};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1435,13 +1435,13 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
 
             query = $"UPDATE leaderboardEU2 SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
-            Globals.conn.Open();
+            await Globals.conn.OpenAsync();
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
@@ -1450,10 +1450,10 @@ public class TimerService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                Globals.conn.Close();
+                await Globals.conn.CloseAsync();
                 throw;
             }
-            Globals.conn.Close();
+            await Globals.conn.CloseAsync();
         }
     }
 }
