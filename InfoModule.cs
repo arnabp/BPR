@@ -2296,6 +2296,22 @@ namespace BPR
 
             await Context.Channel.SendMessageAsync($"{username} win/loss in 1v1 has been updated");
         }
+        
+        [Command("refresh")]
+        [Summary("Resets the elo decay for all people in this leaderboard")]
+        public async Task RefreshDecayTimerAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            string query = $"UPDATE leaderboardNA1 SET decayed = -1;";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            query = $"UPDATE leaderbaordNA1 SET decaytimer = {DateTime.Now.ToBinary()};";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for NA 1v1 leaderboard");
+        }
+
     }
 
     [Group("leaderboardNA2")]
@@ -2400,6 +2416,21 @@ namespace BPR
             await Globals.conn.CloseAsync();
 
             await Context.Channel.SendMessageAsync($"{username} win/loss in 2v2 has been updated");
+        }
+
+        [Command("refresh")]
+        [Summary("Resets the elo decay for all people in this leaderboard")]
+        public async Task RefreshDecayTimerAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            string query = $"UPDATE leaderboardNA2 SET decayed = -1;";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            query = $"UPDATE leaderbaordNA2 SET decaytimer = {DateTime.Now.ToBinary()};";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for NA 2v2 leaderboard");
         }
     }
 
@@ -2507,6 +2538,21 @@ namespace BPR
 
             await Context.Channel.SendMessageAsync($"{username} win/loss in 1v1 has been updated");
         }
+
+        [Command("refresh")]
+        [Summary("Resets the elo decay for all people in this leaderboard")]
+        public async Task RefreshDecayTimerAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            string query = $"UPDATE leaderboardEU1 SET decayed = -1;";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            query = $"UPDATE leaderbaordEU1 SET decaytimer = {DateTime.Now.ToBinary()};";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for EU 1v1 leaderboard");
+        }
     }
 
     [Group("leaderboardEU2")]
@@ -2612,6 +2658,21 @@ namespace BPR
             await Globals.conn.CloseAsync();
 
             await Context.Channel.SendMessageAsync($"{username} win/loss in 2v2 has been updated");
+        }
+
+        [Command("refresh")]
+        [Summary("Resets the elo decay for all people in this leaderboard")]
+        public async Task RefreshDecayTimerAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            string query = $"UPDATE leaderboardEU2 SET decayed = -1;";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            query = $"UPDATE leaderbaordEU2 SET decaytimer = {DateTime.Now.ToBinary()};";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for EU 2v2 leaderboard");
         }
     }
 }
