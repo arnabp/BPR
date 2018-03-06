@@ -39,6 +39,15 @@ namespace BPR
             else if (roleID == 419355453550624768) return "EU";
             else return "";
         }
+
+        public static async Task ResetDecayTimer(ulong id, string region, int gameMode)
+        {
+            string query = $"UPDATE leaderboard{region}{gameMode} SET decaytimer = {DateTime.Now.ToBinary()} WHERE id = {id};";
+            await ExecuteSQLQueryAsync(query);
+
+            query = $"UPDATE leaderboard{region}{gameMode} SET decayed = -1 WHERE id = {id};";
+            await ExecuteSQLQueryAsync(query);
+        }
     }
 
     public class InfoModule : ModuleBase<SocketCommandContext>
@@ -387,6 +396,9 @@ namespace BPR
             query = $"INSERT INTO matchesNA1(id1, id2, username1, username2, time, reverted) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.Now.ToBinary()}, 0);";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
+            await HelperFunctions.ResetDecayTimer(p1id, "NA", 1);
+            await HelperFunctions.ResetDecayTimer(p2id, "NA", 1);
+
             int matchCount = 0;
             query = $"SELECT count(*) FROM matchesNA1;";
             await Globals.conn.OpenAsync();
@@ -490,6 +502,9 @@ namespace BPR
 
             query = $"INSERT INTO matchesEU1(id1, id2, username1, username2, time, reverted) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.Now.ToBinary()}, 0);";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await HelperFunctions.ResetDecayTimer(p1id, "EU", 1);
+            await HelperFunctions.ResetDecayTimer(p2id, "EU", 1);
 
             int matchCount = 0;
             query = $"SELECT count(*) FROM matchesEU1;";
@@ -841,6 +856,11 @@ namespace BPR
                 $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.Now.ToBinary()}, 0);";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
+            await HelperFunctions.ResetDecayTimer(p1id, "NA", 2);
+            await HelperFunctions.ResetDecayTimer(p2id, "NA", 2);
+            await HelperFunctions.ResetDecayTimer(p3id, "NA", 2);
+            await HelperFunctions.ResetDecayTimer(p4id, "NA", 2);
+
             int matchCount = 0;
             query = $"SELECT count(*) FROM matchesNA2;";
             await Globals.conn.OpenAsync();
@@ -1023,6 +1043,11 @@ namespace BPR
             query = $"INSERT INTO matchesEU2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
                 $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.Now.ToBinary()}, 0);";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await HelperFunctions.ResetDecayTimer(p1id, "EU", 2);
+            await HelperFunctions.ResetDecayTimer(p2id, "EU", 2);
+            await HelperFunctions.ResetDecayTimer(p3id, "EU", 2);
+            await HelperFunctions.ResetDecayTimer(p4id, "EU", 2);
 
             int matchCount = 0;
             query = $"SELECT count(*) FROM matchesEU2;";
