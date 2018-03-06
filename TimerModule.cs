@@ -1153,7 +1153,6 @@ public class TimerService
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
                 cmd.ExecuteNonQuery();
-                var user = thisChannel.GetUserAsync(id);
                 await thisChannel.SendMessageAsync($"Hey <@{id}> your elo decay will be starting tomorrow. Play a 1v1 game in the next 24 hours to prevent this from happening.");
             }
             catch (Exception ex)
@@ -1181,6 +1180,9 @@ public class TimerService
                 throw;
             }
             await Globals.conn.CloseAsync();
+
+            var user = await thisChannel.GetUserAsync(decayIDs[i]);
+            Console.WriteLine($"{user.Username} has lost {decayDays[i] + 2} 1v1 elo to decay");
 
             query = $"UPDATE leaderboardNA1 SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
             await Globals.conn.OpenAsync();
@@ -1247,7 +1249,6 @@ public class TimerService
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
                 cmd.ExecuteNonQuery();
-                var user = thisChannel.GetUserAsync(id);
                 await thisChannel.SendMessageAsync($"Hey <@{id}> your elo decay will be starting tomorrow. Play a 2v2 game in the next 24 hours to prevent this from happening.");
             }
             catch (Exception ex)
@@ -1275,6 +1276,9 @@ public class TimerService
                 throw;
             }
             await Globals.conn.CloseAsync();
+
+            var user = await thisChannel.GetUserAsync(decayIDs[i]);
+            Console.WriteLine($"{user.Username} has lost {decayDays[i] + 2} 2v2 elo to decay");
 
             query = $"UPDATE leaderboardNA2 SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
             await Globals.conn.OpenAsync();
@@ -1341,7 +1345,6 @@ public class TimerService
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
                 cmd.ExecuteNonQuery();
-                var user = thisChannel.GetUserAsync(id);
                 await thisChannel.SendMessageAsync($"Hey <@{id}> your elo decay will be starting tomorrow. Play a 1v1 game in the next 24 hours to prevent this from happening.");
             }
             catch (Exception ex)
@@ -1369,6 +1372,9 @@ public class TimerService
                 throw;
             }
             await Globals.conn.CloseAsync();
+
+            var user = await thisChannel.GetUserAsync(decayIDs[i]);
+            Console.WriteLine($"{user.Username} has lost {decayDays[i] + 2} 1v1 elo to decay");
 
             query = $"UPDATE leaderboardEU1 SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
             await Globals.conn.OpenAsync();
@@ -1435,7 +1441,6 @@ public class TimerService
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
                 cmd.ExecuteNonQuery();
-                var user = thisChannel.GetUserAsync(id);
                 await thisChannel.SendMessageAsync($"Hey <@{id}> your elo decay will be starting tomorrow. Play a 2v2 game in the next 24 hours to prevent this from happening.");
             }
             catch (Exception ex)
@@ -1463,6 +1468,9 @@ public class TimerService
                 throw;
             }
             await Globals.conn.CloseAsync();
+
+            var user = await thisChannel.GetUserAsync(decayIDs[i]);
+            Console.WriteLine($"{user.Username} has lost {decayDays[i] + 2} 2v2 elo to decay");
 
             query = $"UPDATE leaderboardEU2 SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
             await Globals.conn.OpenAsync();
