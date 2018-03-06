@@ -2331,7 +2331,7 @@ namespace BPR
             string query = $"UPDATE leaderboardNA1 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            query = $"UPDATE leaderbaordNA1 SET decaytimer = {DateTime.Now.ToBinary()};";
+            query = $"UPDATE leaderboardNA1 SET decaytimer = {DateTime.Now.ToBinary()};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for NA 1v1 leaderboard");
@@ -2452,7 +2452,7 @@ namespace BPR
             string query = $"UPDATE leaderboardNA2 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            query = $"UPDATE leaderbaordNA2 SET decaytimer = {DateTime.Now.ToBinary()};";
+            query = $"UPDATE leaderboardNA2 SET decaytimer = {DateTime.Now.ToBinary()};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for NA 2v2 leaderboard");
@@ -2573,7 +2573,7 @@ namespace BPR
             string query = $"UPDATE leaderboardEU1 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            query = $"UPDATE leaderbaordEU1 SET decaytimer = {DateTime.Now.ToBinary()};";
+            query = $"UPDATE leaderboardEU1 SET decaytimer = {DateTime.Now.ToBinary()};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for EU 1v1 leaderboard");
@@ -2694,7 +2694,7 @@ namespace BPR
             string query = $"UPDATE leaderboardEU2 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            query = $"UPDATE leaderbaordEU2 SET decaytimer = {DateTime.Now.ToBinary()};";
+            query = $"UPDATE leaderboardEU2 SET decaytimer = {DateTime.Now.ToBinary()};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for EU 2v2 leaderboard");
