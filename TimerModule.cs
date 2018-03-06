@@ -1121,18 +1121,19 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                TimeSpan timeDifBinary = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                int timeDif = (int)timeDifBinary.TotalDays;
                 int decayed = reader.GetInt16(1);
                 ulong id = reader.GetUInt64(2);
-                if (timeDif.TotalDays == 2 && decayed == -1)
+                if (timeDif == 2 && decayed == -1)
                 {
                     decayWarning.Add(id);
                 }
 
-                if(timeDif.TotalDays - decayed == 3 && decayed > -1)
+                if(timeDif - decayed == 3 && decayed > -1)
                 {
                     decayIDs.Add(id);
-                    decayDays.Add((int)timeDif.TotalDays);
+                    decayDays.Add(timeDif);
                 }
             }
         }
@@ -1214,18 +1215,19 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                TimeSpan timeDifBinary = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                int timeDif = (int)timeDifBinary.TotalDays;
                 int decayed = reader.GetInt16(1);
                 ulong id = reader.GetUInt64(2);
-                if (timeDif.TotalDays == 2 && decayed == -1)
+                if (timeDif == 2 && decayed == -1)
                 {
                     decayWarning.Add(id);
                 }
 
-                if (timeDif.TotalDays - decayed == 3 && decayed > -1)
+                if (timeDif - decayed == 3 && decayed > -1)
                 {
                     decayIDs.Add(id);
-                    decayDays.Add((int)timeDif.TotalDays);
+                    decayDays.Add(timeDif);
                 }
             }
         }
@@ -1307,18 +1309,19 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                TimeSpan timeDifBinary = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                int timeDif = (int)timeDifBinary.TotalDays;
                 int decayed = reader.GetInt16(1);
                 ulong id = reader.GetUInt64(2);
-                if (timeDif.TotalDays == 2 && decayed == -1)
+                if (timeDif == 2 && decayed == -1)
                 {
                     decayWarning.Add(id);
                 }
 
-                if (timeDif.TotalDays - decayed == 3 && decayed > -1)
+                if (timeDif - decayed == 3 && decayed > -1)
                 {
                     decayIDs.Add(id);
-                    decayDays.Add((int)timeDif.TotalDays);
+                    decayDays.Add(timeDif);
                 }
             }
         }
@@ -1400,18 +1403,19 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                TimeSpan timeDifBinary = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                int timeDif = (int)timeDifBinary.TotalDays;
                 int decayed = reader.GetInt16(1);
                 ulong id = reader.GetUInt64(2);
-                if (timeDif.TotalDays == 2 && decayed == -1)
+                if (timeDif == 2 && decayed == -1)
                 {
                     decayWarning.Add(id);
                 }
 
-                if (timeDif.TotalDays - decayed == 3 && decayed > -1)
+                if (timeDif - decayed == 3 && decayed > -1)
                 {
                     decayIDs.Add(id);
-                    decayDays.Add((int)timeDif.TotalDays);
+                    decayDays.Add((int)timeDif);
                 }
             }
         }
