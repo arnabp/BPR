@@ -1147,6 +1147,7 @@ public class TimerService
 
         foreach (var id in decayWarning)
         {
+            await Task.Delay(5000);
             await Globals.conn.OpenAsync();
             query = $"UPDATE leaderboardNA1 SET decayed = 0 WHERE id = {id};";
             try
@@ -1243,6 +1244,7 @@ public class TimerService
 
         foreach (var id in decayWarning)
         {
+            await Task.Delay(5000);
             await Globals.conn.OpenAsync();
             query = $"UPDATE leaderboardNA2 SET decayed = 0 WHERE id = {id};";
             try
@@ -1339,6 +1341,7 @@ public class TimerService
 
         foreach (var id in decayWarning)
         {
+            await Task.Delay(5000);
             await Globals.conn.OpenAsync();
             query = $"UPDATE leaderboardEU1 SET decayed = 0 WHERE id = {id};";
             try
@@ -1435,6 +1438,7 @@ public class TimerService
 
         foreach (var id in decayWarning)
         {
+            await Task.Delay(5000);
             await Globals.conn.OpenAsync();
             query = $"UPDATE leaderboardEU2 SET decayed = 0 WHERE id = {id};";
             try
