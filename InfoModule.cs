@@ -64,6 +64,9 @@ namespace BPR
         [Summary("Gets the number of days since last match played")]
         public async Task LastMatchAsync(ulong id, string region, int gameMode)
         {
+            var userInfo = Context.User;
+            await Context.Message.DeleteAsync();
+
             DateTime nowTime = DateTime.Now;
             int timeDif = 0;
             
@@ -96,6 +99,9 @@ namespace BPR
         [Summary("Gets the ammount of elo a user is supposed to have lost up to now")]
         public async Task CurrentDecayAsync(ulong id, string region, int gameMode)
         {
+            var userInfo = Context.User;
+            await Context.Message.DeleteAsync();
+
             DateTime nowTime = DateTime.Now;
             int timeDif = 0;
 
