@@ -50,6 +50,7 @@ namespace BPR
         }
     }
 
+    [RequireUserPermission(GuildPermission.Administrator)]
     public class InfoModule : ModuleBase<SocketCommandContext>
     {
         [Command("CheckRoleId")]
@@ -57,6 +58,38 @@ namespace BPR
         public async Task CheckRoleIdAsync([Remainder] ulong id)
         {
             await Context.Channel.SendMessageAsync(Context.Guild.GetRole(id).Name);
+        }
+
+        [Command("LastMatch")]
+        [Summary("Gets the number of days since last match played")]
+        public async Task CheckRoleIdAsync(ulong id, string region, int gameMode)
+        {
+            DateTime nowTime = DateTime.Now;
+            int timeDif = 0;
+            
+            string query = $"SELECT decaytimer FROM leaderboard{region}{gameMode} WHERE id = {id};";
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    TimeSpan timeDifBinary = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                    timeDif = (int)timeDifBinary.TotalDays;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            await Context.Channel.SendMessageAsync($"{Context.Guild.GetRole(id).Name} has been decaying for {timeDif} days.");
         }
 
         [Command("CheckGuildUser")]
