@@ -76,7 +76,7 @@ namespace BPR
             // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
             // Determine if the message is a command, based on if it starts with '!' or a mention prefix
-            if (!(message.Channel.Id == 429366707656589312 || message.HasMentionPrefix(_client.CurrentUser, ref argPos) || !message.Author.IsBot)) return;
+            if (!(message.Channel.Id == 429366707656589312 || message.HasMentionPrefix(_client.CurrentUser, ref argPos) || message.Author.Id != 392828401339334668)) return;
             // Create a Command Context
             var context = new SocketCommandContext(_client, message);
             // Execute the command. (result does not indicate a return value, 
