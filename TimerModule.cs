@@ -24,27 +24,27 @@ public class TimerService
         _timer = new Timer(async _ =>
         {
             // 3) Any code you want to periodically run goes here:
-            if (client.GetChannel(392829581192855554) is IMessageChannel general)
+            if (client.GetChannel(429366707656589312) is IMessageChannel rank_s)
             {
-                await CheckQueueTimeoutNA1(general);
-                await CheckQueueTimeoutEU1(general);
-                await CheckQueueTimeoutNA2(general);
-                await CheckQueueTimeoutEU2(general);
+                await CheckQueueTimeoutNA1(rank_s);
+                await CheckQueueTimeoutEU1(rank_s);
+                await CheckQueueTimeoutNA2(rank_s);
+                await CheckQueueTimeoutEU2(rank_s);
 
                 if(Globals.timerCount % 4 == 0)
                 {
-                    await CheckRoomNA1(general);
-                    await CheckRoomEU1(general);
-                    await CheckRoomNA2(general);
-                    await CheckRoomEU2(general);
+                    await CheckRoomNA1(rank_s);
+                    await CheckRoomEU1(rank_s);
+                    await CheckRoomNA2(rank_s);
+                    await CheckRoomEU2(rank_s);
                 }
 
                 if(Globals.timerCount % 120 == 0)
                 {
-                    await EloDecayNA1(general);
-                    await EloDecayNA2(general);
-                    await EloDecayEU1(general);
-                    await EloDecayEU2(general);
+                    await EloDecayNA1(rank_s);
+                    await EloDecayNA2(rank_s);
+                    await EloDecayEU1(rank_s);
+                    await EloDecayEU2(rank_s);
                 }
             }
 
