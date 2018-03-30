@@ -76,14 +76,17 @@ namespace BPR
             // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
             // Determine if the message is a command, based on if it starts with '!' or a mention prefix
-            if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))) return;
+            if (!(message.Channel.Id == 429366707656589312 || message.HasMentionPrefix(_client.CurrentUser, ref argPos))) return;
             // Create a Command Context
             var context = new SocketCommandContext(_client, message);
             // Execute the command. (result does not indicate a return value, 
             // rather an object stating if the command executed successfully)
             var result = await _commands.ExecuteAsync(context, argPos, _services);
             if (!result.IsSuccess)
+            {
+                await message.DeleteAsync();
                 await context.Channel.SendMessageAsync(result.ErrorReason);
+            }
         }
 
         private Task Log(LogMessage msg)
