@@ -75,8 +75,10 @@ namespace BPR
             if (message == null) return;
             // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
-            // Determine if the message is a command, based on if it starts with '!' or a mention prefix
-            if (!(message.Channel.Id == 429366707656589312 || message.HasMentionPrefix(_client.CurrentUser, ref argPos) || message.Author.Id != 392828401339334668)) return;
+            // Determine if message comes from bot, to prevent rereading bot responses
+            if (message.Author.IsBot) return;
+            // Determine if the message is a command, based on where it's located or a mention prefix
+            if (message.Channel.Id != 429366707656589312) return;
             // Create a Command Context
             var context = new SocketCommandContext(_client, message);
             // Execute the command. (result does not indicate a return value, 
@@ -84,7 +86,7 @@ namespace BPR
             var result = await _commands.ExecuteAsync(context, argPos, _services);
             if (!result.IsSuccess)
             {
-                // await message.DeleteAsync();
+                await message.DeleteAsync();
                 await context.Channel.SendMessageAsync(result.ErrorReason);
             }
         }
