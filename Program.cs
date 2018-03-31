@@ -20,6 +20,20 @@ namespace BPR
     {
         public static MySqlConnection conn = new MySqlConnection("");
         public static int timerCount = 0;
+
+        public static Int64 guild_RankSNAEU = 392829581192855552;
+        public static Int64 guild_RankSAUSSEA = 422045385612328970;
+
+        public static Int64 role_region1;
+        public static Int64 role_region2;
+
+        public static string title_region1;
+        public static string title_region2;
+
+        public static Int64 channel_bot;
+        public static Int64 channel_queue1v1;
+        public static Int64 channel_queue2v2;
+
     }
 
     class Program
@@ -35,9 +49,6 @@ namespace BPR
 
         public async Task MainAsync()
         {
-            //GlobalConfiguration.Configuration.Services.Replace(typeof(IExceptionHandler),
-            //    new OopsExceptionHandler(GlobalConfiguration.Configuration.Services.GetExceptionHandler()));
-
             _client = new DiscordSocketClient();
             _commands = new CommandService();
             _timer = new TimerService(_client);
@@ -78,7 +89,7 @@ namespace BPR
             // Determine if message comes from bot, to prevent rereading bot responses
             if (message.Author.IsBot) return;
             // Determine if the message is a command, based on where it's located or a mention prefix
-            if (message.Channel.Id != 429366707656589312) return;
+            if (message.Channel.Id != 429366707656589312 || message.Channel.Id != 422768563800244234) return;
             // Create a Command Context
             var context = new SocketCommandContext(_client, message);
             // Execute the command. (result does not indicate a return value, 
