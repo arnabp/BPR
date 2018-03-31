@@ -14,8 +14,17 @@ namespace BPR
 {
     public class HelperFunctions
     {
+        public static async Task CheckSQLStateAsync()
+        {
+            while (Globals.conn.State != System.Data.ConnectionState.Closed)
+            {
+                await Task.Delay(100);
+            }
+        }
+
         public static async Task ExecuteSQLQueryAsync(string query)
         {
+            await CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
             {
