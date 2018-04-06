@@ -651,7 +651,8 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                DateTime oldTime = new DateTime(reader.GetInt64(0));
+                TimeSpan timeDif = nowTime - oldTime;
                 if (timeDif.TotalMinutes > 10)
                 {
                     timeOuts.Add(reader.GetUInt64(1));
@@ -701,7 +702,8 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                DateTime oldTime = new DateTime(reader.GetInt64(0));
+                TimeSpan timeDif = nowTime - oldTime;
                 if (timeDif.TotalMinutes > 10)
                 {
                     timeOuts.Add(reader.GetUInt64(1));
@@ -751,7 +753,8 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                DateTime oldTime = new DateTime(reader.GetInt64(0));
+                TimeSpan timeDif = nowTime - oldTime;
                 if (timeDif.TotalMinutes > 10)
                 {
                     timeOuts.Add(reader.GetUInt64(1));
@@ -801,7 +804,8 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                DateTime oldTime = new DateTime(reader.GetInt64(0));
+                TimeSpan timeDif = nowTime - oldTime;
                 if (timeDif.TotalMinutes > 10)
                 {
                     timeOuts.Add(reader.GetUInt64(1));
@@ -851,7 +855,8 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                DateTime oldTime = new DateTime(reader.GetInt64(0));
+                TimeSpan timeDif = nowTime - oldTime;
                 Console.WriteLine($"{reader.GetString(2)} has been in queue for {timeDif.TotalSeconds} seconds.");
                 if (timeDif.TotalMinutes > 10)
                 {
@@ -903,7 +908,8 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                DateTime oldTime = new DateTime(reader.GetInt64(0));
+                TimeSpan timeDif = nowTime - oldTime;
                 if (reader.GetInt32(0) == 0)
                 {
                     nullRooms.Add(reader.GetUInt64(1));
@@ -957,7 +963,8 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                DateTime oldTime = new DateTime(reader.GetInt64(0));
+                TimeSpan timeDif = nowTime - oldTime;
                 if (reader.GetInt32(0) == 0)
                 {
                     nullRooms.Add(reader.GetUInt64(1));
@@ -1011,7 +1018,8 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                DateTime oldTime = new DateTime(reader.GetInt64(0));
+                TimeSpan timeDif = nowTime - oldTime;
                 if (reader.GetInt32(0) == 0)
                 {
                     nullRooms.Add(reader.GetUInt64(1));
@@ -1065,7 +1073,8 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDif = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                DateTime oldTime = new DateTime(reader.GetInt64(0));
+                TimeSpan timeDif = nowTime - oldTime;
                 if (reader.GetInt32(0) == 0)
                 {
                     nullRooms.Add(reader.GetUInt64(1));
@@ -1121,7 +1130,8 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDifBinary = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                DateTime oldTime = new DateTime(reader.GetInt64(0));
+                TimeSpan timeDifBinary = nowTime - oldTime;
                 int timeDif = (int)timeDifBinary.TotalDays;
                 int decayed = reader.GetInt16(1);
                 ulong id = reader.GetUInt64(2);
@@ -1218,7 +1228,8 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDifBinary = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                DateTime oldTime = new DateTime(reader.GetInt64(0));
+                TimeSpan timeDifBinary = nowTime - oldTime;
                 int timeDif = (int)timeDifBinary.TotalDays;
                 int decayed = reader.GetInt16(1);
                 ulong id = reader.GetUInt64(2);
@@ -1315,7 +1326,8 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDifBinary = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                DateTime oldTime = new DateTime(reader.GetInt64(0));
+                TimeSpan timeDifBinary = nowTime - oldTime;
                 int timeDif = (int)timeDifBinary.TotalDays;
                 int decayed = reader.GetInt16(1);
                 ulong id = reader.GetUInt64(2);
@@ -1412,7 +1424,8 @@ public class TimerService
 
             while (reader.Read())
             {
-                TimeSpan timeDifBinary = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                DateTime oldTime = new DateTime(reader.GetInt64(0));
+                TimeSpan timeDifBinary = nowTime - oldTime;
                 int timeDif = (int)timeDifBinary.TotalDays;
                 int decayed = reader.GetInt16(1);
                 ulong id = reader.GetUInt64(2);

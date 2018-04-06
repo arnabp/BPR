@@ -51,7 +51,7 @@ namespace BPR
 
         public static async Task ResetDecayTimer(ulong id, string region, int gameMode)
         {
-            string query = $"UPDATE leaderboard{region}{gameMode} SET decaytimer = {DateTime.Now.ToBinary()} WHERE id = {id};";
+            string query = $"UPDATE leaderboard{region}{gameMode} SET decaytimer = {DateTime.UtcNow.Ticks} WHERE id = {id};";
             await ExecuteSQLQueryAsync(query);
 
             query = $"UPDATE leaderboard{region}{gameMode} SET decayed = -1 WHERE id = {id};";
@@ -88,7 +88,8 @@ namespace BPR
 
                 while (reader.Read())
                 {
-                    TimeSpan timeDifBinary = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                    DateTime oldTime = new DateTime(reader.GetInt64(0));
+                    TimeSpan timeDifBinary = nowTime - oldTime;
                     timeDif = (int)timeDifBinary.TotalDays;
                 }
 
@@ -123,7 +124,8 @@ namespace BPR
 
                 while (reader.Read())
                 {
-                    TimeSpan timeDifBinary = nowTime - DateTime.FromBinary(reader.GetInt64(0));
+                    DateTime oldTime = new DateTime(reader.GetInt64(0));
+                    TimeSpan timeDifBinary = nowTime - oldTime;
                     timeDif = (int)timeDifBinary.TotalDays;
                 }
 
@@ -309,7 +311,7 @@ namespace BPR
             {
                 await Context.Channel.SendMessageAsync($"Player already in {region} 1v1 queue has now refreshed their queue timer");
 
-                query = $"UPDATE queue{region}1 SET time = {DateTime.Now.ToBinary()} WHERE id = {userInfo.Id};";
+                query = $"UPDATE queue{region}1 SET time = {DateTime.UtcNow.Ticks} WHERE id = {userInfo.Id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
                 Console.WriteLine($"{userInfo.Username} refreshed their queue timer");
             }
@@ -320,7 +322,7 @@ namespace BPR
             }
             else
             {
-                query = $"INSERT INTO queue{region}1(time, username, id) VALUES({DateTime.Now.ToBinary()}, '{userInfo.Username}', {userInfo.Id});";
+                query = $"INSERT INTO queue{region}1(time, username, id) VALUES({DateTime.UtcNow.Ticks}, '{userInfo.Username}', {userInfo.Id});";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                 await Context.Channel.SendMessageAsync($"A player has been added to {region} 1v1 queue");
@@ -479,7 +481,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"A player has left the NA 2v2 queue");
             }
 
-            query = $"INSERT INTO matchesNA1(id1, id2, username1, username2, time, reverted) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.Now.ToBinary()}, 0);";
+            query = $"INSERT INTO matchesNA1(id1, id2, username1, username2, time, reverted) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.UtcNow.Ticks}, 0);";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await HelperFunctions.ResetDecayTimer(p1id, "NA", 1);
@@ -586,7 +588,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"A player has left the EU 2v2 queue");
             }
 
-            query = $"INSERT INTO matchesEU1(id1, id2, username1, username2, time, reverted) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.Now.ToBinary()}, 0);";
+            query = $"INSERT INTO matchesEU1(id1, id2, username1, username2, time, reverted) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.UtcNow.Ticks}, 0);";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await HelperFunctions.ResetDecayTimer(p1id, "EU", 1);
@@ -735,7 +737,7 @@ namespace BPR
             {
                 await Context.Channel.SendMessageAsync($"Player already in {region} 2v2 queue has now refreshed their queue timer");
 
-                query = $"UPDATE queue{region}2 SET time = {DateTime.Now.ToBinary()} WHERE id = {userInfo.Id};";
+                query = $"UPDATE queue{region}2 SET time = {DateTime.UtcNow.Ticks} WHERE id = {userInfo.Id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
                 Console.WriteLine($"{userInfo.Username} refreshed their queue timer");
             }
@@ -746,7 +748,7 @@ namespace BPR
             }
             else
             {
-                query = $"INSERT INTO queue{region}2(time, username, id) VALUES({DateTime.Now.ToBinary()}, '{userInfo.Username}', {userInfo.Id});";
+                query = $"INSERT INTO queue{region}2(time, username, id) VALUES({DateTime.UtcNow.Ticks}, '{userInfo.Username}', {userInfo.Id});";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                 await Context.Channel.SendMessageAsync($"A player has been added to {region} 2v2 queue");
@@ -939,7 +941,7 @@ namespace BPR
             }
 
             query = $"INSERT INTO matchesNA2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
-                $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.Now.ToBinary()}, 0);";
+                $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.UtcNow.Ticks}, 0);";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await HelperFunctions.ResetDecayTimer(p1id, "NA", 2);
@@ -1127,7 +1129,7 @@ namespace BPR
             }
 
             query = $"INSERT INTO matchesEU2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
-                $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.Now.ToBinary()}, 0);";
+                $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.UtcNow.Ticks}, 0);";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await HelperFunctions.ResetDecayTimer(p1id, "EU", 2);
@@ -1548,7 +1550,7 @@ namespace BPR
                     query = $"UPDATE leaderboard{region}1 SET elo = {p2elo} WHERE id = {p2ID};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-                    query = $"INSERT INTO matches{region}1(id1, id2, username1, username2, time, reverted) VALUES({p1ID}, {p2ID}, '{p1Username}', '{p2Username}', {DateTime.Now.ToBinary()}, {reporter});";
+                    query = $"INSERT INTO matches{region}1(id1, id2, username1, username2, time, reverted) VALUES({p1ID}, {p2ID}, '{p1Username}', '{p2Username}', {DateTime.UtcNow.Ticks}, {reporter});";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     string p1ResultString = "wins";
@@ -2066,7 +2068,7 @@ namespace BPR
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     query = $"INSERT INTO matches{region}2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
-                        $"VALUES({p1ID}, {p2ID}, {p3ID}, {p4ID}, '{p1Username}', '{p2Username}', '{p3Username}', '{p4Username}', {DateTime.Now.ToBinary()}, {reporter});";
+                        $"VALUES({p1ID}, {p2ID}, {p3ID}, {p4ID}, '{p1Username}', '{p2Username}', '{p3Username}', '{p4Username}', {DateTime.UtcNow.Ticks}, {reporter});";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     string t1ResultString = "wins";
@@ -2315,7 +2317,7 @@ namespace BPR
             var user = Context.Guild.GetUser(id);
             await Context.Message.DeleteAsync();
 
-            string query = $"INSERT INTO leaderboardNA1(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.Now.ToBinary()});";
+            string query = $"INSERT INTO leaderboardNA1(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.UtcNow.Ticks});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await user.AddRoleAsync(Context.Guild.GetRole(419355178680975370));
@@ -2407,7 +2409,7 @@ namespace BPR
 
             await Context.Channel.SendMessageAsync($"{username} win/loss in 1v1 has been updated");
         }
-        
+
         [Command("refresh")]
         [Summary("Resets the elo decay for all people in this leaderboard")]
         public async Task RefreshDecayTimerAsync()
@@ -2417,12 +2419,50 @@ namespace BPR
             string query = $"UPDATE leaderboardNA1 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            query = $"UPDATE leaderboardNA1 SET decaytimer = {DateTime.Now.ToBinary()};";
+            query = $"UPDATE leaderboardNA1 SET decaytimer = {DateTime.UtcNow.Ticks};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for NA 1v1 leaderboard");
         }
 
+        [Command("convert")]
+        public async Task ConvertUTCAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            List<ulong> convertedTimes = new List<ulong>(30);
+            List<ulong> decayIDs = new List<ulong>(30);
+
+            string query = $"SELECT id, decaytimer FROM leaderboardNA1;";
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    decayIDs.Add(reader.GetUInt64(0));
+                    DateTime oldTime = DateTime.FromBinary(reader.GetInt64(1));
+                    convertedTimes.Add((ulong)oldTime.ToUniversalTime().Ticks);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            for (int i = 0; i < decayIDs.Count; i++)
+            {
+                query = $"UPDATE leaderboardNA1 SET decaytimer = {convertedTimes[i]} WHERE id = {decayIDs[i]};";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
+
+            await Context.Channel.SendMessageAsync("All elo decay timers converted to new format for NA 1v1 leaderboard");
+        }
     }
 
     [Group("leaderboardNA2")]
@@ -2436,7 +2476,7 @@ namespace BPR
             var user = Context.Guild.GetUser(id);
             await Context.Message.DeleteAsync();
 
-            string query = $"INSERT INTO leaderboardNA2(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.Now.ToBinary()});";
+            string query = $"INSERT INTO leaderboardNA2(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.UtcNow.Ticks});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await user.AddRoleAsync(Context.Guild.GetRole(419355321061081088));
@@ -2538,10 +2578,49 @@ namespace BPR
             string query = $"UPDATE leaderboardNA2 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            query = $"UPDATE leaderboardNA2 SET decaytimer = {DateTime.Now.ToBinary()};";
+            query = $"UPDATE leaderboardNA2 SET decaytimer = {DateTime.UtcNow.Ticks};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for NA 2v2 leaderboard");
+        }
+
+        [Command("convert")]
+        public async Task ConvertUTCAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            List<ulong> convertedTimes = new List<ulong>(30);
+            List<ulong> decayIDs = new List<ulong>(30);
+
+            string query = $"SELECT id, decaytimer FROM leaderboardNA2;";
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    decayIDs.Add(reader.GetUInt64(0));
+                    DateTime oldTime = DateTime.FromBinary(reader.GetInt64(1));
+                    convertedTimes.Add((ulong)oldTime.ToUniversalTime().Ticks);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            for (int i = 0; i < decayIDs.Count; i++)
+            {
+                query = $"UPDATE leaderboardNA2 SET decaytimer = {convertedTimes[i]} WHERE id = {decayIDs[i]};";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
+
+            await Context.Channel.SendMessageAsync("All elo decay timers converted to new format for NA 2v2 leaderboard");
         }
     }
 
@@ -2556,7 +2635,7 @@ namespace BPR
             var user = Context.Guild.GetUser(id);
             await Context.Message.DeleteAsync();
 
-            string query = $"INSERT INTO leaderboardEU1(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.Now.ToBinary()});";
+            string query = $"INSERT INTO leaderboardEU1(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.UtcNow.Ticks});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await user.AddRoleAsync(Context.Guild.GetRole(419355374529937408));
@@ -2659,10 +2738,49 @@ namespace BPR
             string query = $"UPDATE leaderboardEU1 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            query = $"UPDATE leaderboardEU1 SET decaytimer = {DateTime.Now.ToBinary()};";
+            query = $"UPDATE leaderboardEU1 SET decaytimer = {DateTime.UtcNow.Ticks};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for EU 1v1 leaderboard");
+        }
+
+        [Command("convert")]
+        public async Task ConvertUTCAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            List<ulong> convertedTimes = new List<ulong>(30);
+            List<ulong> decayIDs = new List<ulong>(30);
+
+            string query = $"SELECT id, decaytimer FROM leaderboardEU1;";
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    decayIDs.Add(reader.GetUInt64(0));
+                    DateTime oldTime = DateTime.FromBinary(reader.GetInt64(1));
+                    convertedTimes.Add((ulong)oldTime.ToUniversalTime().Ticks);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            for(int i = 0; i < decayIDs.Count; i++)
+            {
+                query = $"UPDATE leaderboardEU1 SET decaytimer = {convertedTimes[i]} WHERE id = {decayIDs[i]};";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
+
+            await Context.Channel.SendMessageAsync("All elo decay timers converted to new format for EU 1v1 leaderboard");
         }
     }
 
@@ -2677,7 +2795,7 @@ namespace BPR
             var user = Context.Guild.GetUser(id);
             await Context.Message.DeleteAsync();
 
-            string query = $"INSERT INTO leaderboardEU2(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.Now.ToBinary()});";
+            string query = $"INSERT INTO leaderboardEU2(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.UtcNow.Ticks});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await user.AddRoleAsync(Context.Guild.GetRole(419355453550624768));
@@ -2780,10 +2898,49 @@ namespace BPR
             string query = $"UPDATE leaderboardEU2 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            query = $"UPDATE leaderboardEU2 SET decaytimer = {DateTime.Now.ToBinary()};";
+            query = $"UPDATE leaderboardEU2 SET decaytimer = {DateTime.UtcNow.Ticks};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for EU 2v2 leaderboard");
+        }
+
+        [Command("convert")]
+        public async Task ConvertUTCAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            List<ulong> convertedTimes = new List<ulong>(30);
+            List<ulong> decayIDs = new List<ulong>(30);
+
+            string query = $"SELECT id, decaytimer FROM leaderboardEU2;";
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    decayIDs.Add(reader.GetUInt64(0));
+                    DateTime oldTime = DateTime.FromBinary(reader.GetInt64(1));
+                    convertedTimes.Add((ulong)oldTime.ToUniversalTime().Ticks);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            for (int i = 0; i < decayIDs.Count; i++)
+            {
+                query = $"UPDATE leaderboardEU2 SET decaytimer = {convertedTimes[i]} WHERE id = {decayIDs[i]};";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
+
+            await Context.Channel.SendMessageAsync("All elo decay timers converted to new format for EU 2v2 leaderboard");
         }
     }
 }
