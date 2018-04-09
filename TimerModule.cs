@@ -24,27 +24,31 @@ public class TimerService
         _timer = new Timer(async _ =>
         {
             // 3) Any code you want to periodically run goes here:
+            if (client.GetChannel(392829581192855554) is IMessageChannel general)
+            {
+                await CheckQueueTimeoutAsync(general, "NA", 1);
+                await CheckQueueTimeoutAsync(general, "NA", 2);
+                await CheckQueueTimeoutAsync(general, "EU", 1);
+                await CheckQueueTimeoutAsync(general, "EU", 2);
+
+                if (Globals.timerCount % 4 == 0)
+                {
+                    await CheckRoomAsync(general, "NA", 1);
+                    await CheckRoomAsync(general, "NA", 2);
+                    await CheckRoomAsync(general, "EU", 1);
+                    await CheckRoomAsync(general, "EU", 2);
+                }
+                
+            }
+
             if (client.GetChannel(429366707656589312) is IMessageChannel rank_s)
             {
-                await CheckQueueTimeoutNA1(rank_s);
-                await CheckQueueTimeoutEU1(rank_s);
-                await CheckQueueTimeoutNA2(rank_s);
-                await CheckQueueTimeoutEU2(rank_s);
-
-                if(Globals.timerCount % 4 == 0)
+                if (Globals.timerCount % 120 == 0)
                 {
-                    await CheckRoomNA1(rank_s);
-                    await CheckRoomEU1(rank_s);
-                    await CheckRoomNA2(rank_s);
-                    await CheckRoomEU2(rank_s);
-                }
-
-                if(Globals.timerCount % 120 == 0)
-                {
-                    await EloDecayNA1(rank_s);
-                    await EloDecayNA2(rank_s);
-                    await EloDecayEU1(rank_s);
-                    await EloDecayEU2(rank_s);
+                    await EloDecayAsync(rank_s, "NA", 1);
+                    await EloDecayAsync(rank_s, "NA", 2);
+                    await EloDecayAsync(rank_s, "EU", 1);
+                    await EloDecayAsync(rank_s, "EU", 2);
                 }
             }
 
@@ -637,12 +641,12 @@ public class TimerService
         });
     }
 
-    public async Task CheckQueueTimeoutNA1(IMessageChannel thisChannel)
+    public async Task CheckQueueTimeoutAsync(IMessageChannel thisChannel, string region, int gameMode)
     {
         DateTime nowTime = DateTime.Now;
 
         List<ulong> timeOuts = new List<ulong>(5);
-        string query = $"SELECT time, id FROM queueNA1;";
+        string query = $"SELECT time, id FROM queue{region}{gameMode};";
         await Globals.conn.OpenAsync();
         try
         {
@@ -671,12 +675,12 @@ public class TimerService
         foreach (var id in timeOuts)
         {
             await Globals.conn.OpenAsync();
-            query = $"DELETE FROM queueNA1 WHERE id = {id};";
+            query = $"DELETE FROM queue{region}{gameMode} WHERE id = {id};";
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
                 cmd.ExecuteNonQuery();
-                await thisChannel.SendMessageAsync($"A player has timed out of NA 1v1 queue");
+                await thisChannel.SendMessageAsync($"A player has timed out of {region} {gameMode}v{gameMode} queue");
             }
             catch (Exception ex)
             {
@@ -688,218 +692,12 @@ public class TimerService
         }
     }
 
-    public async Task CheckQueueTimeoutEU1(IMessageChannel thisChannel)
-    {
-        DateTime nowTime = DateTime.Now;
-
-        List<ulong> timeOuts = new List<ulong>(5);
-        string query = $"SELECT time, id FROM queueEU1;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                DateTime oldTime = new DateTime(reader.GetInt64(0));
-                TimeSpan timeDif = nowTime - oldTime;
-                if (timeDif.TotalMinutes > 10)
-                {
-                    timeOuts.Add(reader.GetUInt64(1));
-                }
-
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        foreach (var id in timeOuts)
-        {
-            await Globals.conn.OpenAsync();
-            query = $"DELETE FROM queueEU1 WHERE id = {id};";
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                cmd.ExecuteNonQuery();
-                await thisChannel.SendMessageAsync($"A player has timed out of EU 1v1 queue");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-        }
-    }
-
-    public async Task CheckQueueTimeoutNA2(IMessageChannel thisChannel)
-    {
-        DateTime nowTime = DateTime.Now;
-
-        List<ulong> timeOuts = new List<ulong>(5);
-        string query = $"SELECT time, id FROM queueNA2;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                DateTime oldTime = new DateTime(reader.GetInt64(0));
-                TimeSpan timeDif = nowTime - oldTime;
-                if (timeDif.TotalMinutes > 10)
-                {
-                    timeOuts.Add(reader.GetUInt64(1));
-                }
-
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        foreach (var id in timeOuts)
-        {
-            await Globals.conn.OpenAsync();
-            query = $"DELETE FROM queueNA2 WHERE id = {id};";
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                cmd.ExecuteNonQuery();
-                await thisChannel.SendMessageAsync($"A player has timed out of NA 2v2 queue");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-        }
-    }
-
-    public async Task CheckQueueTimeoutEU2(IMessageChannel thisChannel)
-    {
-        DateTime nowTime = DateTime.Now;
-
-        List<ulong> timeOuts = new List<ulong>(5);
-        string query = $"SELECT time, id FROM queueEU2;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                DateTime oldTime = new DateTime(reader.GetInt64(0));
-                TimeSpan timeDif = nowTime - oldTime;
-                if (timeDif.TotalMinutes > 10)
-                {
-                    timeOuts.Add(reader.GetUInt64(1));
-                }
-
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        foreach (var id in timeOuts)
-        {
-            await Globals.conn.OpenAsync();
-            query = $"DELETE FROM queueEU2 WHERE id = {id};";
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                cmd.ExecuteNonQuery();
-                await thisChannel.SendMessageAsync($"A player has timed out of EU 2v2 queue");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-        }
-    }
-
-    public async Task CheckQueueTimeoutTest(IMessageChannel thisChannel)
-    {
-        DateTime nowTime = DateTime.Now;
-
-        List<ulong> timeOuts = new List<ulong>(5);
-        string query = $"SELECT time, id, username FROM queuetest;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                DateTime oldTime = new DateTime(reader.GetInt64(0));
-                TimeSpan timeDif = nowTime - oldTime;
-                Console.WriteLine($"{reader.GetString(2)} has been in queue for {timeDif.TotalSeconds} seconds.");
-                if (timeDif.TotalMinutes > 10)
-                {
-                    Console.WriteLine($"{reader.GetString(2)} is being removed from queue");
-                    timeOuts.Add(reader.GetUInt64(1));
-                }
-
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        foreach(var id in timeOuts)
-        {
-            await Globals.conn.OpenAsync();
-            query = $"DELETE FROM queuetest WHERE id = {id};";
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                cmd.ExecuteNonQuery();
-                await thisChannel.SendMessageAsync($"A player has timed out of test queue");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-        }
-    }
-
-    public async Task CheckRoomNA1(IMessageChannel thisChannel)
+    public async Task CheckRoomAsync(IMessageChannel thisChannel, string region, int gameMode)
     {
         DateTime nowTime = DateTime.Now;
 
         List<ulong> nullRooms = new List<ulong>(5);
-        string query = $"SELECT room, id1 FROM matchesNA1;";
+        string query = $"SELECT room, id1 FROM matches{region}{gameMode};";
         await Globals.conn.OpenAsync();
         try
         {
@@ -927,7 +725,9 @@ public class TimerService
 
         foreach (var id in nullRooms)
         {
-            query = $"SELECT id1, id2 FROM matchesNA1 WHERE id1 = {id};";
+            if(gameMode == 1) query = $"SELECT id1, id2 FROM matches{region}{gameMode} WHERE id1 = {id};";
+            else query = $"SELECT id1, id2, id3, id4 FROM matches{region}{gameMode} WHERE id1 = {id};";
+
             await Globals.conn.OpenAsync();
             try
             {
@@ -936,7 +736,8 @@ public class TimerService
 
                 while (reader.Read())
                 {
-                    await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}> and <@{reader.GetInt64(1)}>, please add your room number so it can be streamed on ProBrawlhalla");
+                    if(gameMode == 1) await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}> and <@{reader.GetInt64(1)}>, please add your room number so it can be streamed on ProBrawlhalla");
+                    else await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}>, <@{reader.GetInt64(1)}>, <@{reader.GetInt64(2)}>, and <@{reader.GetInt64(3)}>, please add your room number so it can be streamed on ProBrawlhalla");
                 }
             }
             catch (Exception ex)
@@ -949,473 +750,14 @@ public class TimerService
         }
     }
 
-    public async Task CheckRoomEU1(IMessageChannel thisChannel)
-    {
-        DateTime nowTime = DateTime.Now;
-
-        List<ulong> nullRooms = new List<ulong>(5);
-        string query = $"SELECT room, id1 FROM matchesEU1;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                DateTime oldTime = new DateTime(reader.GetInt64(0));
-                TimeSpan timeDif = nowTime - oldTime;
-                if (reader.GetInt32(0) == 0)
-                {
-                    nullRooms.Add(reader.GetUInt64(1));
-                }
-
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        foreach (var id in nullRooms)
-        {
-            query = $"SELECT id1, id2 FROM matchesEU1 WHERE id1 = {id};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}> and <@{reader.GetInt64(1)}>, please add your room number so it can be streamed on ProBrawlhalla");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-        }
-    }
-
-    public async Task CheckRoomNA2(IMessageChannel thisChannel)
-    {
-        DateTime nowTime = DateTime.Now;
-
-        List<ulong> nullRooms = new List<ulong>(5);
-        string query = $"SELECT room, id1 FROM matchesNA2;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                DateTime oldTime = new DateTime(reader.GetInt64(0));
-                TimeSpan timeDif = nowTime - oldTime;
-                if (reader.GetInt32(0) == 0)
-                {
-                    nullRooms.Add(reader.GetUInt64(1));
-                }
-
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        foreach (var id in nullRooms)
-        {
-            query = $"SELECT id1, id2, id3, id4 FROM matchesNA2 WHERE id1 = {id};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}>, <@{reader.GetInt64(1)}>, <@{reader.GetInt64(2)}>, and <@{reader.GetInt64(3)}>, please add your room number so it can be streamed on ProBrawlhalla");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-        }
-    }
-
-    public async Task CheckRoomEU2(IMessageChannel thisChannel)
-    {
-        DateTime nowTime = DateTime.Now;
-
-        List<ulong> nullRooms = new List<ulong>(5);
-        string query = $"SELECT room, id1 FROM matchesEU2;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                DateTime oldTime = new DateTime(reader.GetInt64(0));
-                TimeSpan timeDif = nowTime - oldTime;
-                if (reader.GetInt32(0) == 0)
-                {
-                    nullRooms.Add(reader.GetUInt64(1));
-                }
-
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        foreach (var id in nullRooms)
-        {
-            query = $"SELECT id1, id2, id3, id4 FROM matchesEU2 WHERE id1 = {id};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    await thisChannel.SendMessageAsync($"Hey <@{reader.GetInt64(0)}>, <@{reader.GetInt64(1)}>, <@{reader.GetInt64(2)}>, and <@{reader.GetInt64(3)}>, please add your room number so it can be streamed on ProBrawlhalla");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-        }
-    }
-
-    public async Task EloDecayNA1(IMessageChannel thisChannel)
+    public async Task EloDecayAsync(IMessageChannel thisChannel, string region, int gameMode)
     {
         DateTime nowTime = DateTime.Now;
 
         List<ulong> decayWarning = new List<ulong>(30);
         List<ulong> decayIDs = new List<ulong>(30);
         List<int> decayDays = new List<int>(30);
-        string query = $"SELECT decaytimer, decayed, id FROM leaderboardNA1;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                DateTime oldTime = new DateTime(reader.GetInt64(0));
-                TimeSpan timeDifBinary = nowTime - oldTime;
-                int timeDif = (int)timeDifBinary.TotalDays;
-                int decayed = reader.GetInt16(1);
-                ulong id = reader.GetUInt64(2);
-                if (timeDif == 6 && decayed == -1)
-                {
-                    decayWarning.Add(id);
-                }
-
-                if(timeDif - decayed == 7 && decayed > -1)
-                {
-                    decayIDs.Add(id);
-                    decayDays.Add(timeDif);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        foreach (var id in decayWarning)
-        {
-            await Task.Delay(5000);
-            await Globals.conn.OpenAsync();
-            query = $"UPDATE leaderboardNA1 SET decayed = 0 WHERE id = {id};";
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                cmd.ExecuteNonQuery();
-                await thisChannel.SendMessageAsync($"Hey <@{id}> your elo decay will be starting tomorrow. Play a 1v1 game in the next 24 hours to prevent this from happening.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-        }
-
-        for(int i = 0; i < decayIDs.Count; i++)
-        {
-            query = $"UPDATE leaderboardNA1 SET elo = elo - {decayDays[i] - 2} WHERE id = {decayIDs[i]};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            var user = await thisChannel.GetUserAsync(decayIDs[i]);
-            Console.WriteLine($"{user.Username} has lost {decayDays[i] - 2} 1v1 elo to decay");
-
-            query = $"UPDATE leaderboardNA1 SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-        }
-    }
-
-    public async Task EloDecayNA2(IMessageChannel thisChannel)
-    {
-        DateTime nowTime = DateTime.Now;
-
-        List<ulong> decayWarning = new List<ulong>(30);
-        List<ulong> decayIDs = new List<ulong>(30);
-        List<int> decayDays = new List<int>(30);
-        string query = $"SELECT decaytimer, decayed, id FROM leaderboardNA2;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                DateTime oldTime = new DateTime(reader.GetInt64(0));
-                TimeSpan timeDifBinary = nowTime - oldTime;
-                int timeDif = (int)timeDifBinary.TotalDays;
-                int decayed = reader.GetInt16(1);
-                ulong id = reader.GetUInt64(2);
-                if (timeDif == 6 && decayed == -1)
-                {
-                    decayWarning.Add(id);
-                }
-
-                if (timeDif - decayed == 7 && decayed > -1)
-                {
-                    decayIDs.Add(id);
-                    decayDays.Add(timeDif);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        foreach (var id in decayWarning)
-        {
-            await Task.Delay(5000);
-            await Globals.conn.OpenAsync();
-            query = $"UPDATE leaderboardNA2 SET decayed = 0 WHERE id = {id};";
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                cmd.ExecuteNonQuery();
-                await thisChannel.SendMessageAsync($"Hey <@{id}> your elo decay will be starting tomorrow. Play a 2v2 game in the next 24 hours to prevent this from happening.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-        }
-
-        for (int i = 0; i < decayIDs.Count; i++)
-        {
-            query = $"UPDATE leaderboardNA2 SET elo = elo - {decayDays[i] - 2} WHERE id = {decayIDs[i]};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            var user = await thisChannel.GetUserAsync(decayIDs[i]);
-            Console.WriteLine($"{user.Username} has lost {decayDays[i] - 2} 2v2 elo to decay");
-
-            query = $"UPDATE leaderboardNA2 SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-        }
-    }
-
-    public async Task EloDecayEU1(IMessageChannel thisChannel)
-    {
-        DateTime nowTime = DateTime.Now;
-
-        List<ulong> decayWarning = new List<ulong>(30);
-        List<ulong> decayIDs = new List<ulong>(30);
-        List<int> decayDays = new List<int>(30);
-        string query = $"SELECT decaytimer, decayed, id FROM leaderboardEU1;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                DateTime oldTime = new DateTime(reader.GetInt64(0));
-                TimeSpan timeDifBinary = nowTime - oldTime;
-                int timeDif = (int)timeDifBinary.TotalDays;
-                int decayed = reader.GetInt16(1);
-                ulong id = reader.GetUInt64(2);
-                if (timeDif == 6 && decayed == -1)
-                {
-                    decayWarning.Add(id);
-                }
-
-                if (timeDif - decayed == 7 && decayed > -1)
-                {
-                    decayIDs.Add(id);
-                    decayDays.Add(timeDif);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        foreach (var id in decayWarning)
-        {
-            await Task.Delay(5000);
-            await Globals.conn.OpenAsync();
-            query = $"UPDATE leaderboardEU1 SET decayed = 0 WHERE id = {id};";
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                cmd.ExecuteNonQuery();
-                await thisChannel.SendMessageAsync($"Hey <@{id}> your elo decay will be starting tomorrow. Play a 1v1 game in the next 24 hours to prevent this from happening.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-        }
-
-        for (int i = 0; i < decayIDs.Count; i++)
-        {
-            query = $"UPDATE leaderboardEU1 SET elo = elo - {decayDays[i] - 2} WHERE id = {decayIDs[i]};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            var user = await thisChannel.GetUserAsync(decayIDs[i]);
-            Console.WriteLine($"{user.Username} has lost {decayDays[i] - 2} 1v1 elo to decay");
-
-            query = $"UPDATE leaderboardEU1 SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-        }
-    }
-
-    public async Task EloDecayEU2(IMessageChannel thisChannel)
-    {
-        DateTime nowTime = DateTime.Now;
-
-        List<ulong> decayWarning = new List<ulong>(30);
-        List<ulong> decayIDs = new List<ulong>(30);
-        List<int> decayDays = new List<int>(30);
-        string query = $"SELECT decaytimer, decayed, id FROM leaderboardEU2;";
+        string query = $"SELECT decaytimer, decayed, id FROM leaderboard{region}{gameMode};";
         await Globals.conn.OpenAsync();
         try
         {
@@ -1453,12 +795,12 @@ public class TimerService
         {
             await Task.Delay(5000);
             await Globals.conn.OpenAsync();
-            query = $"UPDATE leaderboardEU2 SET decayed = 0 WHERE id = {id};";
+            query = $"UPDATE leaderboard{region}{gameMode} SET decayed = 0 WHERE id = {id};";
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
                 cmd.ExecuteNonQuery();
-                await thisChannel.SendMessageAsync($"Hey <@{id}> your elo decay will be starting tomorrow. Play a 2v2 game in the next 24 hours to prevent this from happening.");
+                await thisChannel.SendMessageAsync($"Hey <@{id}> your elo decay will be starting tomorrow. Play a {gameMode}v{gameMode} game in the next 24 hours to prevent this from happening.");
             }
             catch (Exception ex)
             {
@@ -1471,7 +813,7 @@ public class TimerService
 
         for (int i = 0; i < decayIDs.Count; i++)
         {
-            query = $"UPDATE leaderboardEU2 SET elo = elo - {decayDays[i] - 2} WHERE id = {decayIDs[i]};";
+            query = $"UPDATE leaderboard{region}{gameMode} SET elo = elo - {decayDays[i] - 2} WHERE id = {decayIDs[i]};";
             await Globals.conn.OpenAsync();
             try
             {
@@ -1487,9 +829,9 @@ public class TimerService
             await Globals.conn.CloseAsync();
 
             var user = await thisChannel.GetUserAsync(decayIDs[i]);
-            Console.WriteLine($"{user.Username} has lost {decayDays[i] - 2} 2v2 elo to decay");
+            Console.WriteLine($"{user.Username} has lost {decayDays[i] - 2} {gameMode}v{gameMode} elo to decay");
 
-            query = $"UPDATE leaderboardEU2 SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
+            query = $"UPDATE leaderboard{region}{gameMode} SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
             await Globals.conn.OpenAsync();
             try
             {
