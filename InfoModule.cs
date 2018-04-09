@@ -44,6 +44,8 @@ namespace BPR
         {
             if (roleID == 419355178680975370) return "NA";
             else if (roleID == 419355321061081088) return "NA";
+            else if (roleID == 419355374529937408) return "EU";
+            else if (roleID == 419355453550624768) return "EU";
             else if (roleID == 423095346131107853) return "SEA";
             else if (roleID == 423095293039607809) return "AUS";
             else return "";
