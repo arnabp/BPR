@@ -44,8 +44,8 @@ namespace BPR
         {
             if (roleID == 419355178680975370) return "NA";
             else if (roleID == 419355321061081088) return "NA";
-            else if (roleID == 419355374529937408) return "EU";
-            else if (roleID == 419355453550624768) return "EU";
+            else if (roleID == 423095346131107853) return "SEA";
+            else if (roleID == 423095293039607809) return "AUS";
             else return "";
         }
 
@@ -2360,56 +2360,6 @@ namespace BPR
             await Context.Channel.SendMessageAsync($"{username} has been deleted from the 1v1 leaderboards");
         }
 
-        [Command("wl")]
-        [Summary("Sets the win/loss ratio of a player")]
-        public async Task SetWinLossAsync(ulong id, int wins, int losses)
-        {
-            var user = Context.Guild.GetUser(id);
-            string username = "";
-            string query = $"SELECT username FROM leaderboardNA1 WHERE id = {id};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    username = reader.GetString(0);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-            query = $"UPDATE leaderboardNA1 SET wins1 = {wins}, loss1 = {losses} WHERE id = {id};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    username = reader.GetString(0);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            await Context.Channel.SendMessageAsync($"{username} win/loss in 1v1 has been updated");
-        }
-
         [Command("refresh")]
         [Summary("Resets the elo decay for all people in this leaderboard")]
         public async Task RefreshDecayTimerAsync()
@@ -2423,45 +2373,6 @@ namespace BPR
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for NA 1v1 leaderboard");
-        }
-
-        [Command("convert")]
-        public async Task ConvertUTCAsync()
-        {
-            await Context.Message.DeleteAsync();
-
-            List<ulong> convertedTimes = new List<ulong>(30);
-            List<ulong> decayIDs = new List<ulong>(30);
-
-            string query = $"SELECT id, decaytimer FROM leaderboardNA1;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    decayIDs.Add(reader.GetUInt64(0));
-                    DateTime oldTime = DateTime.FromBinary(reader.GetInt64(1));
-                    convertedTimes.Add((ulong)oldTime.ToUniversalTime().Ticks);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            for (int i = 0; i < decayIDs.Count; i++)
-            {
-                query = $"UPDATE leaderboardNA1 SET decaytimer = {convertedTimes[i]} WHERE id = {decayIDs[i]};";
-                await HelperFunctions.ExecuteSQLQueryAsync(query);
-            }
-
-            await Context.Channel.SendMessageAsync("All elo decay timers converted to new format for NA 1v1 leaderboard");
         }
     }
 
@@ -2519,56 +2430,6 @@ namespace BPR
             await Context.Channel.SendMessageAsync($"{username} has been deleted from the NA 2v2 leaderboards");
         }
 
-        [Command("wl")]
-        [Summary("Sets the win/loss ratio of a player")]
-        public async Task SetWinLossAsync(ulong id, int wins, int losses)
-        {
-            var user = Context.Guild.GetUser(id);
-            string username = "";
-            string query = $"SELECT username FROM leaderboardNA2 WHERE id = {id};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    username = reader.GetString(0);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-            query = $"UPDATE leaderboardNA2 SET wins2 = {wins}, loss2 = {losses} WHERE id = {id};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    username = reader.GetString(0);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            await Context.Channel.SendMessageAsync($"{username} win/loss in 2v2 has been updated");
-        }
-
         [Command("refresh")]
         [Summary("Resets the elo decay for all people in this leaderboard")]
         public async Task RefreshDecayTimerAsync()
@@ -2582,45 +2443,6 @@ namespace BPR
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for NA 2v2 leaderboard");
-        }
-
-        [Command("convert")]
-        public async Task ConvertUTCAsync()
-        {
-            await Context.Message.DeleteAsync();
-
-            List<ulong> convertedTimes = new List<ulong>(30);
-            List<ulong> decayIDs = new List<ulong>(30);
-
-            string query = $"SELECT id, decaytimer FROM leaderboardNA2;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    decayIDs.Add(reader.GetUInt64(0));
-                    DateTime oldTime = DateTime.FromBinary(reader.GetInt64(1));
-                    convertedTimes.Add((ulong)oldTime.ToUniversalTime().Ticks);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            for (int i = 0; i < decayIDs.Count; i++)
-            {
-                query = $"UPDATE leaderboardNA2 SET decaytimer = {convertedTimes[i]} WHERE id = {decayIDs[i]};";
-                await HelperFunctions.ExecuteSQLQueryAsync(query);
-            }
-
-            await Context.Channel.SendMessageAsync("All elo decay timers converted to new format for NA 2v2 leaderboard");
         }
     }
 
@@ -2679,56 +2501,6 @@ namespace BPR
             await Context.Channel.SendMessageAsync($"{username} has been deleted from the EU 1v1 leaderboards");
         }
 
-        [Command("wl")]
-        [Summary("Sets the win/loss ratio of a player")]
-        public async Task SetWinLossAsync(ulong id, int wins, int losses, [Remainder] string gamemode)
-        {
-            var user = Context.Guild.GetUser(id);
-            string username = "";
-            string query = $"SELECT username FROM leaderboardEU1 WHERE id = {id};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    username = reader.GetString(0);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-            query = $"UPDATE leaderboardEU1 SET wins1 = {wins}, loss1 = {losses} WHERE id = {id};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    username = reader.GetString(0);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            await Context.Channel.SendMessageAsync($"{username} win/loss in 1v1 has been updated");
-        }
-
         [Command("refresh")]
         [Summary("Resets the elo decay for all people in this leaderboard")]
         public async Task RefreshDecayTimerAsync()
@@ -2742,45 +2514,6 @@ namespace BPR
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for EU 1v1 leaderboard");
-        }
-
-        [Command("convert")]
-        public async Task ConvertUTCAsync()
-        {
-            await Context.Message.DeleteAsync();
-
-            List<ulong> convertedTimes = new List<ulong>(30);
-            List<ulong> decayIDs = new List<ulong>(30);
-
-            string query = $"SELECT id, decaytimer FROM leaderboardEU1;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    decayIDs.Add(reader.GetUInt64(0));
-                    DateTime oldTime = DateTime.FromBinary(reader.GetInt64(1));
-                    convertedTimes.Add((ulong)oldTime.ToUniversalTime().Ticks);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            for(int i = 0; i < decayIDs.Count; i++)
-            {
-                query = $"UPDATE leaderboardEU1 SET decaytimer = {convertedTimes[i]} WHERE id = {decayIDs[i]};";
-                await HelperFunctions.ExecuteSQLQueryAsync(query);
-            }
-
-            await Context.Channel.SendMessageAsync("All elo decay timers converted to new format for EU 1v1 leaderboard");
         }
     }
 
@@ -2839,56 +2572,6 @@ namespace BPR
             await Context.Channel.SendMessageAsync($"{username} has been deleted from the EU 2v2 leaderboards");
         }
 
-        [Command("wl")]
-        [Summary("Sets the win/loss ratio of a player")]
-        public async Task SetWinLossAsync(ulong id, int wins, int losses, [Remainder] string gamemode)
-        {
-            var user = Context.Guild.GetUser(id);
-            string username = "";
-            string query = $"SELECT username FROM leaderboardEU2 WHERE id = {id};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    username = reader.GetString(0);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-            query = $"UPDATE leaderboardEU2 SET wins2 = {wins}, loss2 = {losses} WHERE id = {id};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    username = reader.GetString(0);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            await Context.Channel.SendMessageAsync($"{username} win/loss in 2v2 has been updated");
-        }
-
         [Command("refresh")]
         [Summary("Resets the elo decay for all people in this leaderboard")]
         public async Task RefreshDecayTimerAsync()
@@ -2903,16 +2586,35 @@ namespace BPR
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for EU 2v2 leaderboard");
         }
+    }
 
-        [Command("convert")]
-        public async Task ConvertUTCAsync()
+    [Group("leaderboardAUS1")]
+    [RequireUserPermission(GuildPermission.Administrator)]
+    public class LeaderboardAUS1Module : ModuleBase<SocketCommandContext>
+    {
+        [Command("add")]
+        [Summary("Adds new users to the leaderboard")]
+        public async Task AddLeaderbardAsync(ulong id)
         {
+            var user = Context.Guild.GetUser(id);
             await Context.Message.DeleteAsync();
 
-            List<ulong> convertedTimes = new List<ulong>(30);
-            List<ulong> decayIDs = new List<ulong>(30);
+            string query = $"INSERT INTO leaderboardAUS1(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.UtcNow.Ticks});";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            string query = $"SELECT id, decaytimer FROM leaderboardEU2;";
+            await user.AddRoleAsync(Context.Guild.GetRole(423095293039607809));
+
+            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the AUS 1v1 leaderboard!");
+            Console.WriteLine($"{user.Username} has been registered");
+        }
+
+        [Command("delete")]
+        [Summary("Allows admin to delete user from leaderboard")]
+        public async Task DeleteLeaderboardAsync([Remainder] ulong id)
+        {
+            var user = Context.Guild.GetUser(id);
+            string username = "";
+            string query = $"SELECT username FROM leaderboardAUS1 WHERE id = {id};";
             await Globals.conn.OpenAsync();
             try
             {
@@ -2921,10 +2623,9 @@ namespace BPR
 
                 while (reader.Read())
                 {
-                    decayIDs.Add(reader.GetUInt64(0));
-                    DateTime oldTime = DateTime.FromBinary(reader.GetInt64(1));
-                    convertedTimes.Add((ulong)oldTime.ToUniversalTime().Ticks);
+                    username = reader.GetString(0);
                 }
+
             }
             catch (Exception ex)
             {
@@ -2933,14 +2634,97 @@ namespace BPR
                 throw;
             }
             await Globals.conn.CloseAsync();
+            query = $"DELETE FROM leaderboardAUS1 WHERE id = {id};";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            for (int i = 0; i < decayIDs.Count; i++)
+            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(423095293039607809));
+
+            await Context.Channel.SendMessageAsync($"{username} has been deleted from the 1v1 leaderboards");
+        }
+
+        [Command("refresh")]
+        [Summary("Resets the elo decay for all people in this leaderboard")]
+        public async Task RefreshDecayTimerAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            string query = $"UPDATE leaderboardAUS1 SET decayed = -1;";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            query = $"UPDATE leaderboardAUS1 SET decaytimer = {DateTime.UtcNow.Ticks};";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for AUS 1v1 leaderboard");
+        }
+    }
+
+    [Group("leaderboardSEA1")]
+    [RequireUserPermission(GuildPermission.Administrator)]
+    public class LeaderboardSEA1Module : ModuleBase<SocketCommandContext>
+    {
+        [Command("add")]
+        [Summary("Adds new users to the leaderboard")]
+        public async Task AddLeaderbardAsync(ulong id)
+        {
+            var user = Context.Guild.GetUser(id);
+            await Context.Message.DeleteAsync();
+
+            string query = $"INSERT INTO leaderboardSEA1(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.UtcNow.Ticks});";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await user.AddRoleAsync(Context.Guild.GetRole(423095346131107853));
+
+            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the SEA 1v1 leaderboard!");
+            Console.WriteLine($"{user.Username} has been registered");
+        }
+
+        [Command("delete")]
+        [Summary("Allows admin to delete user from leaderboard")]
+        public async Task DeleteLeaderboardAsync([Remainder] ulong id)
+        {
+            var user = Context.Guild.GetUser(id);
+            string username = "";
+            string query = $"SELECT username FROM leaderboardSEA1 WHERE id = {id};";
+            await Globals.conn.OpenAsync();
+            try
             {
-                query = $"UPDATE leaderboardEU2 SET decaytimer = {convertedTimes[i]} WHERE id = {decayIDs[i]};";
-                await HelperFunctions.ExecuteSQLQueryAsync(query);
-            }
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
 
-            await Context.Channel.SendMessageAsync("All elo decay timers converted to new format for EU 2v2 leaderboard");
+                while (reader.Read())
+                {
+                    username = reader.GetString(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+            query = $"DELETE FROM leaderboardSEA1 WHERE id = {id};";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(423095346131107853));
+
+            await Context.Channel.SendMessageAsync($"{username} has been deleted from the 1v1 leaderboards");
+        }
+
+        [Command("refresh")]
+        [Summary("Resets the elo decay for all people in this leaderboard")]
+        public async Task RefreshDecayTimerAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            string query = $"UPDATE leaderboardSEA1 SET decayed = -1;";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            query = $"UPDATE leaderboardSEA1 SET decaytimer = {DateTime.UtcNow.Ticks};";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for SEA 1v1 leaderboard");
         }
     }
 }
