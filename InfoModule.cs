@@ -51,6 +51,15 @@ namespace BPR
             else return "";
         }
 
+        public static Color GetRegionColor(string region)
+        {
+            if (region == "NA") return Color.Blue;
+            else if (region == "EU") return Color.Green;
+            else if (region == "SEA") return Color.Orange;
+            else if (region == "AUS") return Color.DarkBlue;
+            else return Color.LightGrey;
+        }
+
         public static async Task ResetDecayTimer(ulong id, string region, int gameMode)
         {
             string query = $"UPDATE leaderboard{region}{gameMode} SET decaytimer = {DateTime.UtcNow.Ticks} WHERE id = {id};";

@@ -61,10 +61,10 @@ public class TimerService
                 IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
                 IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
 
-                if (leaderboardNAm != null) await UpdateLeaderboardNA1(leaderboardNAm);
-                if (leaderboardEUm != null) await UpdateLeaderboardEU1(leaderboardEUm);
-                if (matchListm != null) await UpdateMatches1(matchListm);
-                if (queueListm != null) await UpdateQueue1(queueListm);
+                if (leaderboardNAm != null) await UpdateLeaderboardAsync(leaderboardNAm, "NA", 1);
+                if (leaderboardEUm != null) await UpdateLeaderboardAsync(leaderboardEUm, "EU", 1);
+                if (matchListm != null) await UpdateMatchesAsync(matchListm, "NA", "EU", 1);
+                if (queueListm != null) await UpdateQueueAsync(queueListm, "NA", "EU", 1);
                 
             }
 
@@ -77,10 +77,10 @@ public class TimerService
                 IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
                 IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
 
-                if (leaderboardNAm != null) await UpdateLeaderboardNA2(leaderboardNAm);
-                if (leaderboardEUm != null) await UpdateLeaderboardEU2(leaderboardEUm);
-                if (matchListm != null) await UpdateMatches2(matchListm);
-                if (queueListm != null) await UpdateQueue2(queueListm);
+                if (leaderboardNAm != null) await UpdateLeaderboardAsync(leaderboardNAm, "NA", 2);
+                if (leaderboardEUm != null) await UpdateLeaderboardAsync(leaderboardEUm, "EU", 2);
+                if (matchListm != null) await UpdateMatchesAsync(matchListm, "NA", "EU", 2);
+                if (queueListm != null) await UpdateQueueAsync(queueListm, "NA", "EU", 2);
 
             }
 
@@ -91,16 +91,16 @@ public class TimerService
         TimeSpan.FromSeconds(30)); // 5) Time after which message should repeat (use `Timeout.Infinite` for no repeat)
     }
 
-    public async Task UpdateLeaderboardNA1(IUserMessage thisMessage)
+    public async Task UpdateLeaderboardAsync(IUserMessage thisMessage, string region, int gameMode)
     {
         var embed = new EmbedBuilder
         {
-            Title = "NA Leaderboard",
-            Color = Color.Blue
+            Title = $"{region} Leaderboard",
+            Color = HelperFunctions.GetRegionColor(region)
         };
 
         int i = 1;
-        string query = $"SELECT username, elo, wins, loss FROM leaderboardNA1 ORDER BY elo DESC;";
+        string query = $"SELECT username, elo, wins, loss FROM leaderboard{region}{gameMode} ORDER BY elo DESC;";
         await Globals.conn.OpenAsync();
         try
         {
@@ -132,52 +132,11 @@ public class TimerService
         });
     }
 
-    public async Task UpdateLeaderboardEU1(IUserMessage thisMessage)
-    {
-        var embed = new EmbedBuilder
-        {
-            Title = "EU Leaderboard",
-            Color = Color.Green
-        };
-
-        int i = 1;
-        string query = $"SELECT username, elo, wins, loss FROM leaderboardEU1 ORDER BY elo DESC;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                if (i > 25) break;
-                embed.AddField(x =>
-                {
-                    x.Name = $"{i}: {reader.GetString(0)}";
-                    x.Value = $"{reader.GetInt16(1)} elo\n{reader.GetInt16(2)} - {reader.GetInt16(3)}";
-                });
-                i++;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        await thisMessage.ModifyAsync(x => {
-            x.Content = "";
-            x.Embed = embed.Build();
-        });
-    }
-
-    public async Task UpdateMatches1(IUserMessage thisMessage)
+    public async Task UpdateMatchesAsync(IUserMessage thisMessage, string region1, string region2, int gameMode)
     {
         string pluralizer;
-        int matchCountNA = 0, matchCountEU = 0;
-        string query = $"SELECT count(*) FROM matchesNA1;";
+        int matchCount1 = 0, matchCount2 = 0;
+        string query = $"SELECT count(*) FROM matches{region1}{gameMode};";
         await Globals.conn.OpenAsync();
         try
         {
@@ -186,7 +145,7 @@ public class TimerService
 
             while (reader.Read())
             {
-                matchCountNA = reader.GetInt16(0);
+                matchCount1 = reader.GetInt16(0);
             }
         }
         catch (Exception ex)
@@ -196,7 +155,7 @@ public class TimerService
             throw;
         }
         await Globals.conn.CloseAsync();
-        query = $"SELECT count(*) FROM matchesEU1;";
+        query = $"SELECT count(*) FROM matches{region2}{gameMode};";
         await Globals.conn.OpenAsync();
         try
         {
@@ -205,7 +164,7 @@ public class TimerService
 
             while (reader.Read())
             {
-                matchCountEU = reader.GetInt16(0);
+                matchCount2 = reader.GetInt16(0);
             }
         }
         catch (Exception ex)
@@ -215,14 +174,16 @@ public class TimerService
             throw;
         }
         await Globals.conn.CloseAsync();
-        if (matchCountNA + matchCountEU != 1) pluralizer = "es";
+        if (matchCount1 + matchCount2 != 1) pluralizer = "es";
         else pluralizer = "";
         var embed = new EmbedBuilder
         {
             Title = "Ongoing Matches",
-            Description = $"{matchCountNA + matchCountEU} match{pluralizer} ongoing"
+            Description = $"{matchCount1 + matchCount2} match{pluralizer} ongoing"
         };
-        query = $"SELECT username1, username2, room FROM matchesNA1;";
+        if (gameMode == 1) query = $"SELECT username1, username2, room FROM matches{region1}{gameMode};";
+        else query = $"SELECT username1, username2, username3, username4, room FROM matches{region2}{gameMode};";
+
         await Globals.conn.OpenAsync();
         try
         {
@@ -235,7 +196,8 @@ public class TimerService
                 embed.AddField(x =>
                 {
                     x.Name = $"NA Match #{k}";
-                    x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}\nRoom Number: #{reader.GetInt32(2)}";
+                    if (gameMode == 1) x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}\nRoom Number: #{reader.GetInt32(2)}";
+                    else x.Value = $"{reader.GetString(0)} and {reader.GetString(1)} vs {reader.GetString(2)} and {reader.GetString(3)}\nRoom Number: #{reader.GetInt32(4)}";
                 });
                 k++;
             }
@@ -248,7 +210,8 @@ public class TimerService
         }
         await Globals.conn.CloseAsync();
 
-        query = $"SELECT username1, username2, room FROM matchesEU1;";
+        if (gameMode == 1) query = $"SELECT username1, username2, room FROM matches{region1}{gameMode};";
+        else query = $"SELECT username1, username2, username3, username4, room FROM matches{region2}{gameMode};";
         await Globals.conn.OpenAsync();
         try
         {
@@ -261,7 +224,8 @@ public class TimerService
                 embed.AddField(x =>
                 {
                     x.Name = $"EU Match #{k}";
-                    x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}\nRoom Number: #{reader.GetInt32(2)}";
+                    if (gameMode == 1) x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}\nRoom Number: #{reader.GetInt32(2)}";
+                    else x.Value = $"{reader.GetString(0)} and {reader.GetString(1)} vs {reader.GetString(2)} and {reader.GetString(3)}\nRoom Number: #{reader.GetInt32(4)}";
                 });
                 k++;
             }
@@ -274,7 +238,7 @@ public class TimerService
         }
         await Globals.conn.CloseAsync();
 
-        if (matchCountNA + matchCountEU != 0)
+        if (matchCount1 + matchCount2 != 0)
         {
             embed.Color = Color.Red;
         }
@@ -285,10 +249,10 @@ public class TimerService
         });
     }
 
-    public async Task UpdateQueue1(IUserMessage thisMessage)
+    public async Task UpdateQueueAsync(IUserMessage thisMessage, string region1, string region2, int gameMode)
     {
-        int queueCountNA = 0, queueCountEU = 0;
-        string query = $"SELECT count(*) FROM queueNA1;";
+        int queueCount1 = 0, queueCount2 = 0;
+        string query = $"SELECT count(*) FROM queue{region1}{gameMode};";
         await Globals.conn.OpenAsync();
         try
         {
@@ -297,7 +261,7 @@ public class TimerService
 
             while (reader.Read())
             {
-                queueCountNA = reader.GetInt16(0);
+                queueCount1 = reader.GetInt16(0);
             }
         }
         catch (Exception ex)
@@ -308,7 +272,7 @@ public class TimerService
         }
         await Globals.conn.CloseAsync();
 
-        query = $"SELECT count(*) FROM queueEU1;";
+        query = $"SELECT count(*) FROM queue{region2}{gameMode};";
         await Globals.conn.OpenAsync();
         try
         {
@@ -317,7 +281,7 @@ public class TimerService
 
             while (reader.Read())
             {
-                queueCountEU = reader.GetInt16(0);
+                queueCount2 = reader.GetInt16(0);
             }
         }
         catch (Exception ex)
@@ -328,16 +292,16 @@ public class TimerService
         }
         await Globals.conn.CloseAsync();
 
-        string pluralizer, pluralizerNA, pluralizerEU;
-        int totalCount = queueCountNA + queueCountEU;
+        string pluralizer, pluralizer1, pluralizer2;
+        int totalCount = queueCount1 + queueCount2;
         if (totalCount == 1) pluralizer = "person is";
         else pluralizer = "people are";
 
-        if (queueCountNA == 1) pluralizerNA = "person is";
-        else pluralizerNA = "people are";
+        if (queueCount1 == 1) pluralizer1 = "person is";
+        else pluralizer1 = "people are";
 
-        if (queueCountEU == 1) pluralizerEU = "person is";
-        else pluralizerEU = "people are";
+        if (queueCount2 == 1) pluralizer2 = "person is";
+        else pluralizer2 = "people are";
 
         var embed = new EmbedBuilder
         {
@@ -347,290 +311,15 @@ public class TimerService
         embed.AddField(x =>
         {
             x.Name = "NA Queue";
-            x.Value = $"{queueCountNA} {pluralizerNA} in queue";
+            x.Value = $"{queueCount1} {pluralizer1} in queue";
         });
         embed.AddField(x =>
         {
             x.Name = "EU Queue";
-            x.Value = $"{queueCountEU} {pluralizerEU} in queue";
+            x.Value = $"{queueCount2} {pluralizer2} in queue";
         });
 
         if(totalCount != 0)
-        {
-            embed.Color = Color.Red;
-        }
-
-        await thisMessage.ModifyAsync(x => {
-            x.Content = "";
-            x.Embed = embed.Build();
-        });
-    }
-
-    public async Task UpdateLeaderboardNA2(IUserMessage thisMessage)
-    {
-        var embed = new EmbedBuilder
-        {
-            Title = "NA Leaderboard",
-            Color = Color.Blue
-        };
-
-        int i = 1;
-        string query = $"SELECT username, elo, wins, loss FROM leaderboardNA2 ORDER BY elo DESC;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                if (i > 25) break;
-                embed.AddField(x =>
-                {
-                    x.Name = $"{i}: {reader.GetString(0)}";
-                    x.Value = $"{reader.GetInt16(1)} elo\n{reader.GetInt16(2)} - {reader.GetInt16(3)}";
-                });
-                i++;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        await thisMessage.ModifyAsync(x => {
-            x.Content = "";
-            x.Embed = embed.Build();
-        });
-    }
-
-    public async Task UpdateLeaderboardEU2(IUserMessage thisMessage)
-    {
-        var embed = new EmbedBuilder
-        {
-            Title = "EU Leaderboard",
-            Color = Color.Green
-        };
-
-        int i = 1;
-        string query = $"SELECT username, elo, wins, loss FROM leaderboardEU2 ORDER BY elo DESC;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                if (i > 25) break;
-                embed.AddField(x =>
-                {
-                    x.Name = $"{i}: {reader.GetString(0)}";
-                    x.Value = $"{reader.GetInt16(1)} elo\n{reader.GetInt16(2)} - {reader.GetInt16(3)}";
-                });
-                i++;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        await thisMessage.ModifyAsync(x => {
-            x.Content = "";
-            x.Embed = embed.Build();
-        });
-    }
-
-    public async Task UpdateMatches2(IUserMessage thisMessage)
-    {
-        string pluralizer;
-        int matchCountNA = 0, matchCountEU = 0;
-        string query = $"SELECT count(*) FROM matchesNA2;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                matchCountNA = reader.GetInt16(0);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-        query = $"SELECT count(*) FROM matchesEU2;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                matchCountEU = reader.GetInt16(0);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-        if (matchCountNA + matchCountEU != 1) pluralizer = "es";
-        else pluralizer = "";
-        var embed = new EmbedBuilder
-        {
-            Title = "Ongoing Matches",
-            Description = $"{matchCountNA + matchCountEU} match{pluralizer} ongoing"
-        };
-        query = $"SELECT username1, username2, username3, username4, room FROM matchesNA2;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            int k = 1;
-            while (reader.Read())
-            {
-                embed.AddField(x =>
-                {
-                    x.Name = $"NA Match #{k}";
-                    x.Value = $"{reader.GetString(0)} and {reader.GetString(1)} vs {reader.GetString(2)} and {reader.GetString(3)}\nRoom Number: #{reader.GetInt32(4)}";
-                });
-                k++;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        query = $"SELECT username1, username2, username3, username4, room FROM matchesEU2;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            int k = 1;
-            while (reader.Read())
-            {
-                embed.AddField(x =>
-                {
-                    x.Name = $"EU Match #{k}";
-                    x.Value = $"{reader.GetString(0)} and {reader.GetString(1)} vs {reader.GetString(2)} and {reader.GetString(3)}\nRoom Number: #{reader.GetInt32(4)}";
-                });
-                k++;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        if (matchCountNA + matchCountEU != 0)
-        {
-            embed.Color = Color.Red;
-        }
-
-        await thisMessage.ModifyAsync(x => {
-            x.Content = "";
-            x.Embed = embed.Build();
-        });
-    }
-
-    public async Task UpdateQueue2(IUserMessage thisMessage)
-    {
-        int queueCountNA = 0, queueCountEU = 0;
-        string query = $"SELECT count(*) FROM queueNA2;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                queueCountNA = reader.GetInt16(0);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        query = $"SELECT count(*) FROM queueEU2;";
-        await Globals.conn.OpenAsync();
-        try
-        {
-            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                queueCountEU = reader.GetInt16(0);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            await Globals.conn.CloseAsync();
-            throw;
-        }
-        await Globals.conn.CloseAsync();
-
-        string pluralizer, pluralizerNA, pluralizerEU;
-        int totalCount = queueCountNA + queueCountEU;
-        if (totalCount == 1) pluralizer = "person is";
-        else pluralizer = "people are";
-
-        if (queueCountNA == 1) pluralizerNA = "person is";
-        else pluralizerNA = "people are";
-
-        if (queueCountEU == 1) pluralizerEU = "person is";
-        else pluralizerEU = "people are";
-
-        var embed = new EmbedBuilder
-        {
-            Title = "Queue List",
-            Description = $"{totalCount} {pluralizer} in queue"
-        };
-        embed.AddField(x =>
-        {
-            x.Name = "NA Queue";
-            x.Value = $"{queueCountNA} {pluralizerNA} in queue";
-        });
-        embed.AddField(x =>
-        {
-            x.Name = "EU Queue";
-            x.Value = $"{queueCountEU} {pluralizerEU} in queue";
-        });
-
-        if (totalCount != 0)
         {
             embed.Color = Color.Red;
         }
