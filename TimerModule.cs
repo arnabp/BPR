@@ -52,9 +52,9 @@ public class TimerService
                 }
             }
 
-            if (client.GetChannel(401167888762929153) is IMessageChannel queue1Info)
+            if (client.GetChannel(401167888762929153) is IMessageChannel queue1InfoNAEU)
             {
-                IEnumerable<IMessage> messageList = await queue1Info.GetMessagesAsync(4).Flatten();
+                IEnumerable<IMessage> messageList = await queue1InfoNAEU.GetMessagesAsync(4).Flatten();
 
                 IUserMessage leaderboardNAm = messageList.ToList()[3] as IUserMessage;
                 IUserMessage leaderboardEUm = messageList.ToList()[2] as IUserMessage;
@@ -68,9 +68,9 @@ public class TimerService
                 
             }
 
-            if (client.GetChannel(404558855771521024) is IMessageChannel queue2Info)
+            if (client.GetChannel(404558855771521024) is IMessageChannel queue2InfoNAEU)
             {
-                IEnumerable<IMessage> messageList = await queue2Info.GetMessagesAsync(4).Flatten();
+                IEnumerable<IMessage> messageList = await queue2InfoNAEU.GetMessagesAsync(4).Flatten();
 
                 IUserMessage leaderboardNAm = messageList.ToList()[3] as IUserMessage;
                 IUserMessage leaderboardEUm = messageList.ToList()[2] as IUserMessage;
@@ -81,6 +81,22 @@ public class TimerService
                 if (leaderboardEUm != null) await UpdateLeaderboardAsync(leaderboardEUm, "EU", 2);
                 if (matchListm != null) await UpdateMatchesAsync(matchListm, "NA", "EU", 2);
                 if (queueListm != null) await UpdateQueueAsync(queueListm, "NA", "EU", 2);
+
+            }
+
+            if (client.GetChannel(423372016922525697) is IMessageChannel queue1InfoAUSSEA)
+            {
+                IEnumerable<IMessage> messageList = await queue1InfoAUSSEA.GetMessagesAsync(4).Flatten();
+
+                IUserMessage leaderboardNAm = messageList.ToList()[3] as IUserMessage;
+                IUserMessage leaderboardEUm = messageList.ToList()[2] as IUserMessage;
+                IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
+                IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
+
+                if (leaderboardNAm != null) await UpdateLeaderboardAsync(leaderboardNAm, "AUS", 1);
+                if (leaderboardEUm != null) await UpdateLeaderboardAsync(leaderboardEUm, "SEA", 1);
+                if (matchListm != null) await UpdateMatchesAsync(matchListm, "AUS", "SEA", 1);
+                if (queueListm != null) await UpdateQueueAsync(queueListm, "AUS", "SEA", 1);
 
             }
 
