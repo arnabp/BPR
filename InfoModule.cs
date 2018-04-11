@@ -38,6 +38,23 @@ namespace BPR
                 throw;
             }
             await Globals.conn.CloseAsync();
+
+            if (!query.Contains("tracker"))
+            {
+                if (query.Contains("leaderboard"))
+                {
+                    await ExecuteSQLQueryAsync("UPDATE tracker SET leaderboard = leaderboard + 1;");
+                }
+                else if (query.Contains("queue"))
+                {
+                    await ExecuteSQLQueryAsync("UPDATE tracker SET queue = queue + 1;");
+                }
+                else if (query.Contains("matches"))
+                {
+                    await ExecuteSQLQueryAsync("UPDATE tracker SET matches = matches + 1;");
+                }
+            }
+            
         }
 
         public static string GetRoleRegion(ulong roleID)
