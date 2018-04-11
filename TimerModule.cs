@@ -326,12 +326,12 @@ public class TimerService
         };
         embed.AddField(x =>
         {
-            x.Name = "NA Queue";
+            x.Name = $"{region1} Queue";
             x.Value = $"{queueCount1} {pluralizer1} in queue";
         });
         embed.AddField(x =>
         {
-            x.Name = "EU Queue";
+            x.Name = $"{region2} Queue";
             x.Value = $"{queueCount2} {pluralizer2} in queue";
         });
 
