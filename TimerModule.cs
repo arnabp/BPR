@@ -198,7 +198,7 @@ public class TimerService
             Description = $"{matchCount1 + matchCount2} match{pluralizer} ongoing"
         };
         if (gameMode == 1) query = $"SELECT username1, username2, room FROM matches{region1}{gameMode};";
-        else query = $"SELECT username1, username2, username3, username4, room FROM matches{region2}{gameMode};";
+        else query = $"SELECT username1, username2, username3, username4, room FROM matches{region1}{gameMode};";
 
         await Globals.conn.OpenAsync();
         try
@@ -211,7 +211,7 @@ public class TimerService
             {
                 embed.AddField(x =>
                 {
-                    x.Name = $"NA Match #{k}";
+                    x.Name = $"{region1} Match #{k}";
                     if (gameMode == 1) x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}\nRoom Number: #{reader.GetInt32(2)}";
                     else x.Value = $"{reader.GetString(0)} and {reader.GetString(1)} vs {reader.GetString(2)} and {reader.GetString(3)}\nRoom Number: #{reader.GetInt32(4)}";
                 });
@@ -226,7 +226,7 @@ public class TimerService
         }
         await Globals.conn.CloseAsync();
 
-        if (gameMode == 1) query = $"SELECT username1, username2, room FROM matches{region1}{gameMode};";
+        if (gameMode == 1) query = $"SELECT username1, username2, room FROM matches{region2}{gameMode};";
         else query = $"SELECT username1, username2, username3, username4, room FROM matches{region2}{gameMode};";
         await Globals.conn.OpenAsync();
         try
@@ -239,7 +239,7 @@ public class TimerService
             {
                 embed.AddField(x =>
                 {
-                    x.Name = $"EU Match #{k}";
+                    x.Name = $"{region2} Match #{k}";
                     if (gameMode == 1) x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}\nRoom Number: #{reader.GetInt32(2)}";
                     else x.Value = $"{reader.GetString(0)} and {reader.GetString(1)} vs {reader.GetString(2)} and {reader.GetString(3)}\nRoom Number: #{reader.GetInt32(4)}";
                 });

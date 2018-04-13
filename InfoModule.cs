@@ -539,7 +539,7 @@ namespace BPR
             await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}> and <@{p2id}>");
             Console.WriteLine($"NA 1v1 Match #{matchCount} has started.");
 
-            await Context.Channel.SendMessageAsync($"Please remember to add your room number with !match1 room 00000");
+            await Context.Channel.SendMessageAsync($"Please remember to add your room number with match1 room 00000");
         }
 
         private async Task NewMatchEU(int p1, int p2)
@@ -646,7 +646,7 @@ namespace BPR
             await Context.Channel.SendMessageAsync($"New 1v1 match has started between <@{p1id}> and <@{p2id}>");
             Console.WriteLine($"EU 1v1 Match #{matchCount} has started.");
 
-            await Context.Channel.SendMessageAsync($"Please remember to add your room number with !match1 room 00000");
+            await Context.Channel.SendMessageAsync($"Please remember to add your room number with match1 room 00000");
         }
     }
 
@@ -1046,7 +1046,7 @@ namespace BPR
             
             Console.WriteLine($"NA 2v2 Match #{matchCount} has started.");
 
-            await Context.Channel.SendMessageAsync($"Please remember to add your room number with !match2 room 00000");
+            await Context.Channel.SendMessageAsync($"Please remember to add your room number with match2 room 00000");
         }
 
         private async Task NewMatchEU(int p1, int p2, int p3, int p4)
@@ -1234,7 +1234,7 @@ namespace BPR
 
             Console.WriteLine($"EU 2v2 Match #{matchCount} has started.");
 
-            await Context.Channel.SendMessageAsync($"Please remember to add your room number with !match2 room 00000");
+            await Context.Channel.SendMessageAsync($"Please remember to add your room number with match2 room 00000");
         }
     }
 
