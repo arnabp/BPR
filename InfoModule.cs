@@ -357,9 +357,7 @@ namespace BPR
 
                 if (queueCount == 1)
                 {
-                    if (region == "NA") await NewMatchNA(0, 1); // This should be modified when anti-smurfing mechanism is introduced
-                    else if (region == "EU") await NewMatchEU(0, 1);
-                    else Console.WriteLine("Wrong region detected, role error");
+                    await NewMatch(0, 1, region);
 
                     query = $"TRUNCATE TABLE queue{region}1;";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -435,13 +433,13 @@ namespace BPR
             await Context.Message.DeleteAsync();
         }
 
-        private async Task NewMatchNA(int p1, int p2)
+        private async Task NewMatch(int p1, int p2, string region)
         {
             long p1time = 0, p2time = 0;
             string p1name = "", p2name = "";
             ulong p1id = 0, p2id = 0;
             bool is1InQueue = false, is2InQueue = false;
-            string query = $"SELECT time, username, id FROM queueNA1;";
+            string query = $"SELECT time, username, id FROM queue{region}1;";
             await Globals.conn.OpenAsync();
             try
             {
@@ -475,7 +473,7 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
-            query = $"SELECT id FROM queueNA2;";
+            query = $"SELECT id FROM queue{region}2;";
             await Globals.conn.OpenAsync();
             try
             {
@@ -497,26 +495,26 @@ namespace BPR
             await Globals.conn.CloseAsync();
             if (is1InQueue)
             {
-                query = $"DELETE FROM queueNA2 WHERE id = {p1id};";
+                query = $"DELETE FROM queue{region}2 WHERE id = {p1id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the NA 2v2 queue");
             }
 
             if (is2InQueue)
             {
-                query = $"DELETE FROM queueNA2 WHERE id = {p2id};";
+                query = $"DELETE FROM queue{region}2 WHERE id = {p2id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the NA 2v2 queue");
             }
 
-            query = $"INSERT INTO matchesNA1(id1, id2, username1, username2, time, reverted) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.UtcNow.Ticks}, 0);";
+            query = $"INSERT INTO matches{region}1(id1, id2, username1, username2, time, reverted) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.UtcNow.Ticks}, 0);";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await HelperFunctions.ResetDecayTimer(p1id, "NA", 1);
-            await HelperFunctions.ResetDecayTimer(p2id, "NA", 1);
+            await HelperFunctions.ResetDecayTimer(p1id, region, 1);
+            await HelperFunctions.ResetDecayTimer(p2id, region, 1);
 
             int matchCount = 0;
-            query = $"SELECT count(*) FROM matchesNA1;";
+            query = $"SELECT count(*) FROM matches{region}1;";
             await Globals.conn.OpenAsync();
             try
             {
@@ -537,114 +535,7 @@ namespace BPR
             await Globals.conn.CloseAsync();
 
             await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}> and <@{p2id}>");
-            Console.WriteLine($"NA 1v1 Match #{matchCount} has started.");
-
-            await Context.Channel.SendMessageAsync($"Please remember to add your room number with match1 room 00000");
-        }
-
-        private async Task NewMatchEU(int p1, int p2)
-        {
-            long p1time = 0, p2time = 0;
-            string p1name = "", p2name = "";
-            ulong p1id = 0, p2id = 0;
-            bool is1InQueue = false, is2InQueue = false;
-            string query = $"SELECT time, username, id FROM queueEU1;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                int i = 0;
-                while (reader.Read())
-                {
-                    if (i == p1)
-                    {
-                        p1time = reader.GetInt64(0);
-                        p1name = reader.GetString(1);
-                        p1id = reader.GetUInt64(2);
-                    }
-                    if (i == p2)
-                    {
-                        p2time = reader.GetInt64(0);
-                        p2name = reader.GetString(1);
-                        p2id = reader.GetUInt64(2);
-                    }
-                    i++;
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            query = $"SELECT id FROM queueEU2;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    if (reader.GetUInt64(0) == p1id) is1InQueue = true;
-                    if (reader.GetUInt64(0) == p2id) is2InQueue = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-            if (is1InQueue)
-            {
-                query = $"DELETE FROM queueEU2 WHERE id = {p1id};";
-                await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the EU 2v2 queue");
-            }
-
-            if (is2InQueue)
-            {
-                query = $"DELETE FROM queueEU2 WHERE id = {p2id};";
-                await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the EU 2v2 queue");
-            }
-
-            query = $"INSERT INTO matchesEU1(id1, id2, username1, username2, time, reverted) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.UtcNow.Ticks}, 0);";
-            await HelperFunctions.ExecuteSQLQueryAsync(query);
-
-            await HelperFunctions.ResetDecayTimer(p1id, "EU", 1);
-            await HelperFunctions.ResetDecayTimer(p2id, "EU", 1);
-
-            int matchCount = 0;
-            query = $"SELECT count(*) FROM matchesEU1;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    matchCount = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            await Context.Channel.SendMessageAsync($"New 1v1 match has started between <@{p1id}> and <@{p2id}>");
-            Console.WriteLine($"EU 1v1 Match #{matchCount} has started.");
+            Console.WriteLine($"{region} 1v1 Match #{matchCount} has started.");
 
             await Context.Channel.SendMessageAsync($"Please remember to add your room number with match1 room 00000");
         }
