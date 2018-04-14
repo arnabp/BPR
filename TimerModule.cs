@@ -24,31 +24,37 @@ public class TimerService
         _timer = new Timer(async _ =>
         {
             // 3) Any code you want to periodically run goes here:
-            if (client.GetChannel(392829581192855554) is IMessageChannel general)
+            if (client.GetChannel(392829581192855554) is IMessageChannel generalNAEU)
             {
-                await CheckQueueTimeoutAsync(general, "NA", 1);
-                await CheckQueueTimeoutAsync(general, "NA", 2);
-                await CheckQueueTimeoutAsync(general, "EU", 1);
-                await CheckQueueTimeoutAsync(general, "EU", 2);
+                await CheckQueueTimeoutAsync(generalNAEU, "NA", 1);
+                await CheckQueueTimeoutAsync(generalNAEU, "NA", 2);
+                await CheckQueueTimeoutAsync(generalNAEU, "EU", 1);
+                await CheckQueueTimeoutAsync(generalNAEU, "EU", 2);
 
                 if (Globals.timerCount % 4 == 0)
                 {
-                    await CheckRoomAsync(general, "NA", 1);
-                    await CheckRoomAsync(general, "NA", 2);
-                    await CheckRoomAsync(general, "EU", 1);
-                    await CheckRoomAsync(general, "EU", 2);
+                    await CheckRoomAsync(generalNAEU, "NA", 1);
+                    await CheckRoomAsync(generalNAEU, "NA", 2);
+                    await CheckRoomAsync(generalNAEU, "EU", 1);
+                    await CheckRoomAsync(generalNAEU, "EU", 2);
                 }
                 
             }
 
-            if (client.GetChannel(429366707656589312) is IMessageChannel rank_s)
+            if (client.GetChannel(422045385612328973) is IMessageChannel generalAUSSEA)
+            {
+                await CheckQueueTimeoutAsync(generalAUSSEA, "AUS", 1);
+                await CheckQueueTimeoutAsync(generalAUSSEA, "SEA", 1);
+            }
+
+            if (client.GetChannel(429366707656589312) is IMessageChannel decayNAEU)
             {
                 if (Globals.timerCount % 120 == 0)
                 {
-                    await EloDecayAsync(rank_s, "NA", 1);
-                    await EloDecayAsync(rank_s, "NA", 2);
-                    await EloDecayAsync(rank_s, "EU", 1);
-                    await EloDecayAsync(rank_s, "EU", 2);
+                    await EloDecayAsync(decayNAEU, "NA", 1);
+                    await EloDecayAsync(decayNAEU, "NA", 2);
+                    await EloDecayAsync(decayNAEU, "EU", 1);
+                    await EloDecayAsync(decayNAEU, "EU", 2);
                 }
             }
 
