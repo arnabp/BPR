@@ -1303,11 +1303,13 @@ namespace BPR
             query = $"UPDATE leaderboard{region}1 SET {p2ResultString} = {p2ResultString} + 1 WHERE id = {p2ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
+            /*
             if(reverter != 0)
             {
                 query = $"UPDATE leaderboard{region}1 SET elo = elo - 20 WHERE id = {reverter};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
             }
+            */
                 
             query = $"DELETE FROM matches{region}1 WHERE id1 = {p1ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -1839,11 +1841,13 @@ namespace BPR
             query = $"UPDATE leaderboard{region}2 SET {t2ResultString} = {t2ResultString} + 1 WHERE id = {p4ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
+            /*
             if(reverter != 0)
             {
                 query = $"UPDATE leaderboard{region}2 SET elo = elo - 20 WHERE id = {reverter};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
             }
+            */
                 
             query = $"DELETE FROM matches{region}2 WHERE id1 = {p1ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
