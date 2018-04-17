@@ -242,6 +242,10 @@ namespace BPR
             Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue");
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            if(region == "")
+            {
+                await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+            }
                 
             bool isInQueue = false, isInMatch = false;
             int queueCount = 0, inLeaderboard = 0;
@@ -372,7 +376,11 @@ namespace BPR
         {
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is attempting to leave 1v1 queue");
-            string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);;
+            string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            if (region == "")
+            {
+                await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+            }
 
             bool isInQueue = false;
             int queueCount = 0;
@@ -556,6 +564,10 @@ namespace BPR
             Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue");
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            if (region == "")
+            {
+                await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+            }
 
             bool isInQueue = false, isInMatch = false;
             int queueCount = 0, inLeaderboard = 0;
@@ -692,6 +704,10 @@ namespace BPR
             Console.WriteLine($"{userInfo.Username} is attempting to leave 2v2 queue");
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            if (region == "")
+            {
+                await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+            }
             bool isInQueue = false;
             int queueCount = 0;
             string query = $"SELECT count(*) FROM queue{region}2;";
@@ -1147,6 +1163,10 @@ namespace BPR
             int thisMatchNum = 1;
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            if (region == "")
+            {
+                await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+            }
             string query = $"SELECT id1, id2, username1, username2, reverted FROM matches{region}1;";
             await Globals.conn.OpenAsync();
             try
@@ -1326,6 +1346,10 @@ namespace BPR
             bool isInMatch = false;
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            if (region == "")
+            {
+                await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+            }
             string query = $"SELECT id1, id2, username1, username2 FROM matches{region}1;";
             await Globals.conn.OpenAsync();
             try
@@ -1665,6 +1689,10 @@ namespace BPR
             int thisMatchNum = 1;
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            if (region == "")
+            {
+                await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+            }
             string query = $"SELECT id1, id2, id3, id4, username1, username2, username3, username4, reverted FROM matches{region}2;";
             await Globals.conn.OpenAsync();
             try
@@ -2037,6 +2065,10 @@ namespace BPR
             bool isInMatch = false;
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            if (region == "")
+            {
+                await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+            }
             string query = $"SELECT id1, id2, id3, id4 username1, username2 FROM matches{region}2;";
             await Globals.conn.OpenAsync();
             try
