@@ -2619,7 +2619,7 @@ namespace BPR
             string query = $"INSERT INTO leaderboardAUS2(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.UtcNow.Ticks});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await user.AddRoleAsync(Context.Guild.GetRole(419355321061081088));
+            await user.AddRoleAsync(Context.Guild.GetRole(423095293039607809));
 
             await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the AUS 2v2 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
@@ -2654,7 +2654,7 @@ namespace BPR
             query = $"DELETE FROM leaderboardAUS2 WHERE id = {id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(419355321061081088));
+            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(423095293039607809));
 
             await Context.Channel.SendMessageAsync($"{username} has been deleted from the AUS 2v2 leaderboards");
         }
