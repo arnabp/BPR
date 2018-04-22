@@ -1281,14 +1281,10 @@ namespace BPR
             double new1 = p1elo + results.Item1;
             double new2 = p2elo + results.Item2;
 
-            Color embedColor = Color.Blue;
-            if (region == "NA") embedColor = Color.Blue;
-            else embedColor = Color.Green;
-
             var embed = new EmbedBuilder
             {
                 Title = "Match Result",
-                Color = embedColor
+                Color = HelperFunctions.GetRegionColor(region)
             };
             embed.AddField(x =>
             {
@@ -1805,14 +1801,10 @@ namespace BPR
             double new3 = p3elo + results.Item3;
             double new4 = p4elo + results.Item4;
 
-            Color embedColor = Color.Blue;
-            if (region == "NA") embedColor = Color.Blue;
-            else embedColor = Color.Green;
-
             var embed = new EmbedBuilder
             {
                 Title = "Match Result",
-                Color = embedColor
+                Color = HelperFunctions.GetRegionColor(region)
             };
             embed.AddField(x =>
             {
@@ -2613,6 +2605,76 @@ namespace BPR
         }
     }
 
+    [Group("leaderboardAUS2")]
+    [RequireUserPermission(GuildPermission.Administrator)]
+    public class LeaderboardAUS2Module : ModuleBase<SocketCommandContext>
+    {
+        [Command("add")]
+        [Summary("Adds new users to the leaderboard")]
+        public async Task AddLeaderbardAsync(ulong id)
+        {
+            var user = Context.Guild.GetUser(id);
+            await Context.Message.DeleteAsync();
+
+            string query = $"INSERT INTO leaderboardAUS2(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.UtcNow.Ticks});";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await user.AddRoleAsync(Context.Guild.GetRole(419355321061081088));
+
+            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the AUS 2v2 leaderboard!");
+            Console.WriteLine($"{user.Username} has been registered");
+        }
+
+        [Command("delete")]
+        [Summary("Allows admin to delete user from leaderboard")]
+        public async Task DeleteLeaderboardAsync([Remainder] ulong id)
+        {
+            var user = Context.Guild.GetUser(id);
+            string username = "";
+            string query = $"SELECT username FROM leaderboardAUS2 WHERE id = {id};";
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    username = reader.GetString(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+            query = $"DELETE FROM leaderboardAUS2 WHERE id = {id};";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(419355321061081088));
+
+            await Context.Channel.SendMessageAsync($"{username} has been deleted from the AUS 2v2 leaderboards");
+        }
+
+        [Command("refresh")]
+        [Summary("Resets the elo decay for all people in this leaderboard")]
+        public async Task RefreshDecayTimerAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            string query = $"UPDATE leaderboardAUS2 SET decayed = -1;";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            query = $"UPDATE leaderboardAUS2 SET decaytimer = {DateTime.UtcNow.Ticks};";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for AUS 2v2 leaderboard");
+        }
+    }
+
     [Group("leaderboardSEA1")]
     [RequireUserPermission(GuildPermission.Administrator)]
     public class LeaderboardSEA1Module : ModuleBase<SocketCommandContext>
@@ -2680,6 +2742,76 @@ namespace BPR
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for SEA 1v1 leaderboard");
+        }
+    }
+
+    [Group("leaderboardSEA2")]
+    [RequireUserPermission(GuildPermission.Administrator)]
+    public class LeaderboardSEA2Module : ModuleBase<SocketCommandContext>
+    {
+        [Command("add")]
+        [Summary("Adds new users to the leaderboard")]
+        public async Task AddLeaderbardAsync(ulong id)
+        {
+            var user = Context.Guild.GetUser(id);
+            await Context.Message.DeleteAsync();
+
+            string query = $"INSERT INTO leaderboardSEA2(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.UtcNow.Ticks});";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await user.AddRoleAsync(Context.Guild.GetRole(423095346131107853));
+
+            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the SEA 2v2 leaderboard!");
+            Console.WriteLine($"{user.Username} has been registered");
+        }
+
+        [Command("delete")]
+        [Summary("Allows admin to delete user from leaderboard")]
+        public async Task DeleteLeaderboardAsync([Remainder] ulong id)
+        {
+            var user = Context.Guild.GetUser(id);
+            string username = "";
+            string query = $"SELECT username FROM leaderboardSEA2 WHERE id = {id};";
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    username = reader.GetString(0);
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+            query = $"DELETE FROM leaderboardSEA2 WHERE id = {id};";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(423095346131107853));
+
+            await Context.Channel.SendMessageAsync($"{username} has been deleted from the SEA 2v2 leaderboards");
+        }
+
+        [Command("refresh")]
+        [Summary("Resets the elo decay for all people in this leaderboard")]
+        public async Task RefreshDecayTimerAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            string query = $"UPDATE leaderboardSEA2 SET decayed = -1;";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            query = $"UPDATE leaderboardSEA2 SET decaytimer = {DateTime.UtcNow.Ticks};";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for SEA 2v2 leaderboard");
         }
     }
 }

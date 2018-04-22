@@ -45,6 +45,8 @@ public class TimerService
             {
                 await CheckQueueTimeoutAsync(generalAUSSEA, "AUS", 1);
                 await CheckQueueTimeoutAsync(generalAUSSEA, "SEA", 1);
+                await CheckQueueTimeoutAsync(generalAUSSEA, "AUS", 2);
+                await CheckQueueTimeoutAsync(generalAUSSEA, "SEA", 2);
             }
 
             if (client.GetChannel(429366707656589312) is IMessageChannel decayNAEU)
@@ -94,16 +96,31 @@ public class TimerService
             {
                 IEnumerable<IMessage> messageList = await queue1InfoAUSSEA.GetMessagesAsync(4).Flatten();
 
-                IUserMessage leaderboardNAm = messageList.ToList()[3] as IUserMessage;
-                IUserMessage leaderboardEUm = messageList.ToList()[2] as IUserMessage;
+                IUserMessage leaderboardAUSm = messageList.ToList()[3] as IUserMessage;
+                IUserMessage leaderboardSEAm = messageList.ToList()[2] as IUserMessage;
                 IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
                 IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
 
-                if (leaderboardNAm != null) await UpdateLeaderboardAsync(leaderboardNAm, "AUS", 1);
-                if (leaderboardEUm != null) await UpdateLeaderboardAsync(leaderboardEUm, "SEA", 1);
+                if (leaderboardAUSm != null) await UpdateLeaderboardAsync(leaderboardAUSm, "AUS", 1);
+                if (leaderboardSEAm != null) await UpdateLeaderboardAsync(leaderboardSEAm, "SEA", 1);
                 if (matchListm != null) await UpdateMatchesAsync(matchListm, "AUS", "SEA", 1);
                 if (queueListm != null) await UpdateQueueAsync(queueListm, "AUS", "SEA", 1);
 
+            }
+
+            if (client.GetChannel(437510787951493121) is IMessageChannel queue2InfoAUSSEA)
+            {
+                IEnumerable<IMessage> messageList = await queue2InfoAUSSEA.GetMessagesAsync(4).Flatten();
+
+                IUserMessage leaderboardAUSm = messageList.ToList()[3] as IUserMessage;
+                IUserMessage leaderboardSEAm = messageList.ToList()[2] as IUserMessage;
+                IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
+                IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
+
+                if (leaderboardAUSm != null) await UpdateLeaderboardAsync(leaderboardAUSm, "AUS", 2);
+                if (leaderboardSEAm != null) await UpdateLeaderboardAsync(leaderboardSEAm, "SEA", 2);
+                if (matchListm != null) await UpdateMatchesAsync(matchListm, "AUS", "SEA", 2);
+                if (queueListm != null) await UpdateQueueAsync(queueListm, "AUS", "SEA", 2);
             }
 
             Globals.timerCount++;
