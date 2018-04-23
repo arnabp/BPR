@@ -248,7 +248,7 @@ namespace BPR
             }
             if (region == "NA" || region == "EU")
             {
-                await Context.Channel.SendMessageAsync($"The season has ended, for NA, please wait until the bot has been prepared for the new season.");
+                await Context.Channel.SendMessageAsync($"The season has ended for NA and EU, please wait until the bot has been prepared for the new season.");
                 return;
             }
 
@@ -388,7 +388,7 @@ namespace BPR
             }
             if (region == "NA" || region == "EU")
             {
-                await Context.Channel.SendMessageAsync($"The season has ended, for NA, please wait until the bot has been prepared for the new season.");
+                await Context.Channel.SendMessageAsync($"The season has ended for NA and EU, please wait until the bot has been prepared for the new season.");
                 return;
             }
 
@@ -580,7 +580,7 @@ namespace BPR
             }
             if (region == "NA" || region == "EU")
             {
-                await Context.Channel.SendMessageAsync($"The season has ended, for NA, please wait until the bot has been prepared for the new season.");
+                await Context.Channel.SendMessageAsync($"The season has ended for NA and EU, please wait until the bot has been prepared for the new season.");
                 return;
             }
 
@@ -725,7 +725,7 @@ namespace BPR
             }
             if (region == "NA" || region == "EU")
             {
-                await Context.Channel.SendMessageAsync($"The season has ended, for NA, please wait until the bot has been prepared for the new season.");
+                await Context.Channel.SendMessageAsync($"The season has ended for NA and EU, please wait until the bot has been prepared for the new season.");
                 return;
             }
 
