@@ -246,7 +246,12 @@ namespace BPR
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
             }
-                
+            if (region == "NA")
+            {
+                await Context.Channel.SendMessageAsync($"The season has ended, for NA, please wait until the bot has been prepared for the new season.");
+                return;
+            }
+
             bool isInQueue = false, isInMatch = false;
             int queueCount = 0, inLeaderboard = 0;
 
@@ -380,6 +385,11 @@ namespace BPR
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+            }
+            if (region == "NA")
+            {
+                await Context.Channel.SendMessageAsync($"The season has ended, for NA, please wait until the bot has been prepared for the new season.");
+                return;
             }
 
             bool isInQueue = false;
@@ -568,6 +578,11 @@ namespace BPR
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
             }
+            if (region == "NA")
+            {
+                await Context.Channel.SendMessageAsync($"The season has ended, for NA, please wait until the bot has been prepared for the new season.");
+                return;
+            }
 
             bool isInQueue = false, isInMatch = false;
             int queueCount = 0, inLeaderboard = 0;
@@ -708,6 +723,13 @@ namespace BPR
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
             }
+            if (region == "NA")
+            {
+                await Context.Channel.SendMessageAsync($"The season has ended, for NA, please wait until the bot has been prepared for the new season.");
+                return;
+            }
+
+
             bool isInQueue = false;
             int queueCount = 0;
             string query = $"SELECT count(*) FROM queue{region}2;";
