@@ -246,7 +246,7 @@ namespace BPR
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
             }
-            if (region == "NA")
+            if (region == "NA" || region == "EU")
             {
                 await Context.Channel.SendMessageAsync($"The season has ended, for NA, please wait until the bot has been prepared for the new season.");
                 return;
@@ -386,7 +386,7 @@ namespace BPR
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
             }
-            if (region == "NA")
+            if (region == "NA" || region == "EU")
             {
                 await Context.Channel.SendMessageAsync($"The season has ended, for NA, please wait until the bot has been prepared for the new season.");
                 return;
@@ -578,7 +578,7 @@ namespace BPR
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
             }
-            if (region == "NA")
+            if (region == "NA" || region == "EU")
             {
                 await Context.Channel.SendMessageAsync($"The season has ended, for NA, please wait until the bot has been prepared for the new season.");
                 return;
@@ -723,7 +723,7 @@ namespace BPR
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
             }
-            if (region == "NA")
+            if (region == "NA" || region == "EU")
             {
                 await Context.Channel.SendMessageAsync($"The season has ended, for NA, please wait until the bot has been prepared for the new season.");
                 return;
