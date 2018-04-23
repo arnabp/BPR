@@ -60,6 +60,17 @@ public class TimerService
                 }
             }
 
+            if (client.GetChannel(422768563800244234) is IMessageChannel decayAUSSEA)
+            {
+                if (Globals.timerCount % 120 == 0)
+                {
+                    await EloDecayAsync(decayAUSSEA, "AUS", 1);
+                    await EloDecayAsync(decayAUSSEA, "AUS", 2);
+                    await EloDecayAsync(decayAUSSEA, "SEA", 1);
+                    await EloDecayAsync(decayAUSSEA, "SEA", 2);
+                }
+            }
+
             if (client.GetChannel(401167888762929153) is IMessageChannel queue1InfoNAEU)
             {
                 IEnumerable<IMessage> messageList = await queue1InfoNAEU.GetMessagesAsync(4).Flatten();
