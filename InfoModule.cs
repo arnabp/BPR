@@ -130,7 +130,7 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
-            await Context.Channel.SendMessageAsync($"{Context.Guild.GetUser(id).Username} has been decaying for {timeDif - 2} days.");
+            await Context.Channel.SendMessageAsync($"{Context.Guild.GetUser(id).Username} has been decaying for {timeDif - 7} days.");
         }
 
         [Command("CurrentDecay")]
