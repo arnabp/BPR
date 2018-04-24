@@ -686,9 +686,8 @@ namespace BPR
 
                 if (queueCount == 3)
                 {
-                    if (region == "NA") await NewMatchNA(0, 1, 2, 3); // This should be modified when anti-smurfing mechanism is introduced
-                    else if (region == "EU") await NewMatchEU(0, 1, 2, 3);
-                    else Console.WriteLine("Wrong region detected, role error");
+                    await NewMatch(0, 1, 2, 3, region);
+
                     query = $"TRUNCATE TABLE queue{region}2;";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
                 }
@@ -770,7 +769,7 @@ namespace BPR
             await Context.Message.DeleteAsync();
         }
 
-        private async Task NewMatchNA(int p1, int p2, int p3, int p4)
+        private async Task NewMatch(int p1, int p2, int p3, int p4, string region)
         {
             int[] playerPositions = new int[4] { p1, p2, p3, p4 };
             Random rnd = new Random();
@@ -784,7 +783,7 @@ namespace BPR
             string p1name = "", p2name = "", p3name = "", p4name = "";
             ulong p1id = 0, p2id = 0, p3id = 0, p4id = 0;
             bool is1InQueue = false, is2InQueue = false, is3InQueue = false, is4InQueue = false;
-            string query = $"SELECT time, username, id FROM queueNA2;";
+            string query = $"SELECT time, username, id FROM queue{region}2;";
             await Globals.conn.OpenAsync();
             try
             {
@@ -830,7 +829,7 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
-            query = $"SELECT id FROM queueNA1;";
+            query = $"SELECT id FROM queue{region}1;";
             await Globals.conn.OpenAsync();
             try
             {
@@ -854,40 +853,40 @@ namespace BPR
             await Globals.conn.CloseAsync();
             if (is1InQueue)
             {
-                query = $"DELETE FROM queueNA1 WHERE id = {p1id};";
+                query = $"DELETE FROM queue{region}1 WHERE id = {p1id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
             }
             if (is2InQueue)
             {
-                query = $"DELETE FROM queueNA1 WHERE id = {p2id};";
+                query = $"DELETE FROM queue{region}1 WHERE id = {p2id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
             }
             if (is3InQueue)
             {
-                query = $"DELETE FROM queueNA1 WHERE id = {p3id};";
+                query = $"DELETE FROM queue{region}1 WHERE id = {p3id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
             }
             if (is4InQueue)
             {
-                query = $"DELETE FROM queueNA1 WHERE id = {p4id};";
+                query = $"DELETE FROM queue{region}1 WHERE id = {p4id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
                 await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
             }
 
-            query = $"INSERT INTO matchesNA2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
+            query = $"INSERT INTO matches{region}2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
                 $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.UtcNow.Ticks}, 0);";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await HelperFunctions.ResetDecayTimer(p1id, "NA", 2);
-            await HelperFunctions.ResetDecayTimer(p2id, "NA", 2);
-            await HelperFunctions.ResetDecayTimer(p3id, "NA", 2);
-            await HelperFunctions.ResetDecayTimer(p4id, "NA", 2);
+            await HelperFunctions.ResetDecayTimer(p1id, region, 2);
+            await HelperFunctions.ResetDecayTimer(p2id, region, 2);
+            await HelperFunctions.ResetDecayTimer(p3id, region, 2);
+            await HelperFunctions.ResetDecayTimer(p4id, region, 2);
 
             int matchCount = 0;
-            query = $"SELECT count(*) FROM matchesNA2;";
+            query = $"SELECT count(*) FROM matches{region}2;";
             await Globals.conn.OpenAsync();
             try
             {
@@ -909,7 +908,7 @@ namespace BPR
 
             double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
 
-            query = $"SELECT id, elo FROM leaderboardNA2;";
+            query = $"SELECT id, elo FROM leaderboard{region}2;";
             await Globals.conn.OpenAsync();
             try
             {
@@ -953,195 +952,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"New match has started between <@{p3id}>, <@{p4id}> and <@{p1id}>, <@{p2id}>");
             }
             
-            Console.WriteLine($"NA 2v2 Match #{matchCount} has started.");
-
-            await Context.Channel.SendMessageAsync($"Please remember to add your room number with match2 room 00000");
-        }
-
-        private async Task NewMatchEU(int p1, int p2, int p3, int p4)
-        {
-            int[] playerPositions = new int[4] { p1, p2, p3, p4 };
-            Random rnd = new Random();
-            int[] newplayerPositions = playerPositions.OrderBy(x => rnd.Next()).ToArray();
-            p1 = newplayerPositions[0];
-            p2 = newplayerPositions[1];
-            p3 = newplayerPositions[2];
-            p4 = newplayerPositions[3];
-
-            long p1time = 0, p2time = 0, p3time = 0, p4time = 0;
-            string p1name = "", p2name = "", p3name = "", p4name = "";
-            ulong p1id = 0, p2id = 0, p3id = 0, p4id = 0;
-            bool is1InQueue = false, is2InQueue = false, is3InQueue = false, is4InQueue = false;
-            string query = $"SELECT time, username, id FROM queueEU2;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                int i = 0;
-                while (reader.Read())
-                {
-                    if (i == p1)
-                    {
-                        p1time = reader.GetInt64(0);
-                        p1name = reader.GetString(1);
-                        p1id = reader.GetUInt64(2);
-                    }
-                    if (i == p2)
-                    {
-                        p2time = reader.GetInt64(0);
-                        p2name = reader.GetString(1);
-                        p2id = reader.GetUInt64(2);
-                    }
-                    if (i == p3)
-                    {
-                        p3time = reader.GetInt64(0);
-                        p3name = reader.GetString(1);
-                        p3id = reader.GetUInt64(2);
-                    }
-                    if (i == p4)
-                    {
-                        p4time = reader.GetInt64(0);
-                        p4name = reader.GetString(1);
-                        p4id = reader.GetUInt64(2);
-                    }
-                    i++;
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            query = $"SELECT id FROM queueEU1;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    if (reader.GetUInt64(0) == p1id) is1InQueue = true;
-                    if (reader.GetUInt64(0) == p2id) is2InQueue = true;
-                    if (reader.GetUInt64(0) == p3id) is3InQueue = true;
-                    if (reader.GetUInt64(0) == p4id) is4InQueue = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-            if (is1InQueue)
-            {
-                query = $"DELETE FROM queueEU1 WHERE id = {p1id};";
-                await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the EU 1v1 queue");
-            }
-            if (is2InQueue)
-            {
-                query = $"DELETE FROM queueEU1 WHERE id = {p2id};";
-                await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the EU 1v1 queue");
-            }
-            if (is3InQueue)
-            {
-                query = $"DELETE FROM queueEU1 WHERE id = {p3id};";
-                await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the EU 1v1 queue");
-            }
-            if (is4InQueue)
-            {
-                query = $"DELETE FROM queueEU1 WHERE id = {p4id};";
-                await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the EU 1v1 queue");
-            }
-
-            query = $"INSERT INTO matchesEU2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
-                $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.UtcNow.Ticks}, 0);";
-            await HelperFunctions.ExecuteSQLQueryAsync(query);
-
-            await HelperFunctions.ResetDecayTimer(p1id, "EU", 2);
-            await HelperFunctions.ResetDecayTimer(p2id, "EU", 2);
-            await HelperFunctions.ResetDecayTimer(p3id, "EU", 2);
-            await HelperFunctions.ResetDecayTimer(p4id, "EU", 2);
-
-            int matchCount = 0;
-            query = $"SELECT count(*) FROM matchesEU2;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    matchCount = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
-
-            query = $"SELECT id, elo FROM leaderboardEU2;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    if (reader.GetUInt64(0) == p1id)
-                    {
-                        p1elo = reader.GetDouble(1);
-                    }
-                    else if (reader.GetUInt64(0) == p2id)
-                    {
-                        p2elo = reader.GetDouble(1);
-                    }
-                    else if (reader.GetUInt64(0) == p3id)
-                    {
-                        p3elo = reader.GetDouble(1);
-                    }
-                    else if (reader.GetUInt64(0) == p4id)
-                    {
-                        p4elo = reader.GetDouble(1);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            if (p1elo + p2elo > p3elo + p4elo)
-            {
-                await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}>, <@{p2id}> and <@{p3id}>, <@{p4id}>");
-            }
-            else
-            {
-                await Context.Channel.SendMessageAsync($"New match has started between <@{p3id}>, <@{p4id}> and <@{p1id}>, <@{p2id}>");
-            }
-
-            Console.WriteLine($"EU 2v2 Match #{matchCount} has started.");
+            Console.WriteLine($"{region} 2v2 Match #{matchCount} has started.");
 
             await Context.Channel.SendMessageAsync($"Please remember to add your room number with match2 room 00000");
         }
