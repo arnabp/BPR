@@ -130,7 +130,7 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
-            await Context.Channel.SendMessageAsync($"{Context.Guild.GetUser(id).Username} has been decaying for {timeDif - 7} days.");
+            await Context.Channel.SendMessageAsync($"{Context.Guild.GetUser(id).Username} has been decaying for {timeDif - 3} days.");
         }
 
         [Command("CurrentDecay")]
@@ -245,11 +245,6 @@ namespace BPR
             if(region == "")
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
-            }
-            if (region == "NA" || region == "EU")
-            {
-                await Context.Channel.SendMessageAsync($"The season has ended for NA and EU, please wait until the bot has been prepared for the new season.");
-                return;
             }
 
             bool isInQueue = false, isInMatch = false;
@@ -385,11 +380,6 @@ namespace BPR
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
-            }
-            if (region == "NA" || region == "EU")
-            {
-                await Context.Channel.SendMessageAsync($"The season has ended for NA and EU, please wait until the bot has been prepared for the new season.");
-                return;
             }
 
             bool isInQueue = false;
@@ -578,11 +568,6 @@ namespace BPR
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
             }
-            if (region == "NA" || region == "EU")
-            {
-                await Context.Channel.SendMessageAsync($"The season has ended for NA and EU, please wait until the bot has been prepared for the new season.");
-                return;
-            }
 
             bool isInQueue = false, isInMatch = false;
             int queueCount = 0, inLeaderboard = 0;
@@ -722,11 +707,6 @@ namespace BPR
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
-            }
-            if (region == "NA" || region == "EU")
-            {
-                await Context.Channel.SendMessageAsync($"The season has ended for NA and EU, please wait until the bot has been prepared for the new season.");
-                return;
             }
 
 

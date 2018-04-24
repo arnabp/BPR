@@ -510,12 +510,12 @@ public class TimerService
                 int timeDif = (int)timeDifBinary.TotalDays;
                 int decayed = reader.GetInt16(1);
                 ulong id = reader.GetUInt64(2);
-                if (timeDif == 6 && decayed == -1)
+                if (timeDif == 2 && decayed == -1)
                 {
                     decayWarning.Add(id);
                 }
 
-                if (timeDif - decayed == 7 && decayed > -1)
+                if (timeDif - decayed == 3 && decayed > -1)
                 {
                     decayIDs.Add(id);
                     decayDays.Add((int)timeDif);
@@ -552,7 +552,7 @@ public class TimerService
 
         for (int i = 0; i < decayIDs.Count; i++)
         {
-            query = $"UPDATE leaderboard{region}{gameMode} SET elo = elo - {decayDays[i] - 2} WHERE id = {decayIDs[i]};";
+            query = $"UPDATE leaderboard{region}{gameMode} SET elo = elo - {decayDays[i] + 2} WHERE id = {decayIDs[i]};";
             await Globals.conn.OpenAsync();
             try
             {
@@ -568,7 +568,7 @@ public class TimerService
             await Globals.conn.CloseAsync();
 
             var user = await thisChannel.GetUserAsync(decayIDs[i]);
-            Console.WriteLine($"{user.Username} has lost {decayDays[i] - 2} {gameMode}v{gameMode} elo to decay");
+            Console.WriteLine($"{user.Username} has lost {decayDays[i] + 2} {gameMode}v{gameMode} elo to decay");
 
             query = $"UPDATE leaderboard{region}{gameMode} SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
             await Globals.conn.OpenAsync();
