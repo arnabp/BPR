@@ -1258,7 +1258,12 @@ namespace BPR
             }
             else
             {
-                await Context.Channel.SendMessageAsync($"{revertRequests + 1}/2 players have requested the last 1v1 match to be reverted");
+                if (thisPlayerNum == 0)
+                {
+                    await Context.Channel.SendMessageAsync("You have not had a match recently that can be reverted.");
+                    return;
+                }
+                else await Context.Channel.SendMessageAsync($"{revertRequests + 1}/2 players have requested the last 1v1 match to be reverted");
 
                 if (revertRequests < 1)
                 {
@@ -1769,7 +1774,7 @@ namespace BPR
                     await Context.Channel.SendMessageAsync("You have not had a match recently that can be reverted.");
                     return;
                 }
-                else await Context.Channel.SendMessageAsync($"{revertRequests + 1}/3 players have requested the last 1v1 match to be reverted");
+                else await Context.Channel.SendMessageAsync($"{revertRequests + 1}/3 players have requested the last 2v2 match to be reverted");
 
                 if (revertRequests < 2)
                 {
