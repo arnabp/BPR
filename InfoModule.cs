@@ -507,14 +507,14 @@ namespace BPR
             {
                 query = $"DELETE FROM queue{region}2 WHERE id = {p1id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the NA 2v2 queue");
+                await Context.Channel.SendMessageAsync($"A player has left the {region} 2v2 queue");
             }
 
             if (is2InQueue)
             {
                 query = $"DELETE FROM queue{region}2 WHERE id = {p2id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the NA 2v2 queue");
+                await Context.Channel.SendMessageAsync($"A player has left the {region} 2v2 queue");
             }
 
             query = $"INSERT INTO matches{region}1(id1, id2, username1, username2, time, reverted) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.UtcNow.Ticks}, 0);";
@@ -857,25 +857,25 @@ namespace BPR
             {
                 query = $"DELETE FROM queue{region}1 WHERE id = {p1id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
+                await Context.Channel.SendMessageAsync($"A player has left the {region} 1v1 queue");
             }
             if (is2InQueue)
             {
                 query = $"DELETE FROM queue{region}1 WHERE id = {p2id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
+                await Context.Channel.SendMessageAsync($"A player has left the {region} 1v1 queue");
             }
             if (is3InQueue)
             {
                 query = $"DELETE FROM queue{region}1 WHERE id = {p3id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
+                await Context.Channel.SendMessageAsync($"A player has left the {region} 1v1 queue");
             }
             if (is4InQueue)
             {
                 query = $"DELETE FROM queue{region}1 WHERE id = {p4id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the NA 1v1 queue");
+                await Context.Channel.SendMessageAsync($"A player has left the {region} 1v1 queue");
             }
 
             query = $"INSERT INTO matches{region}2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
