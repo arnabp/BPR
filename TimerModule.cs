@@ -134,7 +134,7 @@ public class TimerService
                 if (queueListm != null) await UpdateQueueAsync(queueListm, "AUS", "SEA", 2);
             }
 
-            if (client.GetChannel(438946129732960257) is IMessageChannel queue1InfoBRZ)
+            if (client.GetChannel(439177902035173389) is IMessageChannel queue1InfoBRZ)
             {
                 IEnumerable<IMessage> messageList = await queue1InfoBRZ.GetMessagesAsync(3).Flatten();
                 
@@ -148,7 +148,7 @@ public class TimerService
 
             }
 
-            if (client.GetChannel(438946013814718464) is IMessageChannel queue2InfoBRZ)
+            if (client.GetChannel(439177928182595586) is IMessageChannel queue2InfoBRZ)
             {
                 IEnumerable<IMessage> messageList = await queue2InfoBRZ.GetMessagesAsync(3).Flatten();
                 
