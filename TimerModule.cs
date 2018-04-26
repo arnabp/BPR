@@ -134,6 +134,33 @@ public class TimerService
                 if (queueListm != null) await UpdateQueueAsync(queueListm, "AUS", "SEA", 2);
             }
 
+            if (client.GetChannel(438946129732960257) is IMessageChannel queue1InfoBRZ)
+            {
+                IEnumerable<IMessage> messageList = await queue1InfoBRZ.GetMessagesAsync(3).Flatten();
+                
+                IUserMessage leaderboardBRZm = messageList.ToList()[2] as IUserMessage;
+                IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
+                IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
+
+                if (leaderboardBRZm != null) await UpdateLeaderboardAsync(leaderboardBRZm, "BRZ", 1);
+                if (matchListm != null) await UpdateMatchesAsync(matchListm, "BRZ", 1);
+                if (queueListm != null) await UpdateQueueAsync(queueListm, "BRZ", 1);
+
+            }
+
+            if (client.GetChannel(438946013814718464) is IMessageChannel queue2InfoBRZ)
+            {
+                IEnumerable<IMessage> messageList = await queue2InfoBRZ.GetMessagesAsync(3).Flatten();
+                
+                IUserMessage leaderboardBRZm = messageList.ToList()[2] as IUserMessage;
+                IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
+                IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
+
+                if (leaderboardBRZm != null) await UpdateLeaderboardAsync(leaderboardBRZm, "BRZ", 2);
+                if (matchListm != null) await UpdateMatchesAsync(matchListm, "BRZ", 2);
+                if (queueListm != null) await UpdateQueueAsync(queueListm, "BRZ", 2);
+            }
+
             Globals.timerCount++;
         },
         null,
@@ -370,6 +397,121 @@ public class TimerService
         });
 
         if(totalCount != 0)
+        {
+            embed.Color = Color.Red;
+        }
+
+        await thisMessage.ModifyAsync(x => {
+            x.Content = "";
+            x.Embed = embed.Build();
+        });
+    }
+
+    public async Task UpdateMatchesAsync(IUserMessage thisMessage, string region, int gameMode)
+    {
+        string pluralizer;
+        int matchCount = 0;
+        string query = $"SELECT count(*) FROM matches{region}{gameMode};";
+        await Globals.conn.OpenAsync();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                matchCount = reader.GetInt16(0);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            await Globals.conn.CloseAsync();
+            throw;
+        }
+        await Globals.conn.CloseAsync();
+        
+        if (matchCount != 1) pluralizer = "es";
+        else pluralizer = "";
+        var embed = new EmbedBuilder
+        {
+            Title = "Ongoing Matches",
+            Description = $"{matchCount} match{pluralizer} ongoing"
+        };
+        if (gameMode == 1) query = $"SELECT username1, username2, room FROM matches{region}{gameMode};";
+        else query = $"SELECT username1, username2, username3, username4, room FROM matches{region}{gameMode};";
+
+        await Globals.conn.OpenAsync();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            int k = 1;
+            while (reader.Read())
+            {
+                embed.AddField(x =>
+                {
+                    x.Name = $"{region} Match #{k}";
+                    if (gameMode == 1) x.Value = $"{reader.GetString(0)} vs {reader.GetString(1)}\nRoom Number: #{reader.GetInt32(2)}";
+                    else x.Value = $"{reader.GetString(0)} and {reader.GetString(1)} vs {reader.GetString(2)} and {reader.GetString(3)}\nRoom Number: #{reader.GetInt32(4)}";
+                });
+                k++;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            await Globals.conn.CloseAsync();
+            throw;
+        }
+        await Globals.conn.CloseAsync();
+
+        if (matchCount != 0)
+        {
+            embed.Color = Color.Red;
+        }
+
+        await thisMessage.ModifyAsync(x => {
+            x.Content = "";
+            x.Embed = embed.Build();
+        });
+    }
+
+    public async Task UpdateQueueAsync(IUserMessage thisMessage, string region, int gameMode)
+    {
+        int queueCount = 0;
+        string query = $"SELECT count(*) FROM queue{region}{gameMode};";
+        await Globals.conn.OpenAsync();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                queueCount = reader.GetInt16(0);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            await Globals.conn.CloseAsync();
+            throw;
+        }
+        await Globals.conn.CloseAsync();
+
+        string pluralizer;
+        if (queueCount == 1) pluralizer = "person is";
+        else pluralizer = "people are";
+
+        var embed = new EmbedBuilder
+        {
+            Title = "Queue List",
+            Description = $"{queueCount} {pluralizer} in queue"
+        };
+
+        if (queueCount != 0)
         {
             embed.Color = Color.Red;
         }
