@@ -544,7 +544,44 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
-            await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}> and <@{p2id}>");
+            double p1elo = 0, p2elo = 0;
+
+            query = $"SELECT id, elo FROM leaderboard{region}1;";
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (reader.GetUInt64(0) == p1id)
+                    {
+                        p1elo = reader.GetDouble(1);
+                    }
+                    else if (reader.GetUInt64(0) == p2id)
+                    {
+                        p2elo = reader.GetDouble(1);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            if(p1elo > p2elo)
+            {
+                await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}> and <@{p2id}>");
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync($"New match has started between <@{p2id}> and <@{p1id}>");
+            }
+            
             Console.WriteLine($"{region} 1v1 Match #{matchCount} has started.");
 
             await Context.Channel.SendMessageAsync($"Please remember to add your room number with match1 room 00000");
