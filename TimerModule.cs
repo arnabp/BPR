@@ -71,6 +71,15 @@ public class TimerService
                 }
             }
 
+            if (client.GetChannel(438991295310987264) is IMessageChannel decayBRZ)
+            {
+                if (Globals.timerCount % 120 == 0)
+                {
+                    await EloDecayAsync(decayBRZ, "BRZ", 1);
+                    await EloDecayAsync(decayBRZ, "BRZ", 2);
+                }
+            }
+
             if (client.GetChannel(401167888762929153) is IMessageChannel queue1InfoNAEU)
             {
                 IEnumerable<IMessage> messageList = await queue1InfoNAEU.GetMessagesAsync(4).Flatten();
