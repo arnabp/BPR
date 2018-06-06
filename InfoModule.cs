@@ -232,6 +232,8 @@ namespace BPR
         [Summary("Returns ID of the Guild")]
         public async Task GetGuildId()
         {
+            var userInfo = Context.User;
+            await Context.Message.DeleteAsync();
             await Context.Channel.SendMessageAsync($"{Context.Guild.Id}");
         }
     }
