@@ -254,6 +254,7 @@ namespace BPR
             if (Context.Guild.Id == 392829581192855552 || Context.Guild.Id == 422045385612328970)
             {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                return;
             }
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
@@ -615,6 +616,11 @@ namespace BPR
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue");
+            if (Context.Guild.Id == 392829581192855552 || Context.Guild.Id == 422045385612328970)
+            {
+                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                return;
+            }
 
             string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
             if (region == "")
