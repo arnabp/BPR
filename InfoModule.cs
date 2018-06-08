@@ -257,7 +257,14 @@ namespace BPR
                 return;
             }
 
-            string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            string region = "";
+            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            {
+                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                {
+                    region = HelperFunctions.GetRoleRegion(role.Id);
+                }
+            }
             if(region == "")
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
@@ -393,7 +400,14 @@ namespace BPR
         {
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is attempting to leave 1v1 queue");
-            string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            string region = "";
+            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            {
+                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                {
+                    region = HelperFunctions.GetRoleRegion(role.Id);
+                }
+            }
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
@@ -622,7 +636,14 @@ namespace BPR
                 return;
             }
 
-            string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            string region = "";
+            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            {
+                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                {
+                    region = HelperFunctions.GetRoleRegion(role.Id);
+                }
+            }
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
@@ -761,7 +782,14 @@ namespace BPR
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is attempting to leave 2v2 queue");
 
-            string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            string region = "";
+            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            {
+                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                {
+                    region = HelperFunctions.GetRoleRegion(role.Id);
+                }
+            }
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
@@ -1034,7 +1062,14 @@ namespace BPR
             string p2Username = "";
             int thisMatchNum = 1;
 
-            string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            string region = "";
+            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            {
+                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                {
+                    region = HelperFunctions.GetRoleRegion(role.Id);
+                }
+            }
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
@@ -1213,7 +1248,14 @@ namespace BPR
             int thisMatchNum = 1, idnum = 0;
             bool isInMatch = false;
 
-            string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            string region = "";
+            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            {
+                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                {
+                    region = HelperFunctions.GetRoleRegion(role.Id);
+                }
+            }
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
@@ -1561,7 +1603,14 @@ namespace BPR
             string p1Username = "", p2Username = "", p3Username = "", p4Username = "";
             int thisMatchNum = 1;
 
-            string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            string region = "";
+            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            {
+                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                {
+                    region = HelperFunctions.GetRoleRegion(role.Id);
+                }
+            }
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
@@ -1938,7 +1987,14 @@ namespace BPR
             int thisMatchNum = 1, idnum = 0;
             bool isInMatch = false;
 
-            string region = HelperFunctions.GetRoleRegion(Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Id);
+            string region = "";
+            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            {
+                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                {
+                    region = HelperFunctions.GetRoleRegion(role.Id);
+                }
+            }
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
