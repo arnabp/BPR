@@ -267,7 +267,7 @@ namespace BPR
             }
             if(region == "")
             {
-                await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
 
@@ -410,7 +410,7 @@ namespace BPR
             }
             if (region == "")
             {
-                await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
             }
 
             bool isInQueue = false;
@@ -646,7 +646,7 @@ namespace BPR
             }
             if (region == "")
             {
-                await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
             }
 
             bool isInQueue = false, isInMatch = false;
@@ -792,7 +792,7 @@ namespace BPR
             }
             if (region == "")
             {
-                await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
             }
 
 
@@ -1072,7 +1072,7 @@ namespace BPR
             }
             if (region == "")
             {
-                await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
             }
             string query = $"SELECT id1, id2, username1, username2, reverted FROM matches{region}1;";
             await Globals.conn.OpenAsync();
@@ -1258,7 +1258,7 @@ namespace BPR
             }
             if (region == "")
             {
-                await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
             }
             string query = $"SELECT id1, id2, username1, username2 FROM matches{region}1;";
             await Globals.conn.OpenAsync();
@@ -1311,7 +1311,7 @@ namespace BPR
         public async Task RevertMatchAsync()
         {
             var userInfo = Context.User;
-            Console.WriteLine($"{userInfo.Username} is adding a room number");
+            Console.WriteLine($"{userInfo.Username} is reverting a match");
             int thisMatchNum = 1, revertRequests = 0, thisPlayerNum = 0;
             bool hasAlreadyReverted = false;
 
@@ -1427,6 +1427,91 @@ namespace BPR
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     await Context.Channel.SendMessageAsync("The last 1v1 match has been reverted. Please report the match correctly now.");
+                }
+            }
+        }
+
+        [Command("cancel")]
+        [Summary("Cancels the match the player is currently in")]
+        public async Task CancelMatchAsync()
+        {
+            var userInfo = Context.User;
+            Console.WriteLine($"{userInfo.Username} is canceling a match");
+            int thisMatchNum = 1, cancelRequests = 0, thisPlayerNum = 0;
+            bool hasAlreadyCancelled = false;
+            string region = "";
+            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            {
+                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                {
+                    region = HelperFunctions.GetRoleRegion(role.Id);
+                }
+            }
+            if (region == "")
+            {
+                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+            }
+
+            string query = $"SELECT id1, id2, cancel1, cancel2 FROM matches{region}1;";
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (userInfo.Id == reader.GetUInt64(0))
+                    {
+                        cancelRequests += reader.GetInt16(2);
+                        cancelRequests += reader.GetInt16(3);
+                        if (reader.GetInt16(2) == 1) hasAlreadyCancelled = true;
+                        thisPlayerNum = 1;
+                        break;
+                    }
+                    else if (userInfo.Id == reader.GetUInt64(1))
+                    {
+                        cancelRequests += reader.GetInt16(2);
+                        cancelRequests += reader.GetInt16(3);
+                        if (reader.GetInt16(3) == 1) hasAlreadyCancelled = true;
+                        thisPlayerNum = 2;
+                        break;
+                    }
+                    thisMatchNum++;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            if (hasAlreadyCancelled)
+            {
+                await Context.Channel.SendMessageAsync("A player tried to cancel the match twice.");
+            }
+            else
+            {
+                if (thisPlayerNum == 0)
+                {
+                    await Context.Channel.SendMessageAsync("You are not in a match that can be cancelled.");
+                    return;
+                }
+                else await Context.Channel.SendMessageAsync($"{cancelRequests + 1}/2 players have requested the last 1v1 match to be cancelled");
+
+                if (cancelRequests < 1)
+                {
+                    query = $"UPDATE matches{region}1 SET cancel{thisPlayerNum} = 1 WHERE id{thisPlayerNum} = {userInfo.Id};";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
+                }
+                else
+                {
+                    query = $"DELETE FROM matches{region}1 WHERE id1 = {userInfo.Id} OR id2 = {userInfo.Id};";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+                    await Context.Channel.SendMessageAsync("The last 1v1 match has been cancelled. You may now queue again.");
                 }
             }
         }
@@ -1613,7 +1698,7 @@ namespace BPR
             }
             if (region == "")
             {
-                await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
             }
             string query = $"SELECT id1, id2, id3, id4, username1, username2, username3, username4, reverted FROM matches{region}2;";
             await Globals.conn.OpenAsync();
@@ -1805,7 +1890,7 @@ namespace BPR
         public async Task RevertMatchAsync()
         {
             var userInfo = Context.User;
-            Console.WriteLine($"{userInfo.Username} is adding a room number");
+            Console.WriteLine($"{userInfo.Username} is reverting a match");
             int thisMatchNum = 1, revertRequests = 0, thisPlayerNum = 0;
             bool hasAlreadyReverted = false;
 
@@ -1967,6 +2052,115 @@ namespace BPR
             }
         }
 
+        [Command("cancel")]
+        [Summary("Cancels the last match for a player")]
+        public async Task CancelMatchAsync()
+        {
+            var userInfo = Context.User;
+            Console.WriteLine($"{userInfo.Username} is cancelling a match");
+            int thisMatchNum = 1, cancelRequests = 0, thisPlayerNum = 0;
+            bool hasAlreadyCancelled = false;
+            string region = "";
+            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            {
+                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                {
+                    region = HelperFunctions.GetRoleRegion(role.Id);
+                }
+            }
+            if (region == "")
+            {
+                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+            }
+
+            string query = $"SELECT id1, id2, id3, id4, cancel1, cancel2, cancel3, cancel4 FROM matches{region}2;";
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (userInfo.Id == reader.GetUInt64(0))
+                    {
+                        cancelRequests += reader.GetInt16(4);
+                        cancelRequests += reader.GetInt16(5);
+                        cancelRequests += reader.GetInt16(6);
+                        cancelRequests += reader.GetInt16(7);
+                        if (reader.GetInt16(4) == 1) hasAlreadyCancelled = true;
+                        thisPlayerNum = 1;
+                        break;
+                    }
+                    else if (userInfo.Id == reader.GetUInt64(1))
+                    {
+                        cancelRequests += reader.GetInt16(4);
+                        cancelRequests += reader.GetInt16(5);
+                        cancelRequests += reader.GetInt16(6);
+                        cancelRequests += reader.GetInt16(7);
+                        if (reader.GetInt16(5) == 1) hasAlreadyCancelled = true;
+                        thisPlayerNum = 2;
+                        break;
+                    }
+                    else if (userInfo.Id == reader.GetUInt64(2))
+                    {
+                        cancelRequests += reader.GetInt16(4);
+                        cancelRequests += reader.GetInt16(5);
+                        cancelRequests += reader.GetInt16(6);
+                        cancelRequests += reader.GetInt16(7);
+                        if (reader.GetInt16(6) == 1) hasAlreadyCancelled = true;
+                        thisPlayerNum = 3;
+                        break;
+                    }
+                    else if (userInfo.Id == reader.GetUInt64(3))
+                    {
+                        cancelRequests += reader.GetInt16(4);
+                        cancelRequests += reader.GetInt16(5);
+                        cancelRequests += reader.GetInt16(6);
+                        cancelRequests += reader.GetInt16(7);
+                        if (reader.GetInt16(7) == 1) hasAlreadyCancelled = true;
+                        thisPlayerNum = 4;
+                        break;
+                    }
+                    thisMatchNum++;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            if (hasAlreadyCancelled)
+            {
+                await Context.Channel.SendMessageAsync("A player tried to cancel a match twice.");
+            }
+            else
+            {
+                if (thisPlayerNum == 0)
+                {
+                    await Context.Channel.SendMessageAsync("You are not in a match that can be cancelled.");
+                    return;
+                }
+                else await Context.Channel.SendMessageAsync($"{cancelRequests + 1}/3 players have requested the last 2v2 match to be cancelled");
+
+                if (cancelRequests < 2)
+                {
+                    query = $"UPDATE matches{region}2 SET cancel{thisPlayerNum} = 1 WHERE id{thisPlayerNum} = {userInfo.Id};";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
+                }
+                else
+                {
+                    query = $"DELETE FROM matches{region}1 WHERE id1 = {userInfo.Id} OR id2 = {userInfo.Id};";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+                    await Context.Channel.SendMessageAsync("The last 2v2 match has been cancelled. You may now queue again.");
+                }
+            }
+        }
+
         [Command("clearhistory")]
         [Summary("Truncates the matchesHistory2 table")]
         [RequireUserPermission(GuildPermission.Administrator)]
@@ -1997,7 +2191,7 @@ namespace BPR
             }
             if (region == "")
             {
-                await Context.Channel.SendMessageAsync($"Your primary role is {Context.Guild.GetUser(userInfo.Id).Roles.ElementAt(1).Name}, which is not a region role. Please join a region, or change role hierarchy.");
+                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
             }
             string query = $"SELECT id1, id2, id3, id4 username1, username2 FROM matches{region}2;";
             await Globals.conn.OpenAsync();
