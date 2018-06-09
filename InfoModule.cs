@@ -251,7 +251,7 @@ namespace BPR
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue");
-            if (Context.Guild.Id == 392829581192855552 || Context.Guild.Id == 422045385612328970 || Context.Guild.Id == 410984826800177154)
+            if (Context.Guild.Id == 392829581192855552 || Context.Guild.Id == 422045385612328970)
             {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
@@ -630,7 +630,7 @@ namespace BPR
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue");
-            if (Context.Guild.Id == 392829581192855552 || Context.Guild.Id == 422045385612328970 || Context.Guild.Id == 410984826800177154)
+            if (Context.Guild.Id == 392829581192855552 || Context.Guild.Id == 422045385612328970)
             {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
