@@ -655,6 +655,7 @@ namespace BPR
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                return;
             }
 
             bool isInQueue = false, isInMatch = false;
@@ -812,6 +813,7 @@ namespace BPR
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                return;
             }
 
 
@@ -1092,6 +1094,7 @@ namespace BPR
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                return;
             }
             string query = $"SELECT id1, id2, username1, username2, reverted FROM matches{region}1;";
             await Globals.conn.OpenAsync();
@@ -1278,6 +1281,7 @@ namespace BPR
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                return;
             }
             string query = $"SELECT id1, id2, username1, username2 FROM matches{region}1;";
             await Globals.conn.OpenAsync();
@@ -1469,6 +1473,7 @@ namespace BPR
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                return;
             }
 
             string query = $"SELECT id1, id2, cancel1, cancel2 FROM matches{region}1;";
@@ -1718,6 +1723,7 @@ namespace BPR
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                return;
             }
             string query = $"SELECT id1, id2, id3, id4, username1, username2, username3, username4, reverted FROM matches{region}2;";
             await Globals.conn.OpenAsync();
@@ -2090,6 +2096,7 @@ namespace BPR
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                return;
             }
 
             string query = $"SELECT id1, id2, id3, id4, cancel1, cancel2, cancel3, cancel4 FROM matches{region}2;";
@@ -2211,6 +2218,7 @@ namespace BPR
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                return;
             }
             string query = $"SELECT id1, id2, id3, id4 username1, username2 FROM matches{region}2;";
             await Globals.conn.OpenAsync();
