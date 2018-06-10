@@ -236,6 +236,14 @@ namespace BPR
             await Context.Message.DeleteAsync();
             await Context.Channel.SendMessageAsync($"{Context.Guild.Id}");
         }
+
+        [Command("GetUserMention")]
+        [Summary("Gets username from mention")]
+        public async Task GetUserMention(Discord.WebSocket.SocketUser user)
+        {
+            if (user != null) await Context.Channel.SendMessageAsync($"This user is {user.Username}");
+            else await Context.Channel.SendMessageAsync($"This user does not exist");
+        }
     }
 
     [Group("queue1")]
