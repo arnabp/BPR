@@ -782,6 +782,17 @@ namespace BPR
             }
         }
 
+        [Command("join")]
+        [Alias("j")]
+        [Summary("Joins the 2v2 queue with another user")]
+        public async Task JoinAsync(Discord.WebSocket.SocketUser teammateInfo)
+        {
+            var userInfo = Context.User;
+            await Context.Message.DeleteAsync();
+
+            await Context.Channel.SendMessageAsync($"{userInfo.Username} is attempting to join queue with {teammateInfo.Username}");
+        }
+
         [Command("leave")]
         [Alias("l")]
         [Summary("Leaves the 2v2 queue")]
