@@ -1430,7 +1430,7 @@ namespace BPR
                 return;
             }
 
-            Console.WriteLine($"isP1: {isP1}");
+            Console.WriteLine($"isP1: {isP1} in {region}");
 
             var results = new Tuple<double, double>(0, 0);
             double p1elo = 0, p2elo = 0;
@@ -2067,7 +2067,7 @@ namespace BPR
                 return;
             }
 
-            Console.WriteLine($"isT1: {isT1}");
+            Console.WriteLine($"isT1: {isT1} in {region}");
 
             var results = new Tuple<double, double, double, double>(0, 0, 0, 0);
             double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;

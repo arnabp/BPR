@@ -719,7 +719,7 @@ public class TimerService
             await Globals.conn.CloseAsync();
 
             var user = await thisChannel.GetUserAsync(decayIDs[i]);
-            Console.WriteLine($"{user.Username} has lost {decayDays[i] + 2} {gameMode}v{gameMode} elo to decay");
+            Console.WriteLine($"{user.Username} has lost {decayDays[i] + 2} {gameMode}v{gameMode} elo to decay in {region}");
 
             query = $"UPDATE leaderboard{region}{gameMode} SET decayed = decayed + 1 WHERE id = {decayIDs[i]};";
             await Globals.conn.OpenAsync();
