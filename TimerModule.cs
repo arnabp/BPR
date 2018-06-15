@@ -49,17 +49,6 @@ public class TimerService
                 await CheckQueueTimeoutAsync(generalAUSSEA, "SEA", 2);
             }
 
-            if (client.GetChannel(429366707656589312) is IMessageChannel decayNAEU)
-            {
-                if (Globals.timerCount % 120 == 0)
-                {
-                    await EloDecayAsync(decayNAEU, "NA", 1);
-                    await EloDecayAsync(decayNAEU, "NA", 2);
-                    await EloDecayAsync(decayNAEU, "EU", 1);
-                    await EloDecayAsync(decayNAEU, "EU", 2);
-                }
-            }
-
             if (client.GetChannel(422768563800244234) is IMessageChannel decayAUSSEA)
             {
                 if (Globals.timerCount % 120 == 0)
