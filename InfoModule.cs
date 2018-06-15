@@ -1082,8 +1082,9 @@ namespace BPR
             }
 
 
-            bool isInQueue = false;
+            bool isInQueue = false, isTeammateFound = false;
             int queueCount = 0;
+            ulong teammateID = 0;
             string query = $"SELECT count(*) FROM queue{region}2;";
             await Globals.conn.OpenAsync();
             try
@@ -1106,7 +1107,7 @@ namespace BPR
 
             if (queueCount > 0)
             {
-                query = $"SELECT id FROM queue{region}2;";
+                query = $"SELECT id, teammateid, foundTeammate FROM queue{region}2;";
                 await Globals.conn.OpenAsync();
                 try
                 {
@@ -1116,6 +1117,11 @@ namespace BPR
                     while (reader.Read())
                     {
                         if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
+                        if (reader.GetUInt16(2) == 1)
+                        {
+                            isTeammateFound = true;
+                            teammateID = reader.GetUInt64(1);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -1131,6 +1137,11 @@ namespace BPR
             {
                 query = $"DELETE FROM queue{region}2 WHERE id = {userInfo.Id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
+                if (isTeammateFound)
+                {
+                    query = $"DELETE FROM queue{region}2 WHERE id = {teammateID};";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
+                }
                 await Context.Channel.SendMessageAsync($"A player has left the {region} 2v2 queue");
             }
             else
