@@ -1050,11 +1050,11 @@ namespace BPR
 
                 if (isPartnerInQueue && queueCountSolo >= 2)
                 {
-                    await NewMatch(firstSoloPosition, secondSoloPosition, queueCountTotal - 2, queueCountTotal, region, false);
+                    await NewMatch(firstSoloPosition, secondSoloPosition, queueCountTotal - 1, queueCountTotal, region, false);
                 }
                 else if (isPartnerInQueue && queueCountDuo == 2)
                 {
-                    await NewMatch(firstDuoPosition, firstDuoPosition + 1, queueCountTotal - 2, queueCountTotal, region, false);
+                    await NewMatch(firstDuoPosition, firstDuoPosition + 1, queueCountTotal - 1, queueCountTotal, region, false);
                 }
             }
         }
