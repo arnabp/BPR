@@ -824,11 +824,11 @@ namespace BPR
 
                 if (queueCountSolo >= 3)
                 {
-                    await NewMatch(firstSoloPosition, secondSoloPosition, thirdSoloPosition, queueCountTotal - 1, region, true);
+                    await NewMatch(firstSoloPosition, secondSoloPosition, thirdSoloPosition, queueCountTotal, region, true);
                 }
                 else if (queueCountDuo == 2 && queueCountSolo == 1)
                 {
-                    await NewMatch(firstDuoPosition, firstDuoPosition + 1, firstSoloPosition, queueCountTotal - 1, region, false);
+                    await NewMatch(firstDuoPosition, firstDuoPosition + 1, firstSoloPosition, queueCountTotal, region, false);
                 }
             }
         }
@@ -1050,11 +1050,11 @@ namespace BPR
 
                 if (isPartnerInQueue && queueCountSolo >= 2)
                 {
-                    await NewMatch(firstSoloPosition, secondSoloPosition, queueCountTotal - 2, queueCountTotal - 1, region, false);
+                    await NewMatch(firstSoloPosition, secondSoloPosition, queueCountTotal - 2, queueCountTotal, region, false);
                 }
                 else if (isPartnerInQueue && queueCountDuo == 2)
                 {
-                    await NewMatch(firstDuoPosition, firstDuoPosition + 1, queueCountTotal - 2, queueCountTotal - 1, region, false);
+                    await NewMatch(firstDuoPosition, firstDuoPosition + 1, queueCountTotal - 2, queueCountTotal, region, false);
                 }
             }
         }
