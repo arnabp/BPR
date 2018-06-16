@@ -30,15 +30,6 @@ public class TimerService
                 await CheckQueueTimeoutAsync(generalNAEU, "NA", 2);
                 await CheckQueueTimeoutAsync(generalNAEU, "EU", 1);
                 await CheckQueueTimeoutAsync(generalNAEU, "EU", 2);
-
-                if (Globals.timerCount % 4 == 0)
-                {
-                    await CheckRoomAsync(generalNAEU, "NA", 1);
-                    await CheckRoomAsync(generalNAEU, "NA", 2);
-                    await CheckRoomAsync(generalNAEU, "EU", 1);
-                    await CheckRoomAsync(generalNAEU, "EU", 2);
-                }
-                
             }
 
             if (client.GetChannel(422045385612328973) is IMessageChannel generalAUSSEA)
