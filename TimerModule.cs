@@ -40,6 +40,12 @@ public class TimerService
                 await CheckQueueTimeoutAsync(generalAUSSEA, "SEA", 2);
             }
 
+            if (client.GetChannel(410988141491519488) is IMessageChannel generalBRZ)
+            {
+                await CheckQueueTimeoutAsync(generalBRZ, "BRZ", 1);
+                await CheckQueueTimeoutAsync(generalBRZ, "BRZ", 2);
+            }
+
             if (client.GetChannel(422768563800244234) is IMessageChannel decayAUSSEA)
             {
                 if (Globals.timerCount % 120 == 0)
