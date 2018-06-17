@@ -621,6 +621,7 @@ namespace BPR
             query = $"DELETE FROM queue{region}1 WHERE id = {p1id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
             query = $"DELETE FROM queue{region}1 WHERE id = {p2id};";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync($"Please remember to add your room number with match1 room 00000");
         }
