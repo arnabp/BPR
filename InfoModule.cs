@@ -2468,7 +2468,7 @@ namespace BPR
                 }
                 else
                 {
-                    query = $"DELETE FROM matches{region}1 WHERE id1 = {userInfo.Id} OR id2 = {userInfo.Id} OR id3 = {userInfo.Id} OR id4 = {userInfo.Id};";
+                    query = $"DELETE FROM matches{region}2 WHERE id1 = {userInfo.Id} OR id2 = {userInfo.Id} OR id3 = {userInfo.Id} OR id4 = {userInfo.Id};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     await Context.Channel.SendMessageAsync("The last 2v2 match has been cancelled. You may now queue again.");
