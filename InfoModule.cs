@@ -549,9 +549,6 @@ namespace BPR
             query = $"INSERT INTO matches{region}1(id1, id2, username1, username2, time, reverted) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.UtcNow.Ticks}, 0);";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await HelperFunctions.ResetDecayTimer(p1id, region, 1);
-            await HelperFunctions.ResetDecayTimer(p2id, region, 1);
-
             int matchCount = 0;
             query = $"SELECT count(*) FROM matches{region}1;";
             await Globals.conn.OpenAsync();
@@ -1253,11 +1250,6 @@ namespace BPR
                 $"VALUES({p1id}, {p2id}, {p3id}, {p4id}, '{p1name}', '{p2name}', '{p3name}', '{p4name}', {DateTime.UtcNow.Ticks}, 0);";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await HelperFunctions.ResetDecayTimer(p1id, region, 2);
-            await HelperFunctions.ResetDecayTimer(p2id, region, 2);
-            await HelperFunctions.ResetDecayTimer(p3id, region, 2);
-            await HelperFunctions.ResetDecayTimer(p4id, region, 2);
-
             int matchCount = 0;
             query = $"SELECT count(*) FROM matches{region}2;";
             await Globals.conn.OpenAsync();
@@ -1522,14 +1514,9 @@ namespace BPR
             query = $"UPDATE leaderboard{region}1 SET {p2ResultString} = {p2ResultString} + 1 WHERE id = {p2ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            /*
-            if(reverter != 0)
-            {
-                query = $"UPDATE leaderboard{region}1 SET elo = elo - 20 WHERE id = {reverter};";
-                await HelperFunctions.ExecuteSQLQueryAsync(query);
-            }
-            */
-                
+            await HelperFunctions.ResetDecayTimer(p1ID, region, 1);
+            await HelperFunctions.ResetDecayTimer(p2ID, region, 1);
+
             query = $"DELETE FROM matches{region}1 WHERE id1 = {p1ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
             Console.WriteLine($"{region} 1v1 Match #{thisMatchNum} has ended.");
@@ -2171,14 +2158,11 @@ namespace BPR
             query = $"UPDATE leaderboard{region}2 SET {t2ResultString} = {t2ResultString} + 1 WHERE id = {p4ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            /*
-            if(reverter != 0)
-            {
-                query = $"UPDATE leaderboard{region}2 SET elo = elo - 20 WHERE id = {reverter};";
-                await HelperFunctions.ExecuteSQLQueryAsync(query);
-            }
-            */
-                
+            await HelperFunctions.ResetDecayTimer(p1ID, region, 2);
+            await HelperFunctions.ResetDecayTimer(p2ID, region, 2);
+            await HelperFunctions.ResetDecayTimer(p3ID, region, 2);
+            await HelperFunctions.ResetDecayTimer(p4ID, region, 2);
+
             query = $"DELETE FROM matches{region}2 WHERE id1 = {p1ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
             Console.WriteLine($"Match #{thisMatchNum} has ended.");
