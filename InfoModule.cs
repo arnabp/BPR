@@ -259,6 +259,11 @@ namespace BPR
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue");
+            if (Context.Guild.Id == 422045385612328970)
+            {
+                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                return;
+            }
 
             string region = "";
             foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
@@ -633,6 +638,11 @@ namespace BPR
             await Context.Message.DeleteAsync();
 
             Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue");
+            if (Context.Guild.Id == 422045385612328970)
+            {
+                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                return;
+            }
 
             string region = "";
             foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
@@ -830,6 +840,11 @@ namespace BPR
             await Context.Message.DeleteAsync();
 
             Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue with {teammateInfo.Username}");
+            if (Context.Guild.Id == 422045385612328970)
+            {
+                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                return;
+            }
 
             string region = "";
             foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
