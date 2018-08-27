@@ -48,7 +48,7 @@ public class TimerService
 
             if (client.GetChannel(422768563800244234) is IMessageChannel decayAUSSEA)
             {
-                if (Globals.timerCount % 120 == 0)
+                if (false)
                 {
                     await EloDecayAsync(decayAUSSEA, "AUS", 1);
                     await EloDecayAsync(decayAUSSEA, "AUS", 2);
