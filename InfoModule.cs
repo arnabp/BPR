@@ -273,11 +273,6 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
-            if (region == "SEA")
-            {
-                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
-                return;
-            }
 
             bool isInQueue = false, isInMatch = false;
             int queueCount = 0, inLeaderboard = 0;
@@ -652,11 +647,6 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
-            if (region == "SEA")
-            {
-                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
-                return;
-            }
 
             bool isInQueue = false, isInMatch = false;
             int queueCountSolo = 0, queueCountDuo = 0, queueCountTotal = 0, inLeaderboard = 0, firstSoloPosition = -1, secondSoloPosition = -1, thirdSoloPosition = -1, firstDuoPosition = -1;
@@ -852,11 +842,6 @@ namespace BPR
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
-                return;
-            }
-            if (region == "SEA")
-            {
-                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
 
