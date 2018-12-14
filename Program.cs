@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Reflection;
-using System.Web.Http;
 
 
 using Discord;
@@ -13,12 +12,13 @@ using MySql.Data.MySqlClient;
 using System.Web.Http.ExceptionHandling;
 using System.Threading;
 using System.Web.Http.Results;
+using System.IO;
 
 namespace BPR
 {
     public static class Globals
     {
-        public static MySqlConnection conn = new MySqlConnection("");
+        public static MySqlConnection conn;
         public static int timerCount = 0;
 
         public static Int64 guild_RankSNAEU = 392829581192855552;
@@ -55,7 +55,15 @@ namespace BPR
 
             _client.Log += Log;
 
-            string token = "";
+            using (TextReader reader = File.OpenText(@"secrets.csv"))
+            {
+                var csv = new CsvHelper.CsvReader(reader);
+                csv.Read();
+                string token = csv.GetField<String>(0);
+
+                csv.Read();
+                Globals.conn = new MySqlConnection(csv.GetField<String>(0));
+            }
 
             _services = new ServiceCollection()
                 .AddSingleton(_client)

@@ -3,9 +3,9 @@ D:\Users\Arnab Purkayastha\source\repos\BPR\BPR\bin\Release\netcoreapp2.0\BPR.ru
 D:\Users\Arnab Purkayastha\source\repos\BPR\BPR\bin\Release\netcoreapp2.0\BPR.runtimeconfig.dev.json
 D:\Users\Arnab Purkayastha\source\repos\BPR\BPR\bin\Release\netcoreapp2.0\BPR.dll
 D:\Users\Arnab Purkayastha\source\repos\BPR\BPR\bin\Release\netcoreapp2.0\BPR.pdb
-D:\Users\Arnab Purkayastha\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.csprojResolveAssemblyReference.cache
 D:\Users\Arnab Purkayastha\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.csproj.CoreCompileInputs.cache
 D:\Users\Arnab Purkayastha\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.AssemblyInfoInputs.cache
 D:\Users\Arnab Purkayastha\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.AssemblyInfo.cs
 D:\Users\Arnab Purkayastha\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.dll
 D:\Users\Arnab Purkayastha\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.pdb
+D:\Users\Arnab Purkayastha\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.csprojAssemblyReference.cache
