@@ -13,6 +13,7 @@ using System.Web.Http.ExceptionHandling;
 using System.Threading;
 using System.Web.Http.Results;
 using System.IO;
+using System.Collections.Generic;
 
 namespace BPR
 {
@@ -21,19 +22,19 @@ namespace BPR
         public static MySqlConnection conn;
         public static int timerCount = 0;
 
-        public static Int64 guild_RankSNAEU = 392829581192855552;
-        public static Int64 guild_RankSAUSSEA = 422045385612328970;
+        public static Dictionary<ulong, Role> roleList;
 
-        public static Int64 role_region1;
-        public static Int64 role_region2;
+        public static bool inQueueNA1;
+        public static bool inQueueNA2;
+        public static bool inQueueEU1;
+        public static bool inQueueEU2;
 
-        public static string title_region1;
-        public static string title_region2;
+        public static bool inQueueAUS1;
+        public static bool inQueueAUS2;
+        public static bool inQueueSEA1;
+        public static bool inQueueSEA2;
 
-        public static Int64 channel_bot;
-        public static Int64 channel_queue1v1;
-        public static Int64 channel_queue2v2;
-
+        public static Random rnd = new Random();
     }
 
     class Program
@@ -55,11 +56,12 @@ namespace BPR
 
             _client.Log += Log;
 
+            string token;
             using (TextReader reader = File.OpenText(@"secrets.csv"))
             {
                 var csv = new CsvHelper.CsvReader(reader);
                 csv.Read();
-                string token = csv.GetField<String>(0);
+                token = csv.GetField<String>(0);
 
                 csv.Read();
                 Globals.conn = new MySqlConnection(csv.GetField<String>(0));

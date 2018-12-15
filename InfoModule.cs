@@ -12,7 +12,14 @@ using System.Linq;
 
 namespace BPR
 {
-    public class HelperFunctions
+    public struct Role
+    {
+        public string region;
+        public int gameMode;
+        public int tier;
+    }
+
+    public static class HelperFunctions
     {
         public static async Task CheckSQLStateAsync()
         {
@@ -59,14 +66,23 @@ namespace BPR
 
         public static string GetRoleRegion(ulong roleID)
         {
-            if (roleID == 419355178680975370) return "NA";
-            else if (roleID == 419355321061081088) return "NA";
-            else if (roleID == 419355374529937408) return "EU";
-            else if (roleID == 419355453550624768) return "EU";
-            else if (roleID == 423095346131107853) return "SEA";
-            else if (roleID == 423095293039607809) return "AUS";
-            else if (roleID == 410986909507256320) return "BRZ";
-            else return "";
+            if (Globals.roleList == null)
+            {
+                Globals.roleList.Add(419355178680975370, new Role { region = "NA", gameMode = 1, tier = 1 });
+                Globals.roleList.Add(522951562667098115, new Role { region = "NA", gameMode = 1, tier = 2 });
+                Globals.roleList.Add(522951569994547200, new Role { region = "NA", gameMode = 1, tier = 3 });
+                Globals.roleList.Add(419355321061081088, new Role { region = "NA", gameMode = 2, tier = 1 });
+                Globals.roleList.Add(522951571839909898, new Role { region = "NA", gameMode = 2, tier = 2 });
+                Globals.roleList.Add(522951573366767637, new Role { region = "NA", gameMode = 2, tier = 3 });
+                Globals.roleList.Add(419355374529937408, new Role { region = "EU", gameMode = 1, tier = 1 });
+                Globals.roleList.Add(522951575195615271, new Role { region = "EU", gameMode = 1, tier = 2 });
+                Globals.roleList.Add(522951576625610762, new Role { region = "EU", gameMode = 1, tier = 3 });
+                Globals.roleList.Add(419355453550624768, new Role { region = "EU", gameMode = 2, tier = 1 });
+                Globals.roleList.Add(522951577955205123, new Role { region = "EU", gameMode = 2, tier = 2 });
+                Globals.roleList.Add(522951579515748354, new Role { region = "EU", gameMode = 2, tier = 3 });
+            }
+
+            return Globals.roleList[roleID].region;
         }
 
         public static Color GetRegionColor(string region)

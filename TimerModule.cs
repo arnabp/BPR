@@ -24,146 +24,286 @@ public class TimerService
         _timer = new Timer(async _ =>
         {
             // 3) Any code you want to periodically run goes here:
+            if (Globals.timerCount % 6 == 0)
+            {
+                if (client.GetChannel(392829581192855554) is IMessageChannel generalTimeoutNAEU)
+                {
+                    await CheckQueueTimeoutAsync(generalTimeoutNAEU, "NA", 1);
+                    await CheckQueueTimeoutAsync(generalTimeoutNAEU, "NA", 2);
+                    await CheckQueueTimeoutAsync(generalTimeoutNAEU, "EU", 1);
+                    await CheckQueueTimeoutAsync(generalTimeoutNAEU, "EU", 2);
+                }
+
+                if (client.GetChannel(422045385612328973) is IMessageChannel generalTimeoutAUSSEA)
+                {
+                    await CheckQueueTimeoutAsync(generalTimeoutAUSSEA, "AUS", 1);
+                    await CheckQueueTimeoutAsync(generalTimeoutAUSSEA, "SEA", 1);
+                    await CheckQueueTimeoutAsync(generalTimeoutAUSSEA, "AUS", 2);
+                    await CheckQueueTimeoutAsync(generalTimeoutAUSSEA, "SEA", 2);
+                }
+
+                if (client.GetChannel(410988141491519488) is IMessageChannel generalTimeoutBRZ)
+                {
+                    await CheckQueueTimeoutAsync(generalTimeoutBRZ, "BRZ", 1);
+                    await CheckQueueTimeoutAsync(generalTimeoutBRZ, "BRZ", 2);
+                }
+
+                if (client.GetChannel(422768563800244234) is IMessageChannel decayAUSSEA)
+                {
+                    if (false)
+                    {
+                        await EloDecayAsync(decayAUSSEA, "AUS", 1);
+                        await EloDecayAsync(decayAUSSEA, "AUS", 2);
+                        await EloDecayAsync(decayAUSSEA, "SEA", 1);
+                        await EloDecayAsync(decayAUSSEA, "SEA", 2);
+                    }
+                }
+
+                if (client.GetChannel(438991295310987264) is IMessageChannel decayBRZ)
+                {
+                    if (false)
+                    {
+                        await EloDecayAsync(decayBRZ, "BRZ", 1);
+                        await EloDecayAsync(decayBRZ, "BRZ", 2);
+                    }
+                }
+
+                if (client.GetChannel(401167888762929153) is IMessageChannel queue1InfoNAEU)
+                {
+                    IEnumerable<IMessage> messageList = await queue1InfoNAEU.GetMessagesAsync(4).Flatten();
+
+                    IUserMessage leaderboardNAm = messageList.ToList()[3] as IUserMessage;
+                    IUserMessage leaderboardEUm = messageList.ToList()[2] as IUserMessage;
+                    IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
+                    IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
+
+                    if (leaderboardNAm != null) await UpdateLeaderboardAsync(leaderboardNAm, "NA", 1);
+                    if (leaderboardEUm != null) await UpdateLeaderboardAsync(leaderboardEUm, "EU", 1);
+                    if (matchListm != null) await UpdateMatchesAsync(matchListm, "NA", "EU", 1);
+                    if (queueListm != null) await UpdateQueueAsync(queueListm, "NA", "EU", 1);
+
+                }
+
+                if (client.GetChannel(404558855771521024) is IMessageChannel queue2InfoNAEU)
+                {
+                    IEnumerable<IMessage> messageList = await queue2InfoNAEU.GetMessagesAsync(4).Flatten();
+
+                    IUserMessage leaderboardNAm = messageList.ToList()[3] as IUserMessage;
+                    IUserMessage leaderboardEUm = messageList.ToList()[2] as IUserMessage;
+                    IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
+                    IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
+
+                    if (leaderboardNAm != null) await UpdateLeaderboardAsync(leaderboardNAm, "NA", 2);
+                    if (leaderboardEUm != null) await UpdateLeaderboardAsync(leaderboardEUm, "EU", 2);
+                    if (matchListm != null) await UpdateMatchesAsync(matchListm, "NA", "EU", 2);
+                    if (queueListm != null) await UpdateQueueAsync(queueListm, "NA", "EU", 2);
+
+                }
+
+                if (client.GetChannel(423372016922525697) is IMessageChannel queue1InfoAUSSEA)
+                {
+                    IEnumerable<IMessage> messageList = await queue1InfoAUSSEA.GetMessagesAsync(4).Flatten();
+
+                    IUserMessage leaderboardAUSm = messageList.ToList()[3] as IUserMessage;
+                    IUserMessage leaderboardSEAm = messageList.ToList()[2] as IUserMessage;
+                    IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
+                    IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
+
+                    if (leaderboardAUSm != null) await UpdateLeaderboardAsync(leaderboardAUSm, "AUS", 1);
+                    if (leaderboardSEAm != null) await UpdateLeaderboardAsync(leaderboardSEAm, "SEA", 1);
+                    if (matchListm != null) await UpdateMatchesAsync(matchListm, "AUS", "SEA", 1);
+                    if (queueListm != null) await UpdateQueueAsync(queueListm, "AUS", "SEA", 1);
+
+                }
+
+                if (client.GetChannel(437510787951493121) is IMessageChannel queue2InfoAUSSEA)
+                {
+                    IEnumerable<IMessage> messageList = await queue2InfoAUSSEA.GetMessagesAsync(4).Flatten();
+
+                    IUserMessage leaderboardAUSm = messageList.ToList()[3] as IUserMessage;
+                    IUserMessage leaderboardSEAm = messageList.ToList()[2] as IUserMessage;
+                    IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
+                    IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
+
+                    if (leaderboardAUSm != null) await UpdateLeaderboardAsync(leaderboardAUSm, "AUS", 2);
+                    if (leaderboardSEAm != null) await UpdateLeaderboardAsync(leaderboardSEAm, "SEA", 2);
+                    if (matchListm != null) await UpdateMatchesAsync(matchListm, "AUS", "SEA", 2);
+                    if (queueListm != null) await UpdateQueueAsync(queueListm, "AUS", "SEA", 2);
+                }
+
+                if (client.GetChannel(439177902035173389) is IMessageChannel queue1InfoBRZ)
+                {
+                    IEnumerable<IMessage> messageList = await queue1InfoBRZ.GetMessagesAsync(3).Flatten();
+
+                    IUserMessage leaderboardBRZm = messageList.ToList()[2] as IUserMessage;
+                    IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
+                    IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
+
+                    if (leaderboardBRZm != null) await UpdateLeaderboardAsync(leaderboardBRZm, "BRZ", 1);
+                    if (matchListm != null) await UpdateMatchesAsync(matchListm, "BRZ", 1);
+                    if (queueListm != null) await UpdateQueueAsync(queueListm, "BRZ", 1);
+
+                }
+
+                if (client.GetChannel(439177928182595586) is IMessageChannel queue2InfoBRZ)
+                {
+                    IEnumerable<IMessage> messageList = await queue2InfoBRZ.GetMessagesAsync(3).Flatten();
+
+                    IUserMessage leaderboardBRZm = messageList.ToList()[2] as IUserMessage;
+                    IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
+                    IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
+
+                    if (leaderboardBRZm != null) await UpdateLeaderboardAsync(leaderboardBRZm, "BRZ", 2);
+                    if (matchListm != null) await UpdateMatchesAsync(matchListm, "BRZ", 2);
+                    if (queueListm != null) await UpdateQueueAsync(queueListm, "BRZ", 2);
+                }
+            }
+
             if (client.GetChannel(392829581192855554) is IMessageChannel generalNAEU)
             {
-                await CheckQueueTimeoutAsync(generalNAEU, "NA", 1);
-                await CheckQueueTimeoutAsync(generalNAEU, "NA", 2);
-                await CheckQueueTimeoutAsync(generalNAEU, "EU", 1);
-                await CheckQueueTimeoutAsync(generalNAEU, "EU", 2);
+                if (Globals.inQueueNA1)
+                    await CheckQueueMatchCreate1sAsync(generalNAEU, "NA");
+                if (Globals.inQueueNA2)
+                    await CheckQueueMatchCreate2sAsync(generalNAEU, "NA");
+                if (Globals.inQueueEU1)
+                    await CheckQueueMatchCreate1sAsync(generalNAEU, "EU");
+                if (Globals.inQueueEU2)
+                    await CheckQueueMatchCreate2sAsync(generalNAEU, "EU");
             }
 
             if (client.GetChannel(422045385612328973) is IMessageChannel generalAUSSEA)
             {
-                await CheckQueueTimeoutAsync(generalAUSSEA, "AUS", 1);
-                await CheckQueueTimeoutAsync(generalAUSSEA, "SEA", 1);
-                await CheckQueueTimeoutAsync(generalAUSSEA, "AUS", 2);
-                await CheckQueueTimeoutAsync(generalAUSSEA, "SEA", 2);
-            }
-
-            if (client.GetChannel(410988141491519488) is IMessageChannel generalBRZ)
-            {
-                await CheckQueueTimeoutAsync(generalBRZ, "BRZ", 1);
-                await CheckQueueTimeoutAsync(generalBRZ, "BRZ", 2);
-            }
-
-            if (client.GetChannel(422768563800244234) is IMessageChannel decayAUSSEA)
-            {
-                if (false)
-                {
-                    await EloDecayAsync(decayAUSSEA, "AUS", 1);
-                    await EloDecayAsync(decayAUSSEA, "AUS", 2);
-                    await EloDecayAsync(decayAUSSEA, "SEA", 1);
-                    await EloDecayAsync(decayAUSSEA, "SEA", 2);
-                }
-            }
-
-            if (client.GetChannel(438991295310987264) is IMessageChannel decayBRZ)
-            {
-                if (false)
-                {
-                    await EloDecayAsync(decayBRZ, "BRZ", 1);
-                    await EloDecayAsync(decayBRZ, "BRZ", 2);
-                }
-            }
-
-            if (client.GetChannel(401167888762929153) is IMessageChannel queue1InfoNAEU)
-            {
-                IEnumerable<IMessage> messageList = await queue1InfoNAEU.GetMessagesAsync(4).Flatten();
-
-                IUserMessage leaderboardNAm = messageList.ToList()[3] as IUserMessage;
-                IUserMessage leaderboardEUm = messageList.ToList()[2] as IUserMessage;
-                IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
-                IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
-
-                if (leaderboardNAm != null) await UpdateLeaderboardAsync(leaderboardNAm, "NA", 1);
-                if (leaderboardEUm != null) await UpdateLeaderboardAsync(leaderboardEUm, "EU", 1);
-                if (matchListm != null) await UpdateMatchesAsync(matchListm, "NA", "EU", 1);
-                if (queueListm != null) await UpdateQueueAsync(queueListm, "NA", "EU", 1);
-                
-            }
-
-            if (client.GetChannel(404558855771521024) is IMessageChannel queue2InfoNAEU)
-            {
-                IEnumerable<IMessage> messageList = await queue2InfoNAEU.GetMessagesAsync(4).Flatten();
-
-                IUserMessage leaderboardNAm = messageList.ToList()[3] as IUserMessage;
-                IUserMessage leaderboardEUm = messageList.ToList()[2] as IUserMessage;
-                IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
-                IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
-
-                if (leaderboardNAm != null) await UpdateLeaderboardAsync(leaderboardNAm, "NA", 2);
-                if (leaderboardEUm != null) await UpdateLeaderboardAsync(leaderboardEUm, "EU", 2);
-                if (matchListm != null) await UpdateMatchesAsync(matchListm, "NA", "EU", 2);
-                if (queueListm != null) await UpdateQueueAsync(queueListm, "NA", "EU", 2);
-
-            }
-
-            if (client.GetChannel(423372016922525697) is IMessageChannel queue1InfoAUSSEA)
-            {
-                IEnumerable<IMessage> messageList = await queue1InfoAUSSEA.GetMessagesAsync(4).Flatten();
-
-                IUserMessage leaderboardAUSm = messageList.ToList()[3] as IUserMessage;
-                IUserMessage leaderboardSEAm = messageList.ToList()[2] as IUserMessage;
-                IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
-                IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
-
-                if (leaderboardAUSm != null) await UpdateLeaderboardAsync(leaderboardAUSm, "AUS", 1);
-                if (leaderboardSEAm != null) await UpdateLeaderboardAsync(leaderboardSEAm, "SEA", 1);
-                if (matchListm != null) await UpdateMatchesAsync(matchListm, "AUS", "SEA", 1);
-                if (queueListm != null) await UpdateQueueAsync(queueListm, "AUS", "SEA", 1);
-
-            }
-
-            if (client.GetChannel(437510787951493121) is IMessageChannel queue2InfoAUSSEA)
-            {
-                IEnumerable<IMessage> messageList = await queue2InfoAUSSEA.GetMessagesAsync(4).Flatten();
-
-                IUserMessage leaderboardAUSm = messageList.ToList()[3] as IUserMessage;
-                IUserMessage leaderboardSEAm = messageList.ToList()[2] as IUserMessage;
-                IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
-                IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
-
-                if (leaderboardAUSm != null) await UpdateLeaderboardAsync(leaderboardAUSm, "AUS", 2);
-                if (leaderboardSEAm != null) await UpdateLeaderboardAsync(leaderboardSEAm, "SEA", 2);
-                if (matchListm != null) await UpdateMatchesAsync(matchListm, "AUS", "SEA", 2);
-                if (queueListm != null) await UpdateQueueAsync(queueListm, "AUS", "SEA", 2);
-            }
-
-            if (client.GetChannel(439177902035173389) is IMessageChannel queue1InfoBRZ)
-            {
-                IEnumerable<IMessage> messageList = await queue1InfoBRZ.GetMessagesAsync(3).Flatten();
-                
-                IUserMessage leaderboardBRZm = messageList.ToList()[2] as IUserMessage;
-                IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
-                IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
-
-                if (leaderboardBRZm != null) await UpdateLeaderboardAsync(leaderboardBRZm, "BRZ", 1);
-                if (matchListm != null) await UpdateMatchesAsync(matchListm, "BRZ", 1);
-                if (queueListm != null) await UpdateQueueAsync(queueListm, "BRZ", 1);
-
-            }
-
-            if (client.GetChannel(439177928182595586) is IMessageChannel queue2InfoBRZ)
-            {
-                IEnumerable<IMessage> messageList = await queue2InfoBRZ.GetMessagesAsync(3).Flatten();
-                
-                IUserMessage leaderboardBRZm = messageList.ToList()[2] as IUserMessage;
-                IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
-                IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
-
-                if (leaderboardBRZm != null) await UpdateLeaderboardAsync(leaderboardBRZm, "BRZ", 2);
-                if (matchListm != null) await UpdateMatchesAsync(matchListm, "BRZ", 2);
-                if (queueListm != null) await UpdateQueueAsync(queueListm, "BRZ", 2);
+                if (Globals.inQueueAUS1)
+                    await CheckQueueMatchCreate1sAsync(generalAUSSEA, "AUS");
+                if (Globals.inQueueAUS2)
+                    await CheckQueueMatchCreate2sAsync(generalAUSSEA, "AUS");
+                if (Globals.inQueueSEA1)
+                    await CheckQueueMatchCreate1sAsync(generalAUSSEA, "SEA");
+                if (Globals.inQueueSEA2)
+                    await CheckQueueMatchCreate2sAsync(generalAUSSEA, "SEA");
             }
 
             Globals.timerCount++;
         },
         null,
         TimeSpan.FromMinutes(0),  // 4) Time that message should fire after the timer is created
-        TimeSpan.FromSeconds(30)); // 5) Time after which message should repeat (use `Timeout.Infinite` for no repeat)
+        TimeSpan.FromSeconds(5)); // 5) Time after which message should repeat (use `Timeout.Infinite` for no repeat)
     }
 
-    public async Task UpdateLeaderboardAsync(IUserMessage thisMessage, string region, int gameMode)
+    private async Task CheckQueueMatchCreate1sAsync(IMessageChannel thisChannel, string region)
+    {
+        List<Player> playersInQueue = new List<Player>(10);
+        string query = $"SELECT id, username, tier FROM queue{region}1 ORDER BY time;";
+        await Globals.conn.OpenAsync();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                Player thisPlayer = new Player
+                {
+                    id = reader.GetUInt64(0),
+                    username = reader.GetString(1),
+                    tier = reader.GetInt16(2)
+                };
+
+                playersInQueue.Add(thisPlayer);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            await Globals.conn.CloseAsync();
+            throw;
+        }
+        await Globals.conn.CloseAsync();
+
+        while (playersInQueue.Count > 0)
+        {
+            Player thisPlayer = playersInQueue[0];
+            playersInQueue.RemoveAt(0);
+            foreach (var checkPlayer in playersInQueue)
+            {
+                if ((thisPlayer.tier & checkPlayer.tier) > 0)
+                {
+                    await MatchModule.CreateMatch1Async(thisChannel, thisPlayer, checkPlayer, region);
+                    playersInQueue.Remove(checkPlayer);
+                }
+            }
+        }
+    }
+
+    private async Task CheckQueueMatchCreate2sAsync(IMessageChannel thisChannel, string region)
+    {
+        List<Player> playersInQueue = new List<Player>(20);
+        List<Team> teamsInQueue = new List<Team>(10);
+        string query = $"SELECT id, username, tier, tierTeammate FROM queue{region}2 ORDER BY time;";
+        await Globals.conn.OpenAsync();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                Player thisPlayer = new Player
+                {
+                    id = reader.GetUInt64(0),
+                    username = reader.GetString(1),
+                    tier = reader.GetInt16(2),
+                    tierTeammate = reader.GetInt16(3)
+                };
+
+                playersInQueue.Add(thisPlayer);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            await Globals.conn.CloseAsync();
+            throw;
+        }
+        await Globals.conn.CloseAsync();
+
+        while (playersInQueue.Count > 0)
+        {
+            Player thisPlayer = playersInQueue[0];
+            playersInQueue.RemoveAt(0);
+            List<Player> potentialTeammates = new List<Player>(playersInQueue.Count);
+            foreach (var checkPlayer in playersInQueue)
+            {
+                if ((thisPlayer.tierTeammate & checkPlayer.tierTeammate) > 0)
+                {
+                    potentialTeammates.Add(checkPlayer);
+                }
+            }
+
+            if (potentialTeammates.Count > 0)
+            {
+                Player teammate = potentialTeammates[Globals.rnd.Next(potentialTeammates.Count)];
+                playersInQueue.Remove(teammate);
+                teamsInQueue.Add(new Team { p1 = thisPlayer, p2 = teammate, tier = thisPlayer.tier & teammate.tier });
+            }
+        }
+
+        while (teamsInQueue.Count > 0)
+        {
+            Team thisTeam = teamsInQueue[0];
+            teamsInQueue.RemoveAt(0);
+            foreach (var checkTeam in teamsInQueue)
+            {
+                if ((thisTeam.tier & checkTeam.tier) > 0)
+                {
+                    await MatchModule.CreateMatch2Async(thisChannel, thisTeam, checkTeam, region);
+                    teamsInQueue.Remove(checkTeam);
+                }
+            }
+        }
+    }
+
+    private async Task UpdateLeaderboardAsync(IUserMessage thisMessage, string region, int gameMode)
     {
         var embed = new EmbedBuilder
         {
@@ -204,7 +344,7 @@ public class TimerService
         });
     }
 
-    public async Task UpdateMatchesAsync(IUserMessage thisMessage, string region1, string region2, int gameMode)
+    private async Task UpdateMatchesAsync(IUserMessage thisMessage, string region1, string region2, int gameMode)
     {
         string pluralizer;
         int matchCount1 = 0, matchCount2 = 0;
@@ -321,7 +461,7 @@ public class TimerService
         });
     }
 
-    public async Task UpdateQueueAsync(IUserMessage thisMessage, string region1, string region2, int gameMode)
+    private async Task UpdateQueueAsync(IUserMessage thisMessage, string region1, string region2, int gameMode)
     {
         int queueCount1 = 0, queueCount2 = 0;
         string query = $"SELECT count(*) FROM queue{region1}{gameMode};";
@@ -402,7 +542,7 @@ public class TimerService
         });
     }
 
-    public async Task UpdateMatchesAsync(IUserMessage thisMessage, string region, int gameMode)
+    private async Task UpdateMatchesAsync(IUserMessage thisMessage, string region, int gameMode)
     {
         string pluralizer;
         int matchCount = 0;
@@ -473,7 +613,7 @@ public class TimerService
         });
     }
 
-    public async Task UpdateQueueAsync(IUserMessage thisMessage, string region, int gameMode)
+    private async Task UpdateQueueAsync(IUserMessage thisMessage, string region, int gameMode)
     {
         int queueCount = 0;
         string query = $"SELECT count(*) FROM queue{region}{gameMode};";
@@ -517,7 +657,7 @@ public class TimerService
         });
     }
 
-    public async Task CheckQueueTimeoutAsync(IMessageChannel thisChannel, string region, int gameMode)
+    private async Task CheckQueueTimeoutAsync(IMessageChannel thisChannel, string region, int gameMode)
     {
         DateTime nowTime = DateTime.Now;
 
@@ -568,7 +708,7 @@ public class TimerService
         }
     }
 
-    public async Task CheckRoomAsync(IMessageChannel thisChannel, string region, int gameMode)
+    private async Task CheckRoomAsync(IMessageChannel thisChannel, string region, int gameMode)
     {
         DateTime nowTime = DateTime.Now;
 
@@ -626,7 +766,7 @@ public class TimerService
         }
     }
 
-    public async Task EloDecayAsync(IMessageChannel thisChannel, string region, int gameMode)
+    private async Task EloDecayAsync(IMessageChannel thisChannel, string region, int gameMode)
     {
         DateTime nowTime = DateTime.Now;
 
