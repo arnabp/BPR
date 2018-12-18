@@ -64,7 +64,7 @@ namespace BPR
             
         }
 
-        public static string GetRoleRegion(ulong roleID)
+        public static Role GetRoleRegion(ulong roleID)
         {
             if (Globals.roleList == null)
             {
@@ -82,7 +82,7 @@ namespace BPR
                 Globals.roleList.Add(522951579515748354, new Role { region = "EU", gameMode = 2, tier = 3 });
             }
 
-            return Globals.roleList[roleID].region;
+            return Globals.roleList[roleID];
         }
 
         public static Color GetRegionColor(string region)
@@ -276,28 +276,41 @@ namespace BPR
             await Context.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue");
 
+            // Get User's information from Role
             string region = "";
+            int tier = 0;
             foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
             {
-                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                try
                 {
-                    region = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    if (thisRole.gameMode == 1)
+                    {
+                        region = thisRole.region;
+                        tier = thisRole.tier;
+                    }
+                }
+                catch (KeyNotFoundException)
+                {
+                    continue;
                 }
             }
+            // Check if user is qualified to queue
             if(region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
-            if (region == "SEA" || region == "AUS")
+            if (!Globals.regionList[region].status)
             {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
 
             bool isInQueue = false, isInMatch = false;
-            int queueCount = 0, inLeaderboard = 0;
+            int inLeaderboard = 0;
 
+            // Check that user is in appropriate leaderboard
             string query = $"SELECT count(*) FROM leaderboard{region}1 WHERE id = {userInfo.Id};";
             await Globals.conn.OpenAsync();
             try
@@ -317,34 +330,14 @@ namespace BPR
                 throw;
             }
             await Globals.conn.CloseAsync();
-
             if (inLeaderboard == 0)
             {
-                await Context.Channel.SendMessageAsync("You are not qualified to play this game mode.");
+                await Context.Channel.SendMessageAsync("You are not on the leaderboard for this game mode. Please contact the server admin to fix this.");
                 return;
             }
 
-            query = $"SELECT count(*) FROM queue{region}1;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    queueCount = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            if (queueCount > 0)
+            // Check if user is already in the queue
+            if (Globals.regionList[region].inQueue1)
             {
                 query = $"SELECT id FROM queue{region}1;";
                 await Globals.conn.OpenAsync();
@@ -367,6 +360,7 @@ namespace BPR
                 await Globals.conn.CloseAsync();
             }
 
+            // Check if user is already in a match
             query = $"SELECT id1, id2 FROM matches{region}1;";
             await Globals.conn.OpenAsync();
             try
@@ -387,6 +381,7 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
+            // Return messages to restrict user from joining queue
             if (isInQueue)
             {
                 await Context.Channel.SendMessageAsync($"Player already in {region} 1v1 queue has now refreshed their queue timer");
@@ -406,11 +401,6 @@ namespace BPR
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                 await Context.Channel.SendMessageAsync($"A player has been added to {region} 1v1 queue");
-
-                if (queueCount == 1)
-                {
-                    await NewMatch(0, 1, region);
-                }
             }
         }
 
@@ -421,42 +411,43 @@ namespace BPR
         {
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is attempting to leave 1v1 queue");
+
+            // Get User's information from Role
             string region = "";
+            int tier = 0;
             foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
             {
-                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                try
                 {
-                    region = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    if (thisRole.gameMode == 1)
+                    {
+                        region = thisRole.region;
+                        tier = thisRole.tier;
+                    }
+                }
+                catch (KeyNotFoundException)
+                {
+                    continue;
                 }
             }
+            // Check if user is qualified to queue
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                return;
+            }
+            if (!Globals.regionList[region].status)
+            {
+                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                return;
             }
 
             bool isInQueue = false;
-            int queueCount = 0;
-            string query = $"SELECT count(*) FROM queue{region}1;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
+            string query;
 
-                while (reader.Read())
-                {
-                    queueCount = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            if (queueCount > 0)
+            // Check if user is already in queue
+            if (Globals.regionList[region].inQueue1)
             {
                 query = $"SELECT id FROM queue{region}1;";
                 await Globals.conn.OpenAsync();
@@ -479,6 +470,7 @@ namespace BPR
                 await Globals.conn.CloseAsync();
             }
 
+            // Return messages to indicate queue leave success
             if (isInQueue)
             {
                 query = $"DELETE FROM queue{region}1 WHERE id = {userInfo.Id};";
@@ -652,31 +644,43 @@ namespace BPR
         {
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
-
             Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue");
 
+            // Get User's information from Role
             string region = "";
+            int tier = 0;
             foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
             {
-                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                try
                 {
-                    region = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    if (thisRole.gameMode == 2)
+                    {
+                        region = thisRole.region;
+                        tier = thisRole.tier;
+                    }
+                }
+                catch (KeyNotFoundException)
+                {
+                    continue;
                 }
             }
+            // Check if user is qualified to queue
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
-            if (region == "SEA" || region == "AUS")
+            if (!Globals.regionList[region].status)
             {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
 
             bool isInQueue = false, isInMatch = false;
-            int queueCountSolo = 0, queueCountDuo = 0, queueCountTotal = 0, inLeaderboard = 0, firstSoloPosition = -1, secondSoloPosition = -1, thirdSoloPosition = -1, firstDuoPosition = -1;
+            int inLeaderboard = 0;
 
+            // Check that user is in appropriate leaderboard
             string query = $"SELECT count(*) FROM leaderboard{region}2 WHERE id = {userInfo.Id};";
             await Globals.conn.OpenAsync();
             try
@@ -696,104 +700,37 @@ namespace BPR
                 throw;
             }
             await Globals.conn.CloseAsync();
-
             if (inLeaderboard == 0)
             {
-                await Context.Channel.SendMessageAsync("You are not qualified to play this game mode.");
+                await Context.Channel.SendMessageAsync("You are not on the leaderboard for this game mode. Please contact the server admin to fix this.");
                 return;
             }
 
-            int i = 0;
-            query = $"SELECT id, teammateid, foundTeammate FROM queue{region}2;";
-            await Globals.conn.OpenAsync();
-            try
+            // Check if user is already in the queue
+            if (Globals.regionList[region].inQueue2)
             {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
+                query = $"SELECT id FROM queue{region}2;";
+                await Globals.conn.OpenAsync();
+                try
                 {
-                    if (reader.GetUInt64(1) == 0)
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
                     {
-                        if (firstSoloPosition == -1) firstSoloPosition = i;
-                        else if (secondSoloPosition == -1) secondSoloPosition = i;
-                        else if (thirdSoloPosition == -1) thirdSoloPosition = i;
+                        if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
                     }
-                    else if (reader.GetUInt16(2) == 1 && firstDuoPosition == -1) firstDuoPosition = i;
-
-                    if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
-
-                    i++;
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            query = $"SELECT count(*) FROM queue{region}2 WHERE teammateid = 0;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
+                catch (Exception ex)
                 {
-                    queueCountSolo = reader.GetInt16(0);
+                    Console.WriteLine(ex.ToString());
+                    await Globals.conn.CloseAsync();
+                    throw;
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
                 await Globals.conn.CloseAsync();
-                throw;
             }
-            await Globals.conn.CloseAsync();
-
-            query = $"SELECT count(*) FROM queue{region}2 WHERE foundTeammate = 1;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    queueCountDuo = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            query = $"SELECT count(*) FROM queue{region}2;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    queueCountTotal = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
+            
+            // Check if user is already in a match
             query = $"SELECT id1, id2, id3, id4 FROM matches{region}2;";
             await Globals.conn.OpenAsync();
             try
@@ -817,6 +754,7 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
+            // Return messages to restrict user from joining queue
             if (isInQueue)
             {
                 await Context.Channel.SendMessageAsync($"Player already in {region} 2v2 queue has now refreshed their queue timer");
@@ -829,247 +767,13 @@ namespace BPR
             {
                 await Context.Channel.SendMessageAsync($"Player already in {region} 2v2 match tried to queue");
                 Console.WriteLine($"{userInfo.Username} tried to join the queue while in match");
-            }else
+            }
+            else
             {
                 query = $"INSERT INTO queue{region}2(time, username, id) VALUES({DateTime.UtcNow.Ticks}, '{userInfo.Username}', {userInfo.Id});";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                 await Context.Channel.SendMessageAsync($"A player has been added to {region} 2v2 queue");
-
-                if (queueCountSolo >= 3)
-                {
-                    await NewMatch(firstSoloPosition, secondSoloPosition, thirdSoloPosition, queueCountTotal, region, true);
-                }
-                else if (queueCountDuo == 2 && queueCountSolo == 1)
-                {
-                    await NewMatch(firstDuoPosition, firstDuoPosition + 1, firstSoloPosition, queueCountTotal, region, false);
-                }
-            }
-        }
-
-        [Command("join")]
-        [Alias("j")]
-        [Summary("Joins the 2v2 queue with another user")]
-        public async Task JoinAsync(Discord.WebSocket.SocketUser teammateInfo)
-        {
-            var userInfo = Context.User;
-            await Context.Message.DeleteAsync();
-
-            Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue with {teammateInfo.Username}");
-
-            string region = "";
-            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
-            {
-                if (HelperFunctions.GetRoleRegion(role.Id) != "")
-                {
-                    region = HelperFunctions.GetRoleRegion(role.Id);
-                }
-            }
-            if (region == "")
-            {
-                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
-                return;
-            }
-            if (region == "SEA" || region == "AUS")
-            {
-                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
-                return;
-            }
-
-            bool isInQueue = false, isInMatch = false, isPartnerInQueue = false, doesPartnerWantYou = true;
-            int queueCountSolo = 0, queueCountDuo = 0, queueCountTotal = 0, inLeaderboard = 0, firstSoloPosition = -1, secondSoloPosition = -1, firstDuoPosition = -1;
-
-            string query = $"SELECT count(*) FROM leaderboard{region}2 WHERE id = {userInfo.Id};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    inLeaderboard = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            if (inLeaderboard == 0)
-            {
-                await Context.Channel.SendMessageAsync("You are not qualified to play this game mode.");
-                return;
-            }
-
-            int i = 0;
-            query = $"SELECT id, teammateid, foundTeammate FROM queue{region}2;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    if (reader.GetUInt64(1) == 0)
-                    {
-                        if (firstSoloPosition == -1) firstSoloPosition = i;
-                        else if (secondSoloPosition == -1) secondSoloPosition = i;
-                    }
-                    else if (reader.GetUInt16(2) == 1 && firstDuoPosition == -1) firstDuoPosition = i;
-
-                    if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
-                    if (reader.GetUInt64(0) == teammateInfo.Id && reader.GetUInt64(1) == userInfo.Id)
-                    {
-                        if (reader.GetUInt64(1) == userInfo.Id)
-                        {
-                            doesPartnerWantYou = true;
-                            i--;
-                        }
-                        else doesPartnerWantYou = false;
-                        isPartnerInQueue = true;
-                    }
-
-                    i++;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-            
-            query = $"SELECT count(*) FROM queue{region}2 WHERE teammateid = 0;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    queueCountSolo = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            query = $"SELECT count(*) FROM queue{region}2 WHERE foundTeammate = 1;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    queueCountDuo = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            query = $"SELECT count(*) FROM queue{region}2;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    queueCountTotal = reader.GetInt16(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            query = $"SELECT id1, id2, id3, id4 FROM matches{region}2;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    if (reader.GetUInt64(0) == userInfo.Id
-                        || reader.GetUInt64(1) == userInfo.Id
-                        || reader.GetUInt64(2) == userInfo.Id
-                        || reader.GetUInt64(3) == userInfo.Id) isInMatch = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            if (isInQueue)
-            {
-                await Context.Channel.SendMessageAsync($"Player already in {region} 2v2 queue has now refreshed their queue timer");
-
-                query = $"UPDATE queue{region}2 SET time = {DateTime.UtcNow.Ticks} WHERE id = {userInfo.Id};";
-                await HelperFunctions.ExecuteSQLQueryAsync(query);
-                Console.WriteLine($"{userInfo.Username} refreshed their queue timer");
-            }
-            else if (isInMatch)
-            {
-                await Context.Channel.SendMessageAsync($"Player already in {region} 2v2 match tried to queue");
-                Console.WriteLine($"{userInfo.Username} tried to join the queue while in match");
-            }
-            else if (!doesPartnerWantYou)
-            {
-                await Context.Channel.SendMessageAsync($"Your partner is already in queue but did not assign you as their partner. Queue with someone else or queue solo.");
-            }
-            else
-            {
-                query = $"INSERT INTO queue{region}2(time, username, id, teammateid) VALUES({DateTime.UtcNow.Ticks}, '{userInfo.Username}', {userInfo.Id}, {teammateInfo.Id});";
-                await HelperFunctions.ExecuteSQLQueryAsync(query);
-
-                if (isPartnerInQueue)
-                {
-                    query = $"UPDATE queue{region}2 SET foundTeammate = 1 WHERE id = {userInfo.Id};";
-                    await HelperFunctions.ExecuteSQLQueryAsync(query);
-                    query = $"UPDATE queue{region}2 SET time = {DateTime.UtcNow.Ticks} WHERE id = {teammateInfo.Id};";
-                    await HelperFunctions.ExecuteSQLQueryAsync(query);
-                    query = $"UPDATE queue{region}2 SET foundTeammate = 1 WHERE id = {teammateInfo.Id};";
-                    await HelperFunctions.ExecuteSQLQueryAsync(query);
-                }
-
-                await Context.Channel.SendMessageAsync($"A player has been added to {region} 2v2 queue");
-
-                if (isPartnerInQueue && queueCountSolo >= 2)
-                {
-                    await NewMatch(firstSoloPosition, secondSoloPosition, queueCountTotal - 1, queueCountTotal, region, false);
-                }
-                else if (isPartnerInQueue && queueCountDuo == 2)
-                {
-                    await NewMatch(firstDuoPosition, firstDuoPosition + 1, queueCountTotal - 1, queueCountTotal, region, false);
-                }
             }
         }
 
@@ -1081,47 +785,44 @@ namespace BPR
             var userInfo = Context.User;
             Console.WriteLine($"{userInfo.Username} is attempting to leave 2v2 queue");
 
+            // Get User's information from Role
             string region = "";
+            int tier = 0;
             foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
             {
-                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                try
                 {
-                    region = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    if (thisRole.gameMode == 1)
+                    {
+                        region = thisRole.region;
+                        tier = thisRole.tier;
+                    }
+                }
+                catch (KeyNotFoundException)
+                {
+                    continue;
                 }
             }
+            // Check if user is qualified to queue
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
-
-
-            bool isInQueue = false, isTeammateFound = false;
-            int queueCount = 0;
-            ulong teammateID = 0;
-            string query = $"SELECT count(*) FROM queue{region}2;";
-            await Globals.conn.OpenAsync();
-            try
+            if (!Globals.regionList[region].status)
             {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    queueCount = reader.GetInt16(0);
-                }
+                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                return;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
 
-            if (queueCount > 0)
+
+            bool isInQueue = false;
+            string query;
+
+            if (Globals.regionList[region].inQueue2)
             {
-                query = $"SELECT id, teammateid, foundTeammate FROM queue{region}2;";
+                query = $"SELECT id FROM queue{region}2;";
                 await Globals.conn.OpenAsync();
                 try
                 {
@@ -1131,11 +832,6 @@ namespace BPR
                     while (reader.Read())
                     {
                         if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
-                        if (reader.GetUInt16(2) == 1)
-                        {
-                            isTeammateFound = true;
-                            teammateID = reader.GetUInt64(1);
-                        }
                     }
                 }
                 catch (Exception ex)
@@ -1147,15 +843,11 @@ namespace BPR
                 await Globals.conn.CloseAsync();
             }
 
+            // Return messages to indicate queue leave success
             if (isInQueue)
             {
                 query = $"DELETE FROM queue{region}2 WHERE id = {userInfo.Id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                if (isTeammateFound)
-                {
-                    query = $"DELETE FROM queue{region}2 WHERE id = {teammateID};";
-                    await HelperFunctions.ExecuteSQLQueryAsync(query);
-                }
                 await Context.Channel.SendMessageAsync($"A player has left the {region} 2v2 queue");
             }
             else
@@ -1380,19 +1072,37 @@ namespace BPR
             string p2Username = "";
             int thisMatchNum = 1;
 
+            // Get User's information from Role
             string region = "";
+            int tier = 0;
             foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
             {
-                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                try
                 {
-                    region = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    if (thisRole.gameMode == 1)
+                    {
+                        region = thisRole.region;
+                        tier = thisRole.tier;
+                    }
+                }
+                catch (KeyNotFoundException)
+                {
+                    continue;
                 }
             }
+            // Check if user is qualified to queue
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
+            if (!Globals.regionList[region].status)
+            {
+                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                return;
+            }
+
             string query = $"SELECT id1, id2, username1, username2, reverted FROM matches{region}1;";
             await Globals.conn.OpenAsync();
             try

@@ -17,24 +17,90 @@ using System.Collections.Generic;
 
 namespace BPR
 {
+    public struct Region
+    {
+        public ulong id;
+        public bool status;
+        public bool inQueue1;
+        public bool inQueue2;
+    }
     public static class Globals
     {
         public static MySqlConnection conn;
         public static int timerCount = 0;
 
         public static Dictionary<ulong, Role> roleList;
-
-        public static bool inQueueNA1;
-        public static bool inQueueNA2;
-        public static bool inQueueEU1;
-        public static bool inQueueEU2;
-
-        public static bool inQueueAUS1;
-        public static bool inQueueAUS2;
-        public static bool inQueueSEA1;
-        public static bool inQueueSEA2;
+        public static Dictionary<string, Region> regionList;
 
         public static Random rnd = new Random();
+
+        public static async Task InitRegions()
+        {
+            string query = $"SELECT region, status, serverID FROM regionStatus;";
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    regionList[reader.GetString(0)] = new Region { id = reader.GetUInt64(2), status = reader.GetBoolean(1) };
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            foreach(var thisValue in regionList)
+            {
+                Region thisRole = thisValue.Value;
+
+                query = $"SELECT count(*) FROM queue{thisValue.Key}1;";
+                await Globals.conn.OpenAsync();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        thisRole.inQueue1 = reader.GetInt16(0) > 0;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    await Globals.conn.CloseAsync();
+                    throw;
+                }
+                await Globals.conn.CloseAsync();
+
+                query = $"SELECT count(*) FROM queue{thisValue.Key}2;";
+                await Globals.conn.OpenAsync();
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        thisRole.inQueue2 = reader.GetInt16(0) > 0;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    await Globals.conn.CloseAsync();
+                    throw;
+                }
+                await Globals.conn.CloseAsync();
+            }
+        }
     }
 
     class Program
@@ -66,6 +132,8 @@ namespace BPR
                 csv.Read();
                 Globals.conn = new MySqlConnection(csv.GetField<String>(0));
             }
+
+            await Globals.InitRegions();
 
             _services = new ServiceCollection()
                 .AddSingleton(_client)
