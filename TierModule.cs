@@ -216,7 +216,7 @@ namespace BPR
                 string direction = (newTier > 0) ? "promoted" : "demoted";
                 newTier = Math.Abs(newTier);
 
-                await context.Channel.SendMessageAsync($"@<{change.Key}> you have been {direction} to Tier {newTier}");
+                await context.Channel.SendMessageAsync($"<@{change.Key}> you have been {direction} to Tier {newTier}");
                 await ChangeRoleToTier(context, newTier);
 
                 changeAnnouncements.Remove(change.Key);

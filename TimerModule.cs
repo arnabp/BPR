@@ -224,12 +224,15 @@ public class TimerService
         {
             Player thisPlayer = playersInQueue[0];
             playersInQueue.RemoveAt(0);
-            foreach (var checkPlayer in playersInQueue)
+            Player checkPlayer;
+            for (int i = 0; i < playersInQueue.Count; i++)
             {
+                checkPlayer = playersInQueue[i];
                 if ((thisPlayer.tier & checkPlayer.tier) > 0)
                 {
                     await MatchModule.CreateMatch1Async(thisChannel, thisPlayer, checkPlayer, region);
                     playersInQueue.Remove(checkPlayer);
+                    i--;
                 }
             }
         }
@@ -292,12 +295,15 @@ public class TimerService
         {
             Team thisTeam = teamsInQueue[0];
             teamsInQueue.RemoveAt(0);
-            foreach (var checkTeam in teamsInQueue)
+            Team checkTeam;
+            for (int i = 0; i < teamsInQueue.Count; i++)
             {
+                checkTeam = teamsInQueue[i];
                 if ((thisTeam.tier & checkTeam.tier) > 0)
                 {
                     await MatchModule.CreateMatch2Async(thisChannel, thisTeam, checkTeam, region);
                     teamsInQueue.Remove(checkTeam);
+                    i--;
                 }
             }
         }
