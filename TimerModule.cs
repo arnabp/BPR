@@ -708,6 +708,81 @@ public class TimerService
         }
     }
 
+    private async Task MidnightBankDecrease(IMessageChannel thisChannel, string region, int gameMode)
+    {
+        int hour = DateTime.Now.Hour;
+        bool checkNeeded = false;
+        if (hour != 7)
+            return;
+
+        Dictionary<ulong, bool> midnightChecks = new Dictionary<ulong, bool>();
+        string query = $"SELECT id, midnightCheck FROM leaderboard{region}{gameMode};";
+        await Globals.conn.OpenAsync();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                midnightChecks[reader.GetUInt64(0)] = reader.GetBoolean(1);
+                if (reader.GetBoolean(1))
+                    checkNeeded = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            await Globals.conn.CloseAsync();
+            throw;
+        }
+        await Globals.conn.CloseAsync();
+
+        if (!checkNeeded)
+            return;
+
+        Dictionary<ulong, int> banks = new Dictionary<ulong, int>();
+        query = $"SELECT id, bank FROM leaderboard{region}{gameMode};";
+        await Globals.conn.OpenAsync();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                banks[reader.GetUInt64(0)] = reader.GetInt16(1);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            await Globals.conn.CloseAsync();
+            throw;
+        }
+        await Globals.conn.CloseAsync();
+
+        foreach(var dictChecker in midnightChecks)
+        {
+            if (dictChecker.Value)
+            {
+                if (banks[dictChecker.Key] > 0)
+                {
+                    query = $"UPDATE leaderboard{region}{gameMode} SET bank = bank - 1 WHERE id = {dictChecker.Key};";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
+                }
+                else
+                {
+                    query = $"UPDATE leaderboard{region}{gameMode} SET elo = elo - 50 WHERE id = {dictChecker.Key};";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
+                }
+                
+                query = $"UPDATE leaderboard{region}{gameMode} SET midnightCheck = 0 WHERE id = {dictChecker.Key};";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
+        }
+    }
+
     private async Task CheckRoomAsync(IMessageChannel thisChannel, string region, int gameMode)
     {
         DateTime nowTime = DateTime.Now;
