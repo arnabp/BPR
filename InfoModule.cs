@@ -1685,7 +1685,7 @@ namespace BPR
             }
 
             // Get player info
-            string query = $"SELECT id1, id2, FROM matches{region}1;";
+            string query = $"SELECT id1, id2 FROM matches{region}1;";
             await Globals.conn.OpenAsync();
             try
             {
