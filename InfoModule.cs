@@ -897,7 +897,7 @@ namespace BPR
             }
             else
             {
-                query = $"INSERT INTO queue{region}2(time, username, id) VALUES({DateTime.UtcNow.Ticks}, '{userInfo.Username}', {userInfo.Id});";
+                query = $"INSERT INTO queue{region}2(time, username, id, tier, tierTeammate) VALUES({DateTime.UtcNow.Ticks}, '{userInfo.Username}', {userInfo.Id}, {queueTier}, {teammateTier});";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                 await Context.Channel.SendMessageAsync($"A player has been added to {region} 2v2 queue");
