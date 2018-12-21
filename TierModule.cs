@@ -200,14 +200,14 @@ namespace BPR
         {
             if (oldTier == newTier)
                 return 0;
-            if (oldTier > newTier)
+            if (oldTier < newTier)
                 return -newTier;
             return newTier;
         }
 
         public static async Task AnnounceTierChanges(SocketCommandContext context)
         {
-            foreach (var change in changeAnnouncements)
+            foreach (var change in changeAnnouncements.ToList())
             {
                 int newTier = change.Value;
                 if (newTier == 0)
