@@ -2736,6 +2736,9 @@ namespace BPR
                     }
                 }
 
+                if (roleTier == 0)
+                    continue;
+
                 double elo = 0;
                 if (roleTier == 1)
                     elo = TierModule.SEED1ELO;
@@ -2749,6 +2752,7 @@ namespace BPR
 
                 await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the NA 1v1 leaderboard!");
                 Console.WriteLine($"{user.Username} has been registered");
+                await Task.Delay(5000);
             }
         }
 
