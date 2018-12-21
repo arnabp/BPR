@@ -300,6 +300,14 @@ namespace BPR
             if (user != null) await Context.Channel.SendMessageAsync($"This user is {user.Username}");
             else await Context.Channel.SendMessageAsync($"This user does not exist");
         }
+
+        [Command("GetModeFromCommand")]
+        public async Task GetModeFromCommand([Remainder] string command)
+        {
+            int lengthOfCommand = 19;
+            int gameMode = (int)(Context.Message.Content[lengthOfCommand + 1] - '0');
+            await Context.Channel.SendMessageAsync($"Game Mode is {gameMode}");
+        }
     }
 
     [Group("queue1")]
