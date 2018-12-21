@@ -68,6 +68,7 @@ namespace BPR
         {
             if (Globals.roleList == null)
             {
+                Globals.roleList = new Dictionary<ulong, Role>();
                 Globals.roleList.Add(GetRoleId("NA", 1, 1), new Role { region = "NA", gameMode = 1, tier = 1 });
                 Globals.roleList.Add(GetRoleId("NA", 1, 2), new Role { region = "NA", gameMode = 1, tier = 2 });
                 Globals.roleList.Add(GetRoleId("NA", 1, 3), new Role { region = "NA", gameMode = 1, tier = 3 });

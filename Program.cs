@@ -41,6 +41,7 @@ namespace BPR
 
         public static async Task InitRegions()
         {
+            regionList = new Dictionary<string, Region>();
             string query = $"SELECT region, status, serverID FROM regionStatus;";
             await Globals.conn.OpenAsync();
             try
