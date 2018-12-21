@@ -128,7 +128,7 @@ namespace BPR
             _client.Log += Log;
 
             string token;
-            using (TextReader reader = File.OpenText(@"secrets.csv"))
+            using (TextReader reader = File.OpenText(@"/root/BPR/secrets.csv"))
             {
                 var csv = new CsvHelper.CsvReader(reader);
                 csv.Read();
