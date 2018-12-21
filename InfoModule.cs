@@ -363,7 +363,7 @@ namespace BPR
                 targetTier = tier;
             }
             // Convert tier and targetTier to binary tier queue number
-            int queueTier = TierModule.binaryAnd(tier, targetTier);
+            int queueTier = TierModule.binaryOr(tier, targetTier);
 
             bool isInQueue = false, isInMatch = false;
             int inLeaderboard = 0, oldTier = 0;
@@ -778,8 +778,8 @@ namespace BPR
                 targetTeammateTier = tier;
             }
             // Convert tier and targetTier to binary tier queue number
-            int queueTier = TierModule.binaryAnd(tier, targetTier);
-            int teammateTier = TierModule.binaryAnd(tier, targetTeammateTier);
+            int queueTier = TierModule.binaryOr(tier, targetTier);
+            int teammateTier = TierModule.binaryOr(tier, targetTeammateTier);
 
             bool isInQueue = false, isInMatch = false;
             int inLeaderboard = 0, oldTier = 0, oldTeammateTier = 0;
