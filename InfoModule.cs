@@ -308,6 +308,15 @@ namespace BPR
             int gameMode = (int)(Context.Message.Content[lengthOfCommand + 1] - '0');
             await Context.Channel.SendMessageAsync($"Game Mode is {gameMode}");
         }
+        
+        [Command("GetPlayerTier")]
+        public async Task GetPlayerTier(string region, int gameMode, [Remainder] ulong id)
+        {
+            TierModule thisTier = TierModule.GetTierModule(region, gameMode);
+            thisTier.getPlayerTier(id);
+
+            await Context.Channel.SendMessageAsync($"Player tier is {thisTier}");
+        }
     }
 
     [Group("queue1")]
