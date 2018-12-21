@@ -313,9 +313,9 @@ namespace BPR
         public async Task GetPlayerTier(string region, int gameMode, [Remainder] ulong id)
         {
             TierModule thisTier = TierModule.GetTierModule(region, gameMode);
-            thisTier.getPlayerTier(id);
+            int tier = thisTier.getPlayerTier(id);
 
-            await Context.Channel.SendMessageAsync($"Player tier is {thisTier}");
+            await Context.Channel.SendMessageAsync($"Player tier is {tier}");
         }
     }
 
