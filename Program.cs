@@ -32,6 +32,11 @@ namespace BPR
         public static Dictionary<ulong, Role> roleList;
         public static Dictionary<string, Region> regionList;
 
+        public static TierModule tiersNA1 = new TierModule("NA", 1);
+        public static TierModule tiersNA2 = new TierModule("NA", 2);
+        public static TierModule tiersEU1 = new TierModule("EU", 1);
+        public static TierModule tiersEU2 = new TierModule("EU", 2);
+
         public static Random rnd = new Random();
 
         public static async Task InitRegions()
@@ -134,6 +139,10 @@ namespace BPR
             }
 
             await Globals.InitRegions();
+            await Globals.tiersNA1.InitTierList();
+            await Globals.tiersNA2.InitTierList();
+            await Globals.tiersEU1.InitTierList();
+            await Globals.tiersEU2.InitTierList();
 
             _services = new ServiceCollection()
                 .AddSingleton(_client)

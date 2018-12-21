@@ -36,9 +36,9 @@ namespace BPR
         const int T1LIMIT = 10;
         const int T2LIMIT = 16;
 
-        const double SEED1ELO = 1150;
-        const double SEED2ELO = 1075;
-        const double SEED3ELO = 1000;
+        public const double SEED1ELO = 1150;
+        public const double SEED2ELO = 1075;
+        public const double SEED3ELO = 1000;
 
         public TierModule(string regionParam, int gameModeParam)
         {

@@ -149,14 +149,9 @@ namespace BPR
                 {
                     if (reader.GetInt16(0) == 0)
                     {
-                        if (region == "NA")
-                            Globals.inQueueNA1 = false;
-                        else if (region == "EU")
-                            Globals.inQueueEU1 = false;
-                        else if(region == "SEA")
-                            Globals.inQueueSEA1 = false;
-                        else if(region == "AUS")
-                            Globals.inQueueAUS1 = false;
+                        Region thisRegion = Globals.regionList[region];
+                        thisRegion.inQueue1 = false;
+                        Globals.regionList[region] = thisRegion;
                     }
                         
                 }
@@ -316,14 +311,9 @@ namespace BPR
                 {
                     if (reader.GetInt16(0) == 0)
                     {
-                        if (region == "NA")
-                            Globals.inQueueNA2 = false;
-                        else if (region == "EU")
-                            Globals.inQueueEU2 = false;
-                        else if (region == "SEA")
-                            Globals.inQueueSEA2 = false;
-                        else if (region == "AUS")
-                            Globals.inQueueAUS2 = false;
+                        Region thisRegion = Globals.regionList[region];
+                        thisRegion.inQueue2 = false;
+                        Globals.regionList[region] = thisRegion;
                     }
 
                 }

@@ -481,10 +481,19 @@ namespace BPR
             }
             else
             {
+                // Add user to queue
                 query = $"INSERT INTO queue{region}1(time, username, id, tier) VALUES({DateTime.UtcNow.Ticks}, '{userInfo.Username}', {userInfo.Id}, {queueTier});";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                 await Context.Channel.SendMessageAsync($"A player has been added to {region} 1v1 queue");
+
+                // Tell region that a user exists in queue
+                if (!Globals.regionList[region].inQueue1)
+                {
+                    Region thisRegion = Globals.regionList[region];
+                    thisRegion.inQueue1 = true;
+                    Globals.regionList[region] = thisRegion;
+                }
             }
         }
 
@@ -902,6 +911,14 @@ namespace BPR
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                 await Context.Channel.SendMessageAsync($"A player has been added to {region} 2v2 queue");
+
+                // Tell region that a user exists in queue
+                if (!Globals.regionList[region].inQueue2)
+                {
+                    Region thisRegion = Globals.regionList[region];
+                    thisRegion.inQueue2 = true;
+                    Globals.regionList[region] = thisRegion;
+                }
             }
         }
 

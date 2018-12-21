@@ -161,25 +161,25 @@ public class TimerService
 
             if (client.GetChannel(392829581192855554) is IMessageChannel generalNAEU)
             {
-                if (Globals.inQueueNA1)
+                if (Globals.regionList["NA"].inQueue1)
                     await CheckQueueMatchCreate1sAsync(generalNAEU, "NA");
-                if (Globals.inQueueNA2)
+                if (Globals.regionList["NA"].inQueue2)
                     await CheckQueueMatchCreate2sAsync(generalNAEU, "NA");
-                if (Globals.inQueueEU1)
+                if (Globals.regionList["EU"].inQueue1)
                     await CheckQueueMatchCreate1sAsync(generalNAEU, "EU");
-                if (Globals.inQueueEU2)
+                if (Globals.regionList["EU"].inQueue2)
                     await CheckQueueMatchCreate2sAsync(generalNAEU, "EU");
             }
 
             if (client.GetChannel(422045385612328973) is IMessageChannel generalAUSSEA)
             {
-                if (Globals.inQueueAUS1)
+                if (Globals.regionList["AUS"].inQueue1)
                     await CheckQueueMatchCreate1sAsync(generalAUSSEA, "AUS");
-                if (Globals.inQueueAUS2)
+                if (Globals.regionList["AUS"].inQueue2)
                     await CheckQueueMatchCreate2sAsync(generalAUSSEA, "AUS");
-                if (Globals.inQueueSEA1)
+                if (Globals.regionList["SEA"].inQueue1)
                     await CheckQueueMatchCreate1sAsync(generalAUSSEA, "SEA");
-                if (Globals.inQueueSEA2)
+                if (Globals.regionList["SEA"].inQueue2)
                     await CheckQueueMatchCreate2sAsync(generalAUSSEA, "SEA");
             }
 
