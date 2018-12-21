@@ -412,32 +412,29 @@ namespace BPR
             }
 
             // Check if user is already in the queue
-            if (Globals.regionList[region].inQueue1)
+            query = $"SELECT id, tier FROM queue{region}1;";
+            await Globals.conn.OpenAsync();
+            try
             {
-                query = $"SELECT id, tier FROM queue{region}1;";
-                await Globals.conn.OpenAsync();
-                try
-                {
-                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                    MySqlDataReader reader = cmd.ExecuteReader();
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
 
-                    while (reader.Read())
+                while (reader.Read())
+                {
+                    if (reader.GetUInt64(0) == userInfo.Id)
                     {
-                        if (reader.GetUInt64(0) == userInfo.Id)
-                        {
-                            isInQueue = true;
-                            oldTier = reader.GetInt16(1);
-                        }
+                        isInQueue = true;
+                        oldTier = reader.GetInt16(1);
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                    await Globals.conn.CloseAsync();
-                    throw;
-                }
-                await Globals.conn.CloseAsync();
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
 
             // Check if user is already in a match
             query = $"SELECT id1, id2 FROM matches{region}1;";
@@ -828,33 +825,30 @@ namespace BPR
             }
 
             // Check if user is already in the queue
-            if (Globals.regionList[region].inQueue2)
+            query = $"SELECT id, tier, tierTeammate FROM queue{region}2;";
+            await Globals.conn.OpenAsync();
+            try
             {
-                query = $"SELECT id, tier, tierTeammate FROM queue{region}2;";
-                await Globals.conn.OpenAsync();
-                try
-                {
-                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                    MySqlDataReader reader = cmd.ExecuteReader();
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
 
-                    while (reader.Read())
+                while (reader.Read())
+                {
+                    if (reader.GetUInt64(0) == userInfo.Id)
                     {
-                        if (reader.GetUInt64(0) == userInfo.Id)
-                        {
-                            isInQueue = true;
-                            oldTier = reader.GetInt16(1);
-                            oldTeammateTier = reader.GetInt16(2);
-                        }
+                        isInQueue = true;
+                        oldTier = reader.GetInt16(1);
+                        oldTeammateTier = reader.GetInt16(2);
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                    await Globals.conn.CloseAsync();
-                    throw;
-                }
-                await Globals.conn.CloseAsync();
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
             
             // Check if user is already in a match
             query = $"SELECT id1, id2, id3, id4 FROM matches{region}2;";
