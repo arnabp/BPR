@@ -233,6 +233,7 @@ public class TimerService
                     await MatchModule.CreateMatch1Async(thisChannel, thisPlayer, checkPlayer, region);
                     playersInQueue.Remove(checkPlayer);
                     i--;
+                    break;
                 }
             }
         }
@@ -304,6 +305,7 @@ public class TimerService
                     await MatchModule.CreateMatch2Async(thisChannel, thisTeam, checkTeam, region);
                     teamsInQueue.Remove(checkTeam);
                     i--;
+                    break;
                 }
             }
         }
