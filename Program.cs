@@ -52,6 +52,8 @@ namespace BPR
                 while (reader.Read())
                 {
                     regionList[reader.GetString(0)] = new Region { id = reader.GetUInt64(2), status = reader.GetBoolean(1) };
+
+                    Console.WriteLine($"{reader.GetString(0)} Region: {reader.GetUInt64(2)}");
                 }
             }
             catch (Exception ex)
@@ -133,11 +135,9 @@ namespace BPR
             {
                 var csv = new CsvHelper.CsvReader(reader);
                 csv.Read();
-                Console.WriteLine($"Token: {csv.GetField<String>(0)}");
                 token = csv.GetField<String>(0);
 
                 csv.Read();
-                Console.WriteLine($"SQL Connection: {csv.GetField<String>(0)}");
                 Globals.conn = new MySqlConnection(csv.GetField<String>(0));
             }
 
