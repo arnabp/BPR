@@ -1867,8 +1867,8 @@ namespace BPR
             double expected1 = 1 / (1 + System.Math.Pow(10, ((p2 - p1) / 400)));
             double expected2 = 1 / (1 + System.Math.Pow(10, ((p1 - p2) / 400)));
 
-            double change1 = (32 * (Convert.ToDouble(isP1) - expected1)) + 2;
-            double change2 = (32 * (Convert.ToDouble(!isP1) - expected2)) + 2;
+            double change1 = (32 * (Convert.ToDouble(isP1) - expected1)) + 1;
+            double change2 = (32 * (Convert.ToDouble(!isP1) - expected2)) + 1;
 
             var allChange = Tuple.Create(change1, change2);
 
@@ -2666,10 +2666,10 @@ namespace BPR
             double expected3 = 1 / (1 + System.Math.Pow(10, ((t1avg - p3) / 400)));
             double expected4 = 1 / (1 + System.Math.Pow(10, ((t1avg - p4) / 400)));
 
-            double change1 = (32 * (Convert.ToDouble(isT1) - expected1)) + 2;
-            double change2 = (32 * (Convert.ToDouble(isT1) - expected2)) + 2;
-            double change3 = (32 * (Convert.ToDouble(!isT1) - expected3)) + 2;
-            double change4 = (32 * (Convert.ToDouble(!isT1) - expected4)) + 2;
+            double change1 = (32 * (Convert.ToDouble(isT1) - expected1)) + 1;
+            double change2 = (32 * (Convert.ToDouble(isT1) - expected2)) + 1;
+            double change3 = (32 * (Convert.ToDouble(!isT1) - expected3)) + 1;
+            double change4 = (32 * (Convert.ToDouble(!isT1) - expected4)) + 1;
 
             var allChange = Tuple.Create(change1, change2, change3, change4);
 
