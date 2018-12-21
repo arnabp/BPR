@@ -68,21 +68,75 @@ namespace BPR
         {
             if (Globals.roleList == null)
             {
-                Globals.roleList.Add(419355178680975370, new Role { region = "NA", gameMode = 1, tier = 1 });
-                Globals.roleList.Add(522951562667098115, new Role { region = "NA", gameMode = 1, tier = 2 });
-                Globals.roleList.Add(522951569994547200, new Role { region = "NA", gameMode = 1, tier = 3 });
-                Globals.roleList.Add(419355321061081088, new Role { region = "NA", gameMode = 2, tier = 1 });
-                Globals.roleList.Add(522951571839909898, new Role { region = "NA", gameMode = 2, tier = 2 });
-                Globals.roleList.Add(522951573366767637, new Role { region = "NA", gameMode = 2, tier = 3 });
-                Globals.roleList.Add(419355374529937408, new Role { region = "EU", gameMode = 1, tier = 1 });
-                Globals.roleList.Add(522951575195615271, new Role { region = "EU", gameMode = 1, tier = 2 });
-                Globals.roleList.Add(522951576625610762, new Role { region = "EU", gameMode = 1, tier = 3 });
-                Globals.roleList.Add(419355453550624768, new Role { region = "EU", gameMode = 2, tier = 1 });
-                Globals.roleList.Add(522951577955205123, new Role { region = "EU", gameMode = 2, tier = 2 });
-                Globals.roleList.Add(522951579515748354, new Role { region = "EU", gameMode = 2, tier = 3 });
+                Globals.roleList.Add(GetRoleId("NA", 1, 1), new Role { region = "NA", gameMode = 1, tier = 1 });
+                Globals.roleList.Add(GetRoleId("NA", 1, 2), new Role { region = "NA", gameMode = 1, tier = 2 });
+                Globals.roleList.Add(GetRoleId("NA", 1, 3), new Role { region = "NA", gameMode = 1, tier = 3 });
+                Globals.roleList.Add(GetRoleId("NA", 2, 1), new Role { region = "NA", gameMode = 2, tier = 1 });
+                Globals.roleList.Add(GetRoleId("NA", 2, 2), new Role { region = "NA", gameMode = 2, tier = 2 });
+                Globals.roleList.Add(GetRoleId("NA", 2, 3), new Role { region = "NA", gameMode = 2, tier = 3 });
+                Globals.roleList.Add(GetRoleId("EU", 1, 1), new Role { region = "EU", gameMode = 1, tier = 1 });
+                Globals.roleList.Add(GetRoleId("EU", 1, 2), new Role { region = "EU", gameMode = 1, tier = 2 });
+                Globals.roleList.Add(GetRoleId("EU", 1, 3), new Role { region = "EU", gameMode = 1, tier = 3 });
+                Globals.roleList.Add(GetRoleId("EU", 2, 1), new Role { region = "EU", gameMode = 2, tier = 1 });
+                Globals.roleList.Add(GetRoleId("EU", 2, 2), new Role { region = "EU", gameMode = 2, tier = 2 });
+                Globals.roleList.Add(GetRoleId("EU", 2, 3), new Role { region = "EU", gameMode = 2, tier = 3 });
             }
 
             return Globals.roleList[roleID];
+        }
+
+        public static ulong GetRoleId(string region, int gameMode, int tier)
+        {
+            if (region == "NA")
+            {
+                if (tier == 1)
+                {
+                    if (gameMode == 1)
+                        return 419355178680975370;
+                    else if (gameMode == 2)
+                        return 419355321061081088;
+                }
+                else if (tier == 2)
+                {
+                    if (gameMode == 1)
+                        return 522951562667098115;
+                    else if (gameMode == 2)
+                        return 522951571839909898;
+                }
+                else if (tier == 3)
+                {
+                    if (gameMode == 1)
+                        return 522951569994547200;
+                    else if (gameMode == 2)
+                        return 522951573366767637;
+                }
+            }
+            else if (region == "EU")
+            {
+                if (tier == 1)
+                {
+                    if (gameMode == 1)
+                        return 419355374529937408;
+                    else if (gameMode == 2)
+                        return 419355453550624768;
+                }
+                else if (tier == 2)
+                {
+                    if (gameMode == 1)
+                        return 522951575195615271;
+                    else if (gameMode == 2)
+                        return 522951577955205123;
+                }
+                else if (tier == 3)
+                {
+                    if (gameMode == 1)
+                        return 522951576625610762;
+                    else if (gameMode == 2)
+                        return 522951579515748354;
+                }
+            }
+
+            return 0;
         }
 
         public static Color GetRegionColor(string region)
@@ -270,7 +324,7 @@ namespace BPR
         [Command("join")]
         [Alias("j")]
         [Summary("Joins the 1v1 queue")]
-        public async Task JoinAsync()
+        public async Task JoinAsync(int targetTier = 0)
         {
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
@@ -278,7 +332,7 @@ namespace BPR
 
             // Get User's information from Role
             string region = "";
-            int tier = 0;
+            int roleTier = 0;
             foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
             {
                 try
@@ -287,7 +341,7 @@ namespace BPR
                     if (thisRole.gameMode == 1)
                     {
                         region = thisRole.region;
-                        tier = thisRole.tier;
+                        roleTier = thisRole.tier;
                     }
                 }
                 catch (KeyNotFoundException)
@@ -306,9 +360,27 @@ namespace BPR
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
+            // Check if role tier matches dictionary tier
+            int tier = TierModule.GetTierModule(region, 1).getPlayerTier(userInfo.Id);
+            if (tier != roleTier)
+            {
+                Console.WriteLine($"{userInfo.Username} had the wrong tier assigned to them, fixing.");
+                await TierModule.ChangeRoleToTier(Context, tier);
+            }
+            // Setting all non-standard tiers to default to user's tier
+            if (targetTier < 1 || targetTier > 3)
+                targetTier = tier;
+            // Check that user can expand queue to desired tier
+            if (targetTier < tier)
+            {
+                await Context.Channel.SendMessageAsync("You cannot expand queue to a tier higher than you. You will be queued into your tier.");
+                targetTier = tier;
+            }
+            // Convert tier and targetTier to binary tier queue number
+            int queueTier = TierModule.binaryAnd(tier, targetTier);
 
             bool isInQueue = false, isInMatch = false;
-            int inLeaderboard = 0;
+            int inLeaderboard = 0, oldTier = 0;
 
             // Check that user is in appropriate leaderboard
             string query = $"SELECT count(*) FROM leaderboard{region}1 WHERE id = {userInfo.Id};";
@@ -339,7 +411,7 @@ namespace BPR
             // Check if user is already in the queue
             if (Globals.regionList[region].inQueue1)
             {
-                query = $"SELECT id FROM queue{region}1;";
+                query = $"SELECT id, tier FROM queue{region}1;";
                 await Globals.conn.OpenAsync();
                 try
                 {
@@ -348,7 +420,11 @@ namespace BPR
 
                     while (reader.Read())
                     {
-                        if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
+                        if (reader.GetUInt64(0) == userInfo.Id)
+                        {
+                            isInQueue = true;
+                            oldTier = reader.GetInt16(1);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -388,7 +464,14 @@ namespace BPR
 
                 query = $"UPDATE queue{region}1 SET time = {DateTime.UtcNow.Ticks} WHERE id = {userInfo.Id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                Console.WriteLine($"{userInfo.Username} refreshed their queue timer");
+
+                if (oldTier != queueTier)
+                {
+                    query = $"UPDATE queue{region}2 SET tier = {queueTier} WHERE id = {userInfo.Id};";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
+                }
+
+                Console.WriteLine($"{userInfo.Username} updated their queue");
             }
             else if (isInMatch)
             {
@@ -397,7 +480,7 @@ namespace BPR
             }
             else
             {
-                query = $"INSERT INTO queue{region}1(time, username, id) VALUES({DateTime.UtcNow.Ticks}, '{userInfo.Username}', {userInfo.Id});";
+                query = $"INSERT INTO queue{region}1(time, username, id, tier) VALUES({DateTime.UtcNow.Ticks}, '{userInfo.Username}', {userInfo.Id}, {queueTier});";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                 await Context.Channel.SendMessageAsync($"A player has been added to {region} 1v1 queue");
@@ -640,7 +723,7 @@ namespace BPR
         [Command("join")]
         [Alias("j")]
         [Summary("Joins the 2v2 queue")]
-        public async Task JoinAsync()
+        public async Task JoinAsync(int targetTier = 0, int targetTeammateTier = 0)
         {
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
@@ -648,7 +731,7 @@ namespace BPR
 
             // Get User's information from Role
             string region = "";
-            int tier = 0;
+            int roleTier = 0;
             foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
             {
                 try
@@ -657,7 +740,7 @@ namespace BPR
                     if (thisRole.gameMode == 2)
                     {
                         region = thisRole.region;
-                        tier = thisRole.tier;
+                        roleTier = thisRole.tier;
                     }
                 }
                 catch (KeyNotFoundException)
@@ -676,9 +759,35 @@ namespace BPR
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
+            // Check if role tier matches dictionary tier
+            int tier = TierModule.GetTierModule(region, 1).getPlayerTier(userInfo.Id);
+            if (tier != roleTier)
+            {
+                Console.WriteLine($"{userInfo.Username} had the wrong tier assigned to them, fixing.");
+                await TierModule.ChangeRoleToTier(Context, tier);
+            }
+            // Setting all non-standard tiers to default to user's tier
+            if (targetTier < 1 || targetTier > 3)
+                targetTier = tier;
+            if (targetTeammateTier < 1 || targetTeammateTier > 3)
+                targetTeammateTier = tier;
+            // Check that user can expand queue to desired tier
+            if (targetTier < tier)
+            {
+                await Context.Channel.SendMessageAsync("You cannot expand queue to a tier higher than you. You will be queued into your tier.");
+                targetTier = tier;
+            }
+            if (targetTeammateTier < tier)
+            {
+                await Context.Channel.SendMessageAsync("You cannot request a teammate with a tier higher than you. You will automatically get a teammate higher than you if they have requested this.");
+                targetTeammateTier = tier;
+            }
+            // Convert tier and targetTier to binary tier queue number
+            int queueTier = TierModule.binaryAnd(tier, targetTier);
+            int teammateTier = TierModule.binaryAnd(tier, targetTeammateTier);
 
             bool isInQueue = false, isInMatch = false;
-            int inLeaderboard = 0;
+            int inLeaderboard = 0, oldTier = 0, oldTeammateTier = 0;
 
             // Check that user is in appropriate leaderboard
             string query = $"SELECT count(*) FROM leaderboard{region}2 WHERE id = {userInfo.Id};";
@@ -709,7 +818,7 @@ namespace BPR
             // Check if user is already in the queue
             if (Globals.regionList[region].inQueue2)
             {
-                query = $"SELECT id FROM queue{region}2;";
+                query = $"SELECT id, tier, tierTeammate FROM queue{region}2;";
                 await Globals.conn.OpenAsync();
                 try
                 {
@@ -718,7 +827,12 @@ namespace BPR
 
                     while (reader.Read())
                     {
-                        if (reader.GetUInt64(0) == userInfo.Id) isInQueue = true;
+                        if (reader.GetUInt64(0) == userInfo.Id)
+                        {
+                            isInQueue = true;
+                            oldTier = reader.GetInt16(1);
+                            oldTeammateTier = reader.GetInt16(2);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -761,7 +875,20 @@ namespace BPR
 
                 query = $"UPDATE queue{region}2 SET time = {DateTime.UtcNow.Ticks} WHERE id = {userInfo.Id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                Console.WriteLine($"{userInfo.Username} refreshed their queue timer");
+
+                if (oldTier != queueTier)
+                {
+                    query = $"UPDATE queue{region}2 SET tier = {queueTier} WHERE id = {userInfo.Id};";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
+                }
+
+                if (oldTeammateTier != teammateTier)
+                {
+                    query = $"UPDATE queue{region}2 SET tierTeammate = {teammateTier} WHERE id = {userInfo.Id};";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
+                }
+
+                Console.WriteLine($"{userInfo.Username} updated their queue");
             }
             else if (isInMatch)
             {
