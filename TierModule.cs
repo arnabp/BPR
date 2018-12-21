@@ -9,6 +9,18 @@ using System.Threading.Tasks;
 
 namespace BPR
 {
+    public class MutableTuple<T1, T2>
+    {
+        public T1 Item1 { get; set; }
+        public T2 Item2 { get; set; }
+
+        public MutableTuple(T1 item1, T2 item2)
+        {
+            Item1 = item1;
+            Item2 = item2;
+        }
+    }
+
     public class TierModule
     {
         private string region;
@@ -16,10 +28,11 @@ namespace BPR
         public int inTier1;
         public int inTier2;
         public int inTier3;
-        private Dictionary<ulong, int> tierList;
+        private static Dictionary<ulong, int> changeAnnouncements = new Dictionary<ulong, int>();
+        private Dictionary<ulong, MutableTuple<double, int>> tierList;
 
-        const int T1ELO = 1400;
-        const int T2ELO = 1200;
+        const double T1ELO = 1400;
+        const double T2ELO = 1200;
         const int T1LIMIT = 10;
         const int T2LIMIT = 16;
 
@@ -27,7 +40,7 @@ namespace BPR
         {
             region = regionParam;
             gameMode = gameModeParam;
-            tierList = new Dictionary<ulong, int>();
+            tierList = new Dictionary<ulong, MutableTuple<double, int>>();
 
             inTier1 = 0;
             inTier2 = 0;
@@ -46,21 +59,21 @@ namespace BPR
 
                 while (reader.Read())
                 {
-                    int elo = reader.GetInt16(1);
+                    double elo = reader.GetDouble(1);
                     if (elo >= T1ELO && inTier1 < T1LIMIT)
                     {
                         inTier1++;
-                        tierList[reader.GetUInt64(0)] = elo;
+                        tierList[reader.GetUInt64(0)] = new MutableTuple<double, int>(elo, 1);
                     }
                     else if (elo >= T2ELO && inTier2 < T2LIMIT)
                     {
                         inTier2++;
-                        tierList[reader.GetUInt64(0)] = elo;
+                        tierList[reader.GetUInt64(0)] = new MutableTuple<double, int>(elo, 2);
                     }
                     else
                     {
                         inTier3++;
-                        tierList[reader.GetUInt64(0)] = elo;
+                        tierList[reader.GetUInt64(0)] = new MutableTuple<double, int>(elo, 3);
                     }
                 }
             }
@@ -73,9 +86,11 @@ namespace BPR
             await Globals.conn.CloseAsync();
         }
 
-        public int PlayerEloChange(ulong id, int newElo)
+        public void PlayerEloChange(ulong id, double newElo)
         {
-            int oldTier = tierList[id];
+            int oldTier = tierList[id].Item2;
+            tierList[id].Item1 = newElo;
+
             if (oldTier == 1)
                 inTier1--;
             else if (oldTier == 2)
@@ -86,28 +101,21 @@ namespace BPR
             if (newElo >= T1ELO)
             {
                 inTier1++;
-                tierList[id] = 1;
-                if (oldTier != 1)
-                    return 1;
+                tierList[id].Item2 = 1;
+                changeAnnouncements[id] = GetChangeValue(oldTier, 1);
             }
             else if (newElo >= T2ELO)
             {
                 inTier2++;
-                tierList[id] = 2;
-                if (oldTier > 2)
-                    return -2;
-                else if (oldTier < 2)
-                    return 2;
+                tierList[id].Item2 = 2;
+                changeAnnouncements[id] = GetChangeValue(oldTier, 2);
             }
             else
             {
                 inTier3++;
-                tierList[id] = 3;
-                if (oldTier != 3)
-                    return -3;
+                tierList[id].Item2 = 3;
+                changeAnnouncements[id] = GetChangeValue(oldTier, 3);
             }
-
-            return 0;
         }
 
         public void NormalizeTiers()
@@ -120,30 +128,41 @@ namespace BPR
 
         public int getPlayerTier(ulong id)
         {
-            return tierList[id];
+            return tierList[id].Item2;
         }
 
         private void NormalizeTier1()
         {
             if (inTier1 > T1LIMIT)
             {
-                var tier1List = tierList.Where(player => player.Key == 1).ToList();
-                tier1List.Sort((pair2, pair1) => pair1.Value.CompareTo(pair2.Value));
+                var tier1List = tierList.Where(player => player.Value.Item2 == 1).ToList();
+                tier1List.Sort((pair2, pair1) => pair1.Value.Item1.CompareTo(pair2.Value.Item1));
 
                 for (int i = T1LIMIT; i < inTier1; i++)
                 {
-                    tierList[tier1List[i].Key] = 2;
+                    tierList[tier1List[i].Key].Item2 = 2;
+                    if (changeAnnouncements.ContainsKey(tier1List[i].Key))
+                        changeAnnouncements.Remove(tier1List[i].Key);
+                    else
+                        changeAnnouncements[tier1List[i].Key] = -2;
                 }
             }
             else if (inTier1 < T1LIMIT)
             {
-                var tier2List = tierList.Where(player => player.Key == 2).ToList();
-                tier2List.Sort((pair2, pair1) => pair1.Value.CompareTo(pair2.Value));
+                var tier2List = tierList.Where(player => player.Value.Item2 == 2).ToList();
+                tier2List.Sort((pair2, pair1) => pair1.Value.Item1.CompareTo(pair2.Value.Item1));
 
                 for (int i = 0; i < T1LIMIT - inTier1; i++)
                 {
-                    if (tier2List[i].Value > T1ELO)
-                        tierList[tier2List[i].Key] = 1;
+                    if (tier2List[i].Value.Item1 > T1ELO)
+                    {
+                        tierList[tier2List[i].Key].Item2 = 1;
+                        if (changeAnnouncements.ContainsKey(tier2List[i].Key))
+                            changeAnnouncements.Remove(tier2List[i].Key);
+                        else
+                            changeAnnouncements[tier2List[i].Key] = 1;
+                    }
+
                 }
             }
         }
@@ -152,37 +171,52 @@ namespace BPR
         {
             if (inTier2 > T2LIMIT)
             {
-                var tier2List = tierList.Where(player => player.Key == 2).ToList();
-                tier2List.Sort((pair2, pair1) => pair1.Value.CompareTo(pair2.Value));
+                var tier2List = tierList.Where(player => player.Value.Item2 == 2).ToList();
+                tier2List.Sort((pair2, pair1) => pair1.Value.Item1.CompareTo(pair2.Value.Item1));
 
                 for (int i = T2LIMIT; i < inTier2; i++)
                 {
-                    tierList[tier2List[i].Key] = 2;
+                    tierList[tier2List[i].Key].Item2 = 2;
                 }
             }
             else if (inTier2 < T2LIMIT)
             {
-                var tier3List = tierList.Where(player => player.Key == 3).ToList();
-                tier3List.Sort((pair2, pair1) => pair1.Value.CompareTo(pair2.Value));
+                var tier3List = tierList.Where(player => player.Value.Item2 == 3).ToList();
+                tier3List.Sort((pair2, pair1) => pair1.Value.Item1.CompareTo(pair2.Value.Item1));
 
                 for (int i = 0; i < T2LIMIT - inTier2; i++)
                 {
-                    if (tier3List[i].Value > T1ELO)
-                        tierList[tier3List[i].Key] = 1;
+                    if (tier3List[i].Value.Item1 > T1ELO)
+                        tierList[tier3List[i].Key].Item2 = 1;
                 }
             }
         }
 
-        public static async Task AnnounceTierChange(SocketCommandContext context, int change)
+        private int GetChangeValue(int oldTier, int newTier)
         {
-            if (change == 0)
-                return;
+            if (oldTier == newTier)
+                return 0;
+            if (oldTier > newTier)
+                return -newTier;
+            return newTier;
+        }
 
-            string direction = (change > 0) ? "promoted" : "demoted";
-            change = Math.Abs(change);
+        public static async Task AnnounceTierChanges(SocketCommandContext context)
+        {
+            foreach (var change in changeAnnouncements)
+            {
+                int newTier = change.Value;
+                if (newTier == 0)
+                    continue;
 
-            await context.Channel.SendMessageAsync($"@<{context.User.Id}> you have been {direction} to Tier {change}");
-            await ChangeRoleToTier(context, change);
+                string direction = (newTier > 0) ? "promoted" : "demoted";
+                newTier = Math.Abs(newTier);
+
+                await context.Channel.SendMessageAsync($"@<{change.Key}> you have been {direction} to Tier {newTier}");
+                await ChangeRoleToTier(context, newTier);
+
+                changeAnnouncements.Remove(change.Key);
+            }
         }
 
         public static async Task ChangeRoleToTier(SocketCommandContext context, int change)

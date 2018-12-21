@@ -151,6 +151,7 @@ namespace BPR
 
         public static async Task ResetDecayTimer(ulong id, string region, int gameMode)
         {
+            // This function is depracated
             string query = $"UPDATE leaderboard{region}{gameMode} SET decaytimer = {DateTime.UtcNow.Ticks} WHERE id = {id};";
             await ExecuteSQLQueryAsync(query);
 
@@ -1201,7 +1202,6 @@ namespace BPR
 
             // Get User's information from Role
             string region = "";
-            int tier = 0;
             foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
             {
                 try
@@ -1210,7 +1210,6 @@ namespace BPR
                     if (thisRole.gameMode == 1)
                     {
                         region = thisRole.region;
-                        tier = thisRole.tier;
                     }
                 }
                 catch (KeyNotFoundException)
@@ -1230,6 +1229,7 @@ namespace BPR
                 return;
             }
 
+            // Get users' info
             string query = $"SELECT id1, id2, username1, username2, reverted FROM matches{region}1;";
             await Globals.conn.OpenAsync();
             try
@@ -1275,6 +1275,7 @@ namespace BPR
                 return;
             }
 
+            // Indicate which player won
             if (winner == "W" || winner == "w" || winner == "Y" || winner == "y") { }
             else if (winner == "L" || winner == "l" || winner == "N" || winner == "n")
             {
@@ -1287,11 +1288,15 @@ namespace BPR
                 return;
             }
 
+            // Debugging line that doubles as in indicator of a 1v1 match being logged
             Console.WriteLine($"isP1: {isP1} in {region}");
 
+            // Create tuple for storing results
             var results = new Tuple<double, double>(0, 0);
             double p1elo = 0, p2elo = 0;
-            query = $"SELECT elo FROM leaderboard{region}1 WHERE id = {p1ID};";
+
+            // Get player elo
+            query = $"SELECT id, elo FROM leaderboard{region}1;";
             await Globals.conn.OpenAsync();
             try
             {
@@ -1300,26 +1305,8 @@ namespace BPR
 
                 while (reader.Read())
                 {
-                    p1elo = reader.GetDouble(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-            query = $"SELECT elo FROM leaderboard{region}1 WHERE id = {p2ID};";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    p2elo = reader.GetDouble(0);
+                    if (reader.GetDouble(0) == p1ID) p1elo = reader.GetDouble(1);
+                    if (reader.GetDouble(0) == p2ID) p2elo = reader.GetDouble(1);
                 }
             }
             catch (Exception ex)
@@ -1330,20 +1317,25 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
+            // Get rid of old matches that could potentially be reverted for either player
             query = $"DELETE FROM matchesHistory1 WHERE id1 = {p1ID} OR id2 = {p1ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
             query = $"DELETE FROM matchesHistory1 WHERE id1 = {p2ID} OR id2 = {p2ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
+            // Add this match to history
             query = $"INSERT INTO matchesHistory1(id1, id2, oldElo1, oldElo2, isP1, region, username1, username2, reporter) " +
                 $"VALUES({p1ID}, {p2ID}, {p1elo}, {p2elo}, {isP1}, '{region}', '{p1Username}', '{p2Username}', {userInfo.Id});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
+            // Get new elo changes
             results = EloConvert(p1elo, p2elo, (bool)isP1);
 
+            // Get new elo amounts
             double new1 = p1elo + results.Item1;
             double new2 = p2elo + results.Item2;
 
+            // Print results in embed
             var embed = new EmbedBuilder
             {
                 Title = "Match Result",
@@ -1370,6 +1362,7 @@ namespace BPR
                 p2ResultString = "wins";
             }
 
+            // Update player's elo in leaderboard
             Console.WriteLine($"Giving {p1Username} {results.Item1} elo, resulting in {new1}");
             query = $"UPDATE leaderboard{region}1 SET elo = {new1} WHERE id = {p1ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -1382,80 +1375,17 @@ namespace BPR
             query = $"UPDATE leaderboard{region}1 SET {p2ResultString} = {p2ResultString} + 1 WHERE id = {p2ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await HelperFunctions.ResetDecayTimer(p1ID, region, 1);
-            await HelperFunctions.ResetDecayTimer(p2ID, region, 1);
+            // Check for any tier changes
+            TierModule thisTierModule = TierModule.GetTierModule(region, 1);
+            thisTierModule.PlayerEloChange(p1ID, new1);
+            thisTierModule.PlayerEloChange(p2ID, new2);
+            thisTierModule.NormalizeTiers();
+            await TierModule.AnnounceTierChanges(Context);
 
+            // Remove the match from the matches list
             query = $"DELETE FROM matches{region}1 WHERE id1 = {p1ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
             Console.WriteLine($"{region} 1v1 Match #{thisMatchNum} has ended.");
-        }
-
-        [Command("room")]
-        [Summary("Adds room number to match info")]
-        public async Task AddRoomNumberAsync([Remainder] int room)
-        {
-            var userInfo = Context.User;
-            Console.WriteLine($"{userInfo.Username} is adding a room number");
-            int thisMatchNum = 1, idnum = 0;
-            bool isInMatch = false;
-
-            string region = "";
-            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
-            {
-                if (HelperFunctions.GetRoleRegion(role.Id) != "")
-                {
-                    region = HelperFunctions.GetRoleRegion(role.Id);
-                }
-            }
-            if (region == "")
-            {
-                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
-                return;
-            }
-            string query = $"SELECT id1, id2, username1, username2 FROM matches{region}1;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    if (userInfo.Id == reader.GetUInt64(0))
-                    {
-                        isInMatch = true;
-                        idnum = 1;
-                        break;
-                    }
-                    else if (userInfo.Id == reader.GetUInt64(1))
-                    {
-                        isInMatch = true;
-                        idnum = 2;
-                        break;
-                    }
-                    thisMatchNum++;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            if (isInMatch)
-            {
-                query = $"UPDATE matches{region}1 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
-                await HelperFunctions.ExecuteSQLQueryAsync(query);
-
-                await Context.Channel.SendMessageAsync($"{region} 1v1 Match #{thisMatchNum} is in room #{room}");
-            }
-            else
-            {
-                await Context.Channel.SendMessageAsync($"You are not currently in an {region} 1v1 match.");
-            }
-            await Context.Message.DeleteAsync();
         }
 
         [Command("revert")]
@@ -1466,7 +1396,8 @@ namespace BPR
             Console.WriteLine($"{userInfo.Username} is reverting a match");
             int thisMatchNum = 1, revertRequests = 0, thisPlayerNum = 0;
             bool hasAlreadyReverted = false;
-
+            
+            // Get users' info
             string query = $"SELECT id1, id2, revert1, revert2 FROM matchesHistory1;";
             await Globals.conn.OpenAsync();
             try
@@ -1502,7 +1433,7 @@ namespace BPR
                 throw;
             }
             await Globals.conn.CloseAsync();
-
+            
             if (hasAlreadyReverted)
             {
                 await Context.Channel.SendMessageAsync("A player tried to revert the match twice.");
@@ -1518,16 +1449,19 @@ namespace BPR
 
                 if (revertRequests < 1)
                 {
+                    // Add indication that a player has requested a revert
                     query = $"UPDATE matchesHistory1 SET revert{thisPlayerNum} = 1 WHERE id{thisPlayerNum} = {userInfo.Id};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
                 }
                 else
                 {
+                    // Now revert the match
                     ulong p1ID = 0, p2ID = 0, reporter = 0;
                     double p1elo = 0, p2elo = 0;
                     int isP1 = 0;
                     string region = "", p1Username = "", p2Username = "";
 
+                    // Get info of match from history
                     query = $"SELECT id1, id2, oldElo1, oldElo2, isP1, region, username1, username2, reporter FROM matchesHistory1 WHERE id{thisPlayerNum} = {userInfo.Id};";
                     await Globals.conn.OpenAsync();
                     try
@@ -1556,15 +1490,18 @@ namespace BPR
                     }
                     await Globals.conn.CloseAsync();
 
+                    // Revert elo
                     query = $"UPDATE leaderboard{region}1 SET elo = {p1elo} WHERE id = {p1ID};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     query = $"UPDATE leaderboard{region}1 SET elo = {p2elo} WHERE id = {p2ID};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
+                    // Readd match to matches
                     query = $"INSERT INTO matches{region}1(id1, id2, username1, username2, time, reverted) VALUES({p1ID}, {p2ID}, '{p1Username}', '{p2Username}', {DateTime.UtcNow.Ticks}, {reporter});";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
+                    // Find winner of reverted match
                     string p1ResultString = "wins";
                     string p2ResultString = "loss";
                     if (isP1 == 0)
@@ -1573,6 +1510,14 @@ namespace BPR
                         p2ResultString = "wins";
                     }
 
+                    // Revert to previous tiers
+                    TierModule thisTierModule = TierModule.GetTierModule(region, 1);
+                    thisTierModule.PlayerEloChange(p1ID, p1elo);
+                    thisTierModule.PlayerEloChange(p2ID, p2elo);
+                    thisTierModule.NormalizeTiers();
+                    await TierModule.AnnounceTierChanges(Context);
+
+                    // Revert wincount
                     query = $"UPDATE leaderboard{region}1 SET {p1ResultString} = {p1ResultString} - 1 WHERE id = {p1ID};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
                     query = $"UPDATE leaderboard{region}1 SET {p2ResultString} = {p2ResultString} - 1 WHERE id = {p2ID};";
@@ -1591,20 +1536,37 @@ namespace BPR
             Console.WriteLine($"{userInfo.Username} is canceling a match");
             int thisMatchNum = 1, cancelRequests = 0, thisPlayerNum = 0;
             bool hasAlreadyCancelled = false;
+
+            // Get User's information from Role
             string region = "";
             foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
             {
-                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                try
                 {
-                    region = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    if (thisRole.gameMode == 1)
+                    {
+                        region = thisRole.region;
+                    }
+                }
+                catch (KeyNotFoundException)
+                {
+                    continue;
                 }
             }
+            // Check if user is qualified to queue
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
+            if (!Globals.regionList[region].status)
+            {
+                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                return;
+            }
 
+            // Get player info
             string query = $"SELECT id1, id2, cancel1, cancel2 FROM matches{region}1;";
             await Globals.conn.OpenAsync();
             try
@@ -1656,11 +1618,13 @@ namespace BPR
 
                 if (cancelRequests < 1)
                 {
+                    // Add indication that a player has requested a cancel
                     query = $"UPDATE matches{region}1 SET cancel{thisPlayerNum} = 1 WHERE id{thisPlayerNum} = {userInfo.Id};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
                 }
                 else
                 {
+                    // Now cancel the match
                     query = $"DELETE FROM matches{region}1 WHERE id1 = {userInfo.Id} OR id2 = {userInfo.Id};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
@@ -1678,6 +1642,92 @@ namespace BPR
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("Match history cleared.");
+        }
+
+        [Command("room")]
+        [Summary("Adds room number to match info")]
+        public async Task AddRoomNumberAsync([Remainder] int room)
+        {
+            var userInfo = Context.User;
+            Console.WriteLine($"{userInfo.Username} is adding a room number");
+            int thisMatchNum = 1, idnum = 0;
+            bool isInMatch = false;
+
+            // Get User's information from Role
+            string region = "";
+            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            {
+                try
+                {
+                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    if (thisRole.gameMode == 1)
+                    {
+                        region = thisRole.region;
+                    }
+                }
+                catch (KeyNotFoundException)
+                {
+                    continue;
+                }
+            }
+            // Check if user is qualified to queue
+            if (region == "")
+            {
+                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                return;
+            }
+            if (!Globals.regionList[region].status)
+            {
+                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                return;
+            }
+
+            // Get player info
+            string query = $"SELECT id1, id2, FROM matches{region}1;";
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (userInfo.Id == reader.GetUInt64(0))
+                    {
+                        isInMatch = true;
+                        idnum = 1;
+                        break;
+                    }
+                    else if (userInfo.Id == reader.GetUInt64(1))
+                    {
+                        isInMatch = true;
+                        idnum = 2;
+                        break;
+                    }
+                    thisMatchNum++;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            if (isInMatch)
+            {
+                // Set room in match info
+                query = $"UPDATE matches{region}1 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+                await Context.Channel.SendMessageAsync($"{region} 1v1 Match #{thisMatchNum} is in room #{room}");
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync($"You are not currently in an {region} 1v1 match.");
+            }
+            await Context.Message.DeleteAsync();
         }
 
         [Command("superNA")]
@@ -1841,19 +1891,36 @@ namespace BPR
             string p1Username = "", p2Username = "", p3Username = "", p4Username = "";
             int thisMatchNum = 1;
 
+            // Get User's information from Role
             string region = "";
             foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
             {
-                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                try
                 {
-                    region = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    if (thisRole.gameMode == 1)
+                    {
+                        region = thisRole.region;
+                    }
+                }
+                catch (KeyNotFoundException)
+                {
+                    continue;
                 }
             }
+            // Check if user is qualified to queue
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
+            if (!Globals.regionList[region].status)
+            {
+                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                return;
+            }
+
+            // Get user's info
             string query = $"SELECT id1, id2, id3, id4, username1, username2, username3, username4, reverted FROM matches{region}2;";
             await Globals.conn.OpenAsync();
             try
@@ -1907,6 +1974,7 @@ namespace BPR
                 return;
             }
 
+            // Indicate which team won
             if (winner == "W" || winner == "w" || winner == "Y" || winner == "y") { }
             else if (winner == "L" || winner == "l" || winner == "N" || winner == "n")
             {
@@ -1919,10 +1987,14 @@ namespace BPR
                 return;
             }
 
+            // Debugging line that doubles as an indicator of a 2v2 match being logged
             Console.WriteLine($"isT1: {isT1} in {region}");
 
+            // Create tuple for storing results
             var results = new Tuple<double, double, double, double>(0, 0, 0, 0);
             double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0;
+
+            // Get player elo
             query = $"SELECT id, elo FROM leaderboard{region}2;";
             await Globals.conn.OpenAsync();
             try
@@ -1946,6 +2018,7 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
+            // Get rid of old matches that couple potentially be reverted for any player
             query = $"DELETE FROM matchesHistory2 WHERE id1 = {p1ID} OR id2 = {p1ID} OR id3 = {p1ID} OR id4 = {p1ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
             query = $"DELETE FROM matchesHistory2 WHERE id1 = {p2ID} OR id2 = {p2ID} OR id3 = {p2ID} OR id4 = {p2ID};";
@@ -1955,17 +2028,21 @@ namespace BPR
             query = $"DELETE FROM matchesHistory2 WHERE id1 = {p4ID} OR id2 = {p4ID} OR id3 = {p4ID} OR id4 = {p4ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
+            // Add this match to history
             query = $"INSERT INTO matchesHistory2(id1, id2, id3, id4, oldElo1, oldElo2, oldElo3, oldElo4, isT1, region, username1, username2, username3, username4, reporter) " +
                 $"VALUES({p1ID}, {p2ID}, {p3ID}, {p4ID}, {p1elo}, {p2elo}, {p3elo}, {p4elo}, {isT1}, '{region}', '{p1Username}', '{p2Username}', '{p3Username}', '{p4Username}', {userInfo.Id});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
+            // Get new elo changes
             results = EloConvert(p1elo, p2elo, p3elo, p4elo, (bool)isT1);
 
+            // Great new elo amounts
             double new1 = p1elo + results.Item1;
             double new2 = p2elo + results.Item2;
             double new3 = p3elo + results.Item3;
             double new4 = p4elo + results.Item4;
 
+            // Print results in embed
             var embed = new EmbedBuilder
             {
                 Title = "Match Result",
@@ -2002,6 +2079,7 @@ namespace BPR
                 t2ResultString = "wins";
             }
 
+            // Update player's elo in leaderboard
             Console.WriteLine($"Giving {p1Username} {results.Item1} elo, resulting in {new1}");
             query = $"UPDATE leaderboard{region}2 SET elo = {new1} WHERE id = {p1ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -2026,11 +2104,16 @@ namespace BPR
             query = $"UPDATE leaderboard{region}2 SET {t2ResultString} = {t2ResultString} + 1 WHERE id = {p4ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await HelperFunctions.ResetDecayTimer(p1ID, region, 2);
-            await HelperFunctions.ResetDecayTimer(p2ID, region, 2);
-            await HelperFunctions.ResetDecayTimer(p3ID, region, 2);
-            await HelperFunctions.ResetDecayTimer(p4ID, region, 2);
+            // Check for any tier changes
+            TierModule thisTierModule = TierModule.GetTierModule(region, 2);
+            thisTierModule.PlayerEloChange(p1ID, new1);
+            thisTierModule.PlayerEloChange(p2ID, new2);
+            thisTierModule.PlayerEloChange(p3ID, new3);
+            thisTierModule.PlayerEloChange(p4ID, new4);
+            thisTierModule.NormalizeTiers();
+            await TierModule.AnnounceTierChanges(Context);
 
+            // Remove the match from the matches list
             query = $"DELETE FROM matches{region}2 WHERE id1 = {p1ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
             Console.WriteLine($"Match #{thisMatchNum} has ended.");
@@ -2045,6 +2128,7 @@ namespace BPR
             int thisMatchNum = 1, revertRequests = 0, thisPlayerNum = 0;
             bool hasAlreadyReverted = false;
 
+            // Get users' info
             string query = $"SELECT id1, id2, id3, id4, revert1, revert2, revert3, revert4 FROM matchesHistory2;";
             await Globals.conn.OpenAsync();
             try
@@ -2120,16 +2204,19 @@ namespace BPR
 
                 if (revertRequests < 2)
                 {
+                    // Add indication that a player has requested a revert
                     query = $"UPDATE matchesHistory2 SET revert{thisPlayerNum} = 1 WHERE id{thisPlayerNum} = {userInfo.Id};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
                 }
                 else
                 {
+                    // Now revert the match
                     ulong p1ID = 0, p2ID = 0, p3ID = 0, p4ID = 0;
                     double p1elo = 0, p2elo = 0, p3elo = 0, p4elo = 0, reporter = 0;
                     int isT1 = 0;
                     string region = "", p1Username = "", p2Username = "", p3Username = "", p4Username = "";
 
+                    // Get info of the match from history
                     query = $"SELECT id1, id2, id3, id4, oldElo1, oldElo2, oldElo3, oldElo4, isT1, region, username1, username2, username3, username4, reporter " +
                         $"FROM matchesHistory2 WHERE id{thisPlayerNum} = {userInfo.Id};";
                     await Globals.conn.OpenAsync();
@@ -2165,6 +2252,7 @@ namespace BPR
                     }
                     await Globals.conn.CloseAsync();
 
+                    // Revert elo
                     query = $"UPDATE leaderboard{region}2 SET elo = {p1elo} WHERE id = {p1ID};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
@@ -2177,10 +2265,12 @@ namespace BPR
                     query = $"UPDATE leaderboard{region}2 SET elo = {p4elo} WHERE id = {p4ID};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
+                    // Readd match to matches
                     query = $"INSERT INTO matches{region}2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
                         $"VALUES({p1ID}, {p2ID}, {p3ID}, {p4ID}, '{p1Username}', '{p2Username}', '{p3Username}', '{p4Username}', {DateTime.UtcNow.Ticks}, {reporter});";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
+                    // Find winner of reverted match
                     string t1ResultString = "wins";
                     string t2ResultString = "loss";
                     if (isT1 == 0)
@@ -2189,6 +2279,16 @@ namespace BPR
                         t2ResultString = "wins";
                     }
 
+                    // Rever to previous tiers
+                    TierModule thisTierModule = TierModule.GetTierModule(region, 2);
+                    thisTierModule.PlayerEloChange(p1ID, p1elo);
+                    thisTierModule.PlayerEloChange(p2ID, p2elo);
+                    thisTierModule.PlayerEloChange(p3ID, p3elo);
+                    thisTierModule.PlayerEloChange(p4ID, p4elo);
+                    thisTierModule.NormalizeTiers();
+                    await TierModule.AnnounceTierChanges(Context);
+
+                    // Revert wincount
                     query = $"UPDATE leaderboard{region}2 SET {t1ResultString} = {t1ResultString} - 1 WHERE id = {p1ID};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
                     query = $"UPDATE leaderboard{region}2 SET {t1ResultString} = {t1ResultString} - 1 WHERE id = {p2ID};";
@@ -2211,20 +2311,37 @@ namespace BPR
             Console.WriteLine($"{userInfo.Username} is cancelling a match");
             int thisMatchNum = 1, cancelRequests = 0, thisPlayerNum = 0;
             bool hasAlreadyCancelled = false;
+
+            // Get User's information from Role
             string region = "";
             foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
             {
-                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                try
                 {
-                    region = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    if (thisRole.gameMode == 1)
+                    {
+                        region = thisRole.region;
+                    }
+                }
+                catch (KeyNotFoundException)
+                {
+                    continue;
                 }
             }
+            // Check if user is qualified to queue
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
+            if (!Globals.regionList[region].status)
+            {
+                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                return;
+            }
 
+            // Get player info
             string query = $"SELECT id1, id2, id3, id4, cancel1, cancel2, cancel3, cancel4 FROM matches{region}2;";
             await Globals.conn.OpenAsync();
             try
@@ -2300,11 +2417,13 @@ namespace BPR
 
                 if (cancelRequests < 2)
                 {
+                    // Add indication that a player has requested a cancel
                     query = $"UPDATE matches{region}2 SET cancel{thisPlayerNum} = 1 WHERE id{thisPlayerNum} = {userInfo.Id};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
                 }
                 else
                 {
+                    // Now cancel the match
                     query = $"DELETE FROM matches{region}2 WHERE id1 = {userInfo.Id} OR id2 = {userInfo.Id} OR id3 = {userInfo.Id} OR id4 = {userInfo.Id};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
@@ -2333,19 +2452,36 @@ namespace BPR
             int thisMatchNum = 1, idnum = 0;
             bool isInMatch = false;
 
+            // Get User's information from Role
             string region = "";
             foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
             {
-                if (HelperFunctions.GetRoleRegion(role.Id) != "")
+                try
                 {
-                    region = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    if (thisRole.gameMode == 1)
+                    {
+                        region = thisRole.region;
+                    }
+                }
+                catch (KeyNotFoundException)
+                {
+                    continue;
                 }
             }
+            // Check if user is qualified to queue
             if (region == "")
             {
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
+            if (!Globals.regionList[region].status)
+            {
+                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                return;
+            }
+
+            // Get player info
             string query = $"SELECT id1, id2, id3, id4 username1, username2 FROM matches{region}2;";
             await Globals.conn.OpenAsync();
             try
@@ -2392,6 +2528,7 @@ namespace BPR
 
             if (isInMatch)
             {
+                // Set room in match info
                 query = $"UPDATE matches{region}2 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
 
