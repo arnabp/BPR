@@ -417,18 +417,25 @@ public class TimerService
             MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
             MySqlDataReader reader = cmd.ExecuteReader();
 
-            var thisEmbed = embed1;
-
             while (reader.Read())
             {
-                if (i > 25)
-                    thisEmbed = embed2;
-                
-                thisEmbed.AddField(x =>
+                if (i <= 25)
                 {
-                    x.Name = $"{reader.GetString(0)}: {reader.GetInt16(1)}";
-                    x.IsInline = false;
-                });
+                    embed1.AddField(x =>
+                    {
+                        x.Name = $"{reader.GetString(0)}: {reader.GetInt16(1)}";
+                        x.IsInline = false;
+                    });
+                }
+                else
+                {
+                    embed2.AddField(x =>
+                    {
+                        x.Name = $"{reader.GetString(0)}: {reader.GetInt16(1)}";
+                        x.IsInline = false;
+                    });
+                }
+                
                 i++;
             }
         }
