@@ -769,7 +769,7 @@ namespace BPR
                 return;
             }
             // Check if role tier matches dictionary tier
-            int tier = TierModule.GetTierModule(region, 1).getPlayerTier(userInfo.Id);
+            int tier = TierModule.GetTierModule(region, 2).getPlayerTier(userInfo.Id);
             if (tier != roleTier)
             {
                 Console.WriteLine($"{userInfo.Username} had the wrong tier assigned to them, fixing.");
@@ -934,7 +934,7 @@ namespace BPR
                 try
                 {
                     Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
-                    if (thisRole.gameMode == 1)
+                    if (thisRole.gameMode == 2)
                     {
                         region = thisRole.region;
                         tier = thisRole.tier;
@@ -1911,7 +1911,7 @@ namespace BPR
                 try
                 {
                     Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
-                    if (thisRole.gameMode == 1)
+                    if (thisRole.gameMode == 2)
                     {
                         region = thisRole.region;
                     }
@@ -2332,7 +2332,7 @@ namespace BPR
                 try
                 {
                     Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
-                    if (thisRole.gameMode == 1)
+                    if (thisRole.gameMode == 2)
                     {
                         region = thisRole.region;
                     }
@@ -2472,7 +2472,7 @@ namespace BPR
                 try
                 {
                     Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
-                    if (thisRole.gameMode == 1)
+                    if (thisRole.gameMode == 2)
                     {
                         region = thisRole.region;
                     }
@@ -2495,7 +2495,7 @@ namespace BPR
             }
 
             // Get player info
-            string query = $"SELECT id1, id2, id3, id4 username1, username2 FROM matches{region}2;";
+            string query = $"SELECT id1, id2, id3, id4 FROM matches{region}2;";
             await Globals.conn.OpenAsync();
             try
             {
