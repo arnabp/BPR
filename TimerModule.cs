@@ -181,7 +181,7 @@ public class TimerService
                     IUserMessage bankInfoEU2m = messageList.ToList()[0] as IUserMessage;
 
                     if (bankInfoNA1m != null && bankInfoNA2m != null) await UpdateBankInfoAsync(bankInfoNA1m, bankInfoNA2m, "NA", 1);
-                    if (bankInfoEU1m != null && bankInfoEU2m != null) await UpdateBankInfoAsync(bankInfoNA1m, bankInfoNA2m, "EU", 1);
+                    if (bankInfoEU1m != null && bankInfoEU2m != null) await UpdateBankInfoAsync(bankInfoEU1m, bankInfoEU2m, "EU", 1);
                 }
 
                 if (client.GetChannel(525950398297669639) is IMessageChannel bank2InfoNAEU)
@@ -194,7 +194,7 @@ public class TimerService
                     IUserMessage bankInfoEU2m = messageList.ToList()[0] as IUserMessage;
 
                     if (bankInfoNA1m != null && bankInfoNA2m != null) await UpdateBankInfoAsync(bankInfoNA1m, bankInfoNA2m, "NA", 2);
-                    if (bankInfoEU1m != null && bankInfoEU2m != null) await UpdateBankInfoAsync(bankInfoNA1m, bankInfoNA2m, "EU", 2);
+                    if (bankInfoEU1m != null && bankInfoEU2m != null) await UpdateBankInfoAsync(bankInfoEU1m, bankInfoEU2m, "EU", 2);
                 }
             }
 
