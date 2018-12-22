@@ -140,7 +140,7 @@ public class TimerService
 
                 }
 
-                if (client.GetChannel(423372016922525697) is IMessageChannel queue1InfoAUSSEA)
+                if (false && client.GetChannel(423372016922525697) is IMessageChannel queue1InfoAUSSEA)
                 {
                     IEnumerable<IMessage> messageList = await queue1InfoAUSSEA.GetMessagesAsync(4).Flatten();
 
@@ -156,7 +156,7 @@ public class TimerService
 
                 }
 
-                if (client.GetChannel(437510787951493121) is IMessageChannel queue2InfoAUSSEA)
+                if (false && client.GetChannel(437510787951493121) is IMessageChannel queue2InfoAUSSEA)
                 {
                     IEnumerable<IMessage> messageList = await queue2InfoAUSSEA.GetMessagesAsync(4).Flatten();
 
