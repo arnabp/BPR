@@ -24,7 +24,7 @@ public class TimerService
         _timer = new Timer(async _ =>
         {
             // 3) Any code you want to periodically run goes here:
-            if (Globals.timerCount % 6 == 0)
+            if (Globals.timerCount % 2 == 0)
             {
                 if (client.GetChannel(392829581192855554) is IMessageChannel generalTimeoutNAEU)
                 {
@@ -187,7 +187,7 @@ public class TimerService
         },
         null,
         TimeSpan.FromMinutes(0),  // 4) Time that message should fire after the timer is created
-        TimeSpan.FromSeconds(5)); // 5) Time after which message should repeat (use `Timeout.Infinite` for no repeat)
+        TimeSpan.FromSeconds(15)); // 5) Time after which message should repeat (use `Timeout.Infinite` for no repeat)
     }
 
     private async Task CheckQueueMatchCreate1sAsync(IMessageChannel thisChannel, string region)
