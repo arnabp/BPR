@@ -68,9 +68,9 @@ public class TimerService
                     }
                 }
 
-                if (client.GetChannel(401167888762929153) is IMessageChannel queue1InfoNAEU)
+                if (client.GetChannel(401167888762929153) is IMessageChannel queue1InfoNA)
                 {
-                    IEnumerable<IMessage> messageList = await queue1InfoNAEU.GetMessagesAsync(4).Flatten();
+                    IEnumerable<IMessage> messageList = await queue1InfoNA.GetMessagesAsync(4).Flatten();
 
                     IUserMessage leaderboardNAm = messageList.ToList()[3] as IUserMessage;
                     IUserMessage leaderboardEUm = messageList.ToList()[2] as IUserMessage;
@@ -84,9 +84,9 @@ public class TimerService
 
                 }
 
-                if (client.GetChannel(404558855771521024) is IMessageChannel queue2InfoNAEU)
+                if (client.GetChannel(404558855771521024) is IMessageChannel queue2InfoNA)
                 {
-                    IEnumerable<IMessage> messageList = await queue2InfoNAEU.GetMessagesAsync(4).Flatten();
+                    IEnumerable<IMessage> messageList = await queue2InfoNA.GetMessagesAsync(4).Flatten();
 
                     IUserMessage leaderboardNAm = messageList.ToList()[3] as IUserMessage;
                     IUserMessage leaderboardEUm = messageList.ToList()[2] as IUserMessage;
