@@ -227,7 +227,15 @@ namespace BPR
         {
             var userInfo = context.User;
             var guildUser = (IGuildUser)userInfo;
-            int gameMode = (int)(context.Message.Content[1] - '0');
+            int gameMode = 0;
+            try
+            {
+                gameMode = (int)(context.Message.Content[1] - '0');
+            }
+            catch (ArgumentException)
+            {
+                gameMode = (int)(context.Message.Content[5] - '0');
+            }
             string region = "";
             foreach (Discord.WebSocket.SocketRole role in context.Guild.GetUser(userInfo.Id).Roles)
             {
