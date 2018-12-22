@@ -1403,6 +1403,12 @@ namespace BPR
             thisTierModule.NormalizeTiers();
             await TierModule.AnnounceTierChanges(Context);
 
+            // Add banked game
+            query = $"UPDATE leaderboard{region}1 SET bank = bank + 1 WHERE id = {p1ID} AND bank < 7;";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+            query = $"UPDATE leaderboard{region}1 SET bank = bank + 1 WHERE id = {p2ID} AND bank < 7;";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
             // Remove the match from the matches list
             query = $"DELETE FROM matches{region}1 WHERE id1 = {p1ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -1537,6 +1543,12 @@ namespace BPR
                     thisTierModule.PlayerEloChange(p2ID, p2elo);
                     thisTierModule.NormalizeTiers();
                     await TierModule.AnnounceTierChanges(Context);
+
+                    // Revert banked game
+                    query = $"UPDATE leaderboard{region}1 SET bank = bank - 1 WHERE id = {p1ID} AND bank > 0;";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
+                    query = $"UPDATE leaderboard{region}1 SET bank = bank - 1 WHERE id = {p2ID} AND bank > 0;";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     // Revert wincount
                     query = $"UPDATE leaderboard{region}1 SET {p1ResultString} = {p1ResultString} - 1 WHERE id = {p1ID};";
@@ -2134,6 +2146,16 @@ namespace BPR
             thisTierModule.NormalizeTiers();
             await TierModule.AnnounceTierChanges(Context);
 
+            // Add banked game
+            query = $"UPDATE leaderboard{region}2 SET bank = bank + 1 WHERE id = {p1ID} AND bank < 7;";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+            query = $"UPDATE leaderboard{region}2 SET bank = bank + 1 WHERE id = {p2ID} AND bank < 7;";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+            query = $"UPDATE leaderboard{region}2 SET bank = bank + 1 WHERE id = {p3ID} AND bank < 7;";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+            query = $"UPDATE leaderboard{region}2 SET bank = bank + 1 WHERE id = {p4ID} AND bank < 7;";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
             // Remove the match from the matches list
             query = $"DELETE FROM matches{region}2 WHERE id1 = {p1ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -2308,6 +2330,16 @@ namespace BPR
                     thisTierModule.PlayerEloChange(p4ID, p4elo);
                     thisTierModule.NormalizeTiers();
                     await TierModule.AnnounceTierChanges(Context);
+
+                    // Add banked game
+                    query = $"UPDATE leaderboard{region}2 SET bank = bank - 1 WHERE id = {p1ID} AND bank > 0;";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
+                    query = $"UPDATE leaderboard{region}2 SET bank = bank - 1 WHERE id = {p2ID} AND bank > 0;";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
+                    query = $"UPDATE leaderboard{region}2 SET bank = bank - 1 WHERE id = {p3ID} AND bank > 0;";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
+                    query = $"UPDATE leaderboard{region}2 SET bank = bank - 1 WHERE id = {p4ID} AND bank > 0;";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     // Revert wincount
                     query = $"UPDATE leaderboard{region}2 SET {t1ResultString} = {t1ResultString} - 1 WHERE id = {p1ID};";

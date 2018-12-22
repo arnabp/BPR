@@ -170,6 +170,32 @@ public class TimerService
                     if (matchListm != null) await UpdateMatchesAsync(matchListm, "AUS", "SEA", 2);
                     if (queueListm != null) await UpdateQueueAsync(queueListm, "AUS", "SEA", 2);
                 }
+
+                if (client.GetChannel(525950148581523466) is IMessageChannel bank1InfoNAEU)
+                {
+                    IEnumerable<IMessage> messageList = await bank1InfoNAEU.GetMessagesAsync(4).Flatten();
+
+                    IUserMessage bankInfoNA1m = messageList.ToList()[3] as IUserMessage;
+                    IUserMessage bankInfoNA2m = messageList.ToList()[2] as IUserMessage;
+                    IUserMessage bankInfoEU1m = messageList.ToList()[1] as IUserMessage;
+                    IUserMessage bankInfoEU2m = messageList.ToList()[0] as IUserMessage;
+
+                    if (bankInfoNA1m != null && bankInfoNA2m != null) await UpdateBankInfoAsync(bankInfoNA1m, bankInfoNA2m, "NA", 1);
+                    if (bankInfoEU1m != null && bankInfoEU2m != null) await UpdateBankInfoAsync(bankInfoNA1m, bankInfoNA2m, "EU", 1);
+                }
+
+                if (client.GetChannel(525950398297669639) is IMessageChannel bank2InfoNAEU)
+                {
+                    IEnumerable<IMessage> messageList = await bank2InfoNAEU.GetMessagesAsync(4).Flatten();
+
+                    IUserMessage bankInfoNA1m = messageList.ToList()[3] as IUserMessage;
+                    IUserMessage bankInfoNA2m = messageList.ToList()[2] as IUserMessage;
+                    IUserMessage bankInfoEU1m = messageList.ToList()[1] as IUserMessage;
+                    IUserMessage bankInfoEU2m = messageList.ToList()[0] as IUserMessage;
+
+                    if (bankInfoNA1m != null && bankInfoNA2m != null) await UpdateBankInfoAsync(bankInfoNA1m, bankInfoNA2m, "NA", 2);
+                    if (bankInfoEU1m != null && bankInfoEU2m != null) await UpdateBankInfoAsync(bankInfoNA1m, bankInfoNA2m, "EU", 2);
+                }
             }
 
             if (client.GetChannel(392829581192855554) is IMessageChannel generalNAEU)
@@ -364,6 +390,64 @@ public class TimerService
         await thisMessage.ModifyAsync(x => {
             x.Content = "";
             x.Embed = embed.Build();
+        });
+    }
+
+    private async Task UpdateBankInfoAsync(IUserMessage thisMessage1, IUserMessage thisMessage2, string region, int gameMode)
+    {
+        List<KeyValuePair<ulong, int>> playerBanks = new List<KeyValuePair<ulong, int>>();
+
+        var embed1 = new EmbedBuilder
+        {
+            Title = $"{region} Banks 1/2",
+            Color = HelperFunctions.GetRegionColor(region)
+        };
+
+        var embed2 = new EmbedBuilder
+        {
+            Title = $"{region} Banks 2/2",
+            Color = HelperFunctions.GetRegionColor(region)
+        };
+
+        int i = 1;
+        string query = $"SELECT username, bank FROM leaderboard{region}{gameMode} ORDER BY username;";
+        await Globals.conn.OpenAsync();
+        try
+        {
+            MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            var thisEmbed = embed1;
+
+            while (reader.Read())
+            {
+                if (i > 25)
+                    thisEmbed = embed2;
+                
+                thisEmbed.AddField(x =>
+                {
+                    x.Name = $"{reader.GetString(0)}: {reader.GetInt16(1)}";
+                    x.IsInline = false;
+                });
+                i++;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            await Globals.conn.CloseAsync();
+            throw;
+        }
+        await Globals.conn.CloseAsync();
+
+        await thisMessage1.ModifyAsync(x => {
+            x.Content = "";
+            x.Embed = embed1.Build();
+        });
+
+        await thisMessage2.ModifyAsync(x => {
+            x.Content = "";
+            x.Embed = embed2.Build();
         });
     }
 
