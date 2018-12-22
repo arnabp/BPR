@@ -344,6 +344,7 @@ public class TimerService
             {
                 if (i > 25) break;
                 if (TierModule.GetTierModule(region, gameMode).getPlayerTier(reader.GetUInt64(0)) != tier)
+                    continue;
                 embed.AddField(x =>
                 {
                     x.Name = $"{i}: {reader.GetString(1)}";
