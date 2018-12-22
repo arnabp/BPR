@@ -433,7 +433,7 @@ public class TimerService
                     embed2.AddField(x =>
                     {
                         x.Name = $"{reader.GetString(0)}: {reader.GetInt16(1)}";
-                        x.Value = " ";
+                        x.Value = "​";
                         x.IsInline = true;
                     });
                 }
