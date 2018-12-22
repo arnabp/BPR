@@ -329,7 +329,7 @@ public class TimerService
         var embed = new EmbedBuilder
         {
             Title = $"{region} Leaderboard",
-            Color = HelperFunctions.GetRegionColor(region)
+            Color = HelperFunctions.GetTierColor(tier)
         };
 
         int i = 1;

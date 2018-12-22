@@ -134,6 +134,14 @@ namespace BPR
             else return Color.LightGrey;
         }
 
+        public static Color GetTierColor(int tier)
+        {
+            if (tier == 1) return new Color(0xfa7298);
+            else if (tier == 2) return new Color(0xff8201);
+            else if (tier == 3) return new Color(0x0071cd);
+            else return Color.LighterGrey;
+        }
+
         public static async Task ResetDecayTimer(ulong id, string region, int gameMode)
         {
             // This function is depracated
