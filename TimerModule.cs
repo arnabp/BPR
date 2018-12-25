@@ -851,7 +851,7 @@ public class TimerService
 
             while (reader.Read())
             {
-                if (midnightChecks[reader.GetUInt64(0)] = (reader.GetInt16(1) != hour))
+                if (midnightChecks[reader.GetUInt64(0)] = (reader.GetInt16(1) != day))
                     checkNeeded = true;
             }
         }
