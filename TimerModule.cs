@@ -198,6 +198,17 @@ public class TimerService
                 }
             }
 
+            if (Globals.timerCount % 20 == 0)
+            {
+                if (client.GetChannel(392829581192855554) is IMessageChannel generalDecayNAEU)
+                {
+                    await MidnightBankDecrease(generalDecayNAEU, "NA", 1);
+                    await MidnightBankDecrease(generalDecayNAEU, "NA", 2);
+                    await MidnightBankDecrease(generalDecayNAEU, "EU", 1);
+                    await MidnightBankDecrease(generalDecayNAEU, "EU", 2);
+                }
+            }
+
             if (client.GetChannel(392829581192855554) is IMessageChannel generalNAEU)
             {
                 if (Globals.regionList["NA"].inQueue1)
@@ -395,8 +406,6 @@ public class TimerService
 
     private async Task UpdateBankInfoAsync(IUserMessage thisMessage1, IUserMessage thisMessage2, string region, int gameMode)
     {
-        List<KeyValuePair<ulong, int>> playerBanks = new List<KeyValuePair<ulong, int>>();
-
         var embed1 = new EmbedBuilder
         {
             Title = $"{region} Banks 1/2",
@@ -827,6 +836,7 @@ public class TimerService
     private async Task MidnightBankDecrease(IMessageChannel thisChannel, string region, int gameMode)
     {
         int hour = DateTime.Now.Hour;
+        int day = DateTime.Now.Day;
         bool checkNeeded = false;
         if (hour != 7)
             return;
@@ -841,8 +851,7 @@ public class TimerService
 
             while (reader.Read())
             {
-                midnightChecks[reader.GetUInt64(0)] = reader.GetBoolean(1);
-                if (reader.GetBoolean(1))
+                if (midnightChecks[reader.GetUInt64(0)] = (reader.GetInt16(1) != hour))
                     checkNeeded = true;
             }
         }
@@ -891,9 +900,10 @@ public class TimerService
                 {
                     query = $"UPDATE leaderboard{region}{gameMode} SET elo = elo - 50 WHERE id = {dictChecker.Key};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
+                    await thisChannel.SendMessageAsync($"<@{dictChecker.Key}> has lost 50 elo from having an empty bank");
                 }
                 
-                query = $"UPDATE leaderboard{region}{gameMode} SET midnightCheck = 0 WHERE id = {dictChecker.Key};";
+                query = $"UPDATE leaderboard{region}{gameMode} SET midnightCheck = {day} WHERE id = {dictChecker.Key};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
             }
         }
