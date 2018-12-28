@@ -325,6 +325,21 @@ namespace BPR
 
             await Context.Channel.SendMessageAsync($"Player tier is {tier}");
         }
+
+        [Command("ClearQueue")]
+        public async Task ClearQueue(string region, int gameMode)
+        {
+            await Context.Message.DeleteAsync();
+            if (HelperFunctions.GetRoleId(region, gameMode, 1) == 0)
+            {
+                await Context.Channel.SendMessageAsync($"Incorrect region or game mode");
+                return;
+            }
+
+            string query = $"TRUNCATE TABLE queue{region}{gameMode};";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+            await Context.Channel.SendMessageAsync($"{region} {gameMode}v{gameMode} queue cleared");
+        }
     }
 
     [Group("queue1")]
