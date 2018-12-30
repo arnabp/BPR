@@ -124,6 +124,65 @@ namespace BPR
             return 0;
         }
 
+public static ulong GetChannelId(string region, int channelType) {
+            // General
+            if (channelType == 0) {
+                if (region == "NA" || region == "EU") {
+                    return 392829581192855554;
+                }
+                if (region == "AUS" || region == "SEA") {
+                    return 422045385612328973;
+                }
+            }
+            // 1v1 Queue Info
+            if (channelType == 1) {
+                if (region == "NA") {
+                    return 401167888762929153;
+                }
+                if (region == "EU") {
+                    return 525425865262104576;
+                }
+                if (region == "AUS") {
+                    return 423372016922525697;
+                }
+                if (region == "SEA") {
+                    return 529011508659748872;
+                }
+            }
+            // 2v2 Queue Info
+            if (channelType == 2) {
+                if (region == "NA") {
+                    return 404558855771521024;
+                }
+                if (region == "EU") {
+                    return 525425886195875861;
+                }
+                if (region == "AUS") {
+                    return 437510787951493121;
+                }
+                if (region == "SEA") {
+                    return 529012003415654400;
+                }
+            }
+            // Bank Status
+            if (channelType == 3) {
+                if (region == "NA") {
+                    return 525950148581523466;
+                }
+                if (region == "EU") {
+                    return 525950398297669639;
+                }
+                if (region == "AUS") {
+                    return 529012722432737290;
+                }
+                if (region == "SEA") {
+                    return 529012939735302144;
+                }
+            }
+
+            return 0;
+        }
+
         public static Color GetRegionColor(string region)
         {
             if (region == "NA") return Color.Blue;
