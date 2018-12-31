@@ -432,6 +432,20 @@ namespace BPR
             await HelperFunctions.ExecuteSQLQueryAsync(query);
             await Context.Channel.SendMessageAsync($"{region} {gameMode}v{gameMode} queue cleared");
         }
+
+        [Command("CheckQueue")]
+        public async Task CheckQueue(string region, int gameMode)
+        {
+            await Context.Message.DeleteAsync();
+            if (HelperFunctions.GetRoleId(region, gameMode, 1) == 0)
+            {
+                await Context.Channel.SendMessageAsync($"Incorrect region or game mode");
+                return;
+            }
+
+            string inQueue = (gameMode == 1 ? Globals.regionList[region].inQueue1 : Globals.regionList[region].inQueue2) ? "nonempty" : "empty";
+            await Context.Channel.SendMessageAsync($"{region} {gameMode}v{gameMode} queue is {inQueue}");
+        }
     }
 
     [Group("queue1")]
