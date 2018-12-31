@@ -55,8 +55,6 @@ namespace BPR
                     regionList[reader.GetString(0)] = new Region { id = reader.GetUInt64(2),
                                                                    status = reader.GetBoolean(1),
                                                                    tiers = reader.GetInt16(3) };
-
-                    Console.WriteLine($"{reader.GetString(0)} Region: {reader.GetUInt64(2)}");
                 }
             }
             catch (Exception ex)
@@ -110,6 +108,8 @@ namespace BPR
                     throw;
                 }
                 await Globals.conn.CloseAsync();
+
+                Console.WriteLine($"{thisValue.Key} - 1v1: {thisRole.inQueue1}, 2v2: {thisRole.inQueue2}");
             }
         }
     }
