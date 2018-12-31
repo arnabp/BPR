@@ -67,7 +67,7 @@ namespace BPR
 
             foreach(var thisValue in regionList)
             {
-                Region thisRole = thisValue.Value;
+                Region thisRegion = regionList[thisValue.Key];
 
                 query = $"SELECT count(*) FROM queue{thisValue.Key}1;";
                 await Globals.conn.OpenAsync();
@@ -78,7 +78,7 @@ namespace BPR
 
                     while (reader.Read())
                     {
-                        thisRole.inQueue1 = reader.GetInt16(0) > 0;
+                        thisRegion.inQueue1 = reader.GetInt16(0) > 0;
                     }
                 }
                 catch (Exception ex)
@@ -98,7 +98,7 @@ namespace BPR
 
                     while (reader.Read())
                     {
-                        thisRole.inQueue2 = reader.GetInt16(0) > 0;
+                        thisRegion.inQueue2 = reader.GetInt16(0) > 0;
                     }
                 }
                 catch (Exception ex)
@@ -109,7 +109,7 @@ namespace BPR
                 }
                 await Globals.conn.CloseAsync();
 
-                Console.WriteLine($"{thisValue.Key} - 1v1: {thisRole.inQueue1}, 2v2: {thisRole.inQueue2}");
+                Console.WriteLine($"{thisValue.Key} - 1v1: {thisRegion.inQueue1}, 2v2: {thisRegion.inQueue2}");
             }
         }
     }
