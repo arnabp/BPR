@@ -109,6 +109,8 @@ namespace BPR
                 }
                 await Globals.conn.CloseAsync();
 
+                regionList[thisValue.Key] = thisRegion;
+
                 Console.WriteLine($"{thisValue.Key} - 1v1: {thisRegion.inQueue1}, 2v2: {thisRegion.inQueue2}");
             }
         }
