@@ -23,6 +23,7 @@ namespace BPR
         public bool status;
         public bool inQueue1;
         public bool inQueue2;
+        public int tiers;
     }
     public static class Globals
     {
@@ -42,7 +43,7 @@ namespace BPR
         public static async Task InitRegions()
         {
             regionList = new Dictionary<string, Region>();
-            string query = $"SELECT region, status, serverID FROM regionStatus;";
+            string query = $"SELECT region, status, serverID, tiers FROM regionStatus;";
             await Globals.conn.OpenAsync();
             try
             {
@@ -51,7 +52,9 @@ namespace BPR
 
                 while (reader.Read())
                 {
-                    regionList[reader.GetString(0)] = new Region { id = reader.GetUInt64(2), status = reader.GetBoolean(1) };
+                    regionList[reader.GetString(0)] = new Region { id = reader.GetUInt64(2),
+                                                                   status = reader.GetBoolean(1),
+                                                                   tiers = reader.GetInt16(3) };
 
                     Console.WriteLine($"{reader.GetString(0)} Region: {reader.GetUInt64(2)}");
                 }

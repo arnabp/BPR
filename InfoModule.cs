@@ -65,6 +65,10 @@ namespace BPR
                 Globals.roleList.Add(GetRoleId("EU", 2, 1), new Role { region = "EU", gameMode = 2, tier = 1 });
                 Globals.roleList.Add(GetRoleId("EU", 2, 2), new Role { region = "EU", gameMode = 2, tier = 2 });
                 Globals.roleList.Add(GetRoleId("EU", 2, 3), new Role { region = "EU", gameMode = 2, tier = 3 });
+                Globals.roleList.Add(GetRoleId("AUS", 1, 3), new Role { region = "AUS", gameMode = 1, tier = 3 });
+                Globals.roleList.Add(GetRoleId("AUS", 2, 3), new Role { region = "AUS", gameMode = 2, tier = 3 });
+                Globals.roleList.Add(GetRoleId("SEA", 1, 3), new Role { region = "SEA", gameMode = 1, tier = 3 });
+                Globals.roleList.Add(GetRoleId("SEA", 2, 3), new Role { region = "SEA", gameMode = 2, tier = 3 });
             }
 
             return Globals.roleList[roleID];
@@ -118,6 +122,34 @@ namespace BPR
                         return 522951576625610762;
                     else if (gameMode == 2)
                         return 522951579515748354;
+                }
+            }
+            else if (region == "AUS")
+            {
+                if (tier == 1)
+                    return 0;
+                if (tier == 2)
+                    return 0;
+                if (tier == 3)
+                {
+                    if (gameMode == 1)
+                        return 423095293039607809;
+                    else if (gameMode == 2)
+                        return 529047745487437824;
+                }
+            }
+            else if (region == "SEA")
+            {
+                if (tier == 1)
+                    return 0;
+                if (tier == 2)
+                    return 0;
+                if (tier == 3)
+                {
+                    if (gameMode == 1)
+                        return 423095346131107853;
+                    else if (gameMode == 2)
+                        return 529047311188492288;
                 }
             }
 
@@ -413,7 +445,7 @@ public static ulong GetChannelId(string region, int channelType) {
         {
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
-            Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue");
+            Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue with target {targetTier}");
 
             // Get User's information from Role
             string region = "";
@@ -445,25 +477,31 @@ public static ulong GetChannelId(string region, int channelType) {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
+            // Check if server has tiers
+            bool tiersExist = Globals.regionList[region].tiers > 1;
+            int queueTier = roleTier;
             // Check if role tier matches dictionary tier
-            int tier = TierModule.GetTierModule(region, 1).getPlayerTier(userInfo.Id);
-            if (tier != roleTier)
+            if (tiersExist)
             {
-                Console.WriteLine($"{userInfo.Username} had the wrong tier assigned to them, fixing.");
-                await TierModule.ChangeRoleToTier(Context, tier);
+                int tier = TierModule.GetTierModule(region, 1).getPlayerTier(userInfo.Id);
+                if (tier != roleTier)
+                {
+                    Console.WriteLine($"{userInfo.Username} had the wrong tier assigned to them, fixing.");
+                    await TierModule.ChangeRoleToTier(Context, tier);
+                }
+                // Setting all non-standard tiers to default to user's tier
+                if (targetTier < 1 || targetTier > 3)
+                    targetTier = tier;
+                // Check that user can expand queue to desired tier
+                if (targetTier < tier)
+                {
+                    await Context.Channel.SendMessageAsync("You cannot expand queue to a tier higher than you. You will be queued into your tier.");
+                    targetTier = tier;
+                }
+                // Convert tier and targetTier to binary tier queue number
+                queueTier = TierModule.binaryOr(tier, targetTier);
             }
-            // Setting all non-standard tiers to default to user's tier
-            if (targetTier < 1 || targetTier > 3)
-                targetTier = tier;
-            // Check that user can expand queue to desired tier
-            if (targetTier < tier)
-            {
-                await Context.Channel.SendMessageAsync("You cannot expand queue to a tier higher than you. You will be queued into your tier.");
-                targetTier = tier;
-            }
-            // Convert tier and targetTier to binary tier queue number
-            int queueTier = TierModule.binaryOr(tier, targetTier);
-
+            
             bool isInQueue = false, isInMatch = false;
             int inLeaderboard = 0, oldTier = 0;
 
@@ -818,7 +856,7 @@ public static ulong GetChannelId(string region, int channelType) {
         {
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
-            Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue");
+            Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue with target {targetTier} and teammate {targetTeammateTier}");
 
             // Get User's information from Role
             string region = "";
@@ -850,32 +888,39 @@ public static ulong GetChannelId(string region, int channelType) {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
+            // Check if server has tiers
+            bool tiersExist = Globals.regionList[region].tiers > 1;
+            int queueTier = roleTier;
+            int teammateTier = roleTier;
             // Check if role tier matches dictionary tier
-            int tier = TierModule.GetTierModule(region, 2).getPlayerTier(userInfo.Id);
-            if (tier != roleTier)
+            if (tiersExist)
             {
-                Console.WriteLine($"{userInfo.Username} had the wrong tier assigned to them, fixing.");
-                await TierModule.ChangeRoleToTier(Context, tier);
+                int tier = TierModule.GetTierModule(region, 2).getPlayerTier(userInfo.Id);
+                if (tier != roleTier)
+                {
+                    Console.WriteLine($"{userInfo.Username} had the wrong tier assigned to them, fixing.");
+                    await TierModule.ChangeRoleToTier(Context, tier);
+                }
+                // Setting all non-standard tiers to default to user's tier
+                if (targetTier < 1 || targetTier > 3)
+                    targetTier = tier;
+                if (targetTeammateTier < 1 || targetTeammateTier > 3)
+                    targetTeammateTier = tier;
+                // Check that user can expand queue to desired tier
+                if (targetTier < tier)
+                {
+                    await Context.Channel.SendMessageAsync("You cannot expand queue to a tier higher than you. You will be queued into your tier.");
+                    targetTier = tier;
+                }
+                if (targetTeammateTier < tier)
+                {
+                    await Context.Channel.SendMessageAsync("You cannot request a teammate with a tier higher than you. You will automatically get a teammate higher than you if they have requested this.");
+                    targetTeammateTier = tier;
+                }
+                // Convert tier and targetTier to binary tier queue number
+                queueTier = TierModule.binaryOr(tier, targetTier);
+                teammateTier = TierModule.binaryOr(tier, targetTeammateTier);
             }
-            // Setting all non-standard tiers to default to user's tier
-            if (targetTier < 1 || targetTier > 3)
-                targetTier = tier;
-            if (targetTeammateTier < 1 || targetTeammateTier > 3)
-                targetTeammateTier = tier;
-            // Check that user can expand queue to desired tier
-            if (targetTier < tier)
-            {
-                await Context.Channel.SendMessageAsync("You cannot expand queue to a tier higher than you. You will be queued into your tier.");
-                targetTier = tier;
-            }
-            if (targetTeammateTier < tier)
-            {
-                await Context.Channel.SendMessageAsync("You cannot request a teammate with a tier higher than you. You will automatically get a teammate higher than you if they have requested this.");
-                targetTeammateTier = tier;
-            }
-            // Convert tier and targetTier to binary tier queue number
-            int queueTier = TierModule.binaryOr(tier, targetTier);
-            int teammateTier = TierModule.binaryOr(tier, targetTeammateTier);
 
             bool isInQueue = false, isInMatch = false;
             int inLeaderboard = 0, oldTier = 0, oldTeammateTier = 0;
