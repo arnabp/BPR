@@ -127,14 +127,6 @@ namespace BPR
 
         public async Task MainAsync()
         {
-            await Globals.InitRegions();
-
-            _client = new DiscordSocketClient();
-            _commands = new CommandService();
-            _timer = new TimerService(_client);
-
-            _client.Log += Log;
-
             string token;
             using (TextReader reader = File.OpenText(@"/root/BPR/secrets.csv"))
             {
@@ -145,6 +137,14 @@ namespace BPR
                 csv.Read();
                 Globals.conn = new MySqlConnection(csv.GetField<String>(0));
             }
+
+            await Globals.InitRegions();
+
+            _client = new DiscordSocketClient();
+            _commands = new CommandService();
+            _timer = new TimerService(_client);
+
+            _client.Log += Log;
             
             await Globals.tiersNA1.InitTierList();
             await Globals.tiersNA2.InitTierList();
