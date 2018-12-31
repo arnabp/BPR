@@ -14,6 +14,7 @@ using System.Threading;
 using System.Web.Http.Results;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BPR
 {
@@ -65,7 +66,9 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
-            foreach(var thisValue in regionList)
+            var listOfRegions = regionList.ToList();
+
+            foreach(var thisValue in listOfRegions)
             {
                 Region thisRegion = regionList[thisValue.Key];
 
