@@ -127,6 +127,8 @@ namespace BPR
 
         public async Task MainAsync()
         {
+            await Globals.InitRegions();
+
             _client = new DiscordSocketClient();
             _commands = new CommandService();
             _timer = new TimerService(_client);
@@ -143,8 +145,7 @@ namespace BPR
                 csv.Read();
                 Globals.conn = new MySqlConnection(csv.GetField<String>(0));
             }
-
-            await Globals.InitRegions();
+            
             await Globals.tiersNA1.InitTierList();
             await Globals.tiersNA2.InitTierList();
             await Globals.tiersEU1.InitTierList();
