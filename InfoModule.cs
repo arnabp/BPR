@@ -156,7 +156,8 @@ namespace BPR
             return 0;
         }
 
-public static ulong GetChannelId(string region, int channelType) {
+        public static ulong GetChannelId(string region, int channelType)
+        {
             // General
             if (channelType == 0) {
                 if (region == "NA" || region == "EU") {
