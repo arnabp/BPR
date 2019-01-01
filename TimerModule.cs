@@ -269,7 +269,7 @@ public class TimerService
             while (reader.Read())
             {
                 if (i > 25) break;
-                if (TierModule.GetTierModule(region, gameMode).getPlayerTier(reader.GetUInt64(0)) != tier)
+                if (Globals.regionList[region].tiers > 1 && TierModule.GetTierModule(region, gameMode).getPlayerTier(reader.GetUInt64(0)) != tier)
                     continue;
                 embed.AddField(x =>
                 {
