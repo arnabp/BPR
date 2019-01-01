@@ -57,12 +57,12 @@ public class TimerService
                             messageCount++;
                         IEnumerable<IMessage> messageList = await queue1Info.GetMessagesAsync(messageCount).Flatten();
 
-                        if (messageCount == 5)
+                        if (messageCount >= 5)
                         {
                             IUserMessage leaderboardT1m = messageList.ToList()[4] as IUserMessage;
                             await UpdateLeaderboardAsync(leaderboardT1m, region.Key, 1, 1);
                         }
-                        if (messageCount == 4)
+                        if (messageCount >= 4)
                         {
                             IUserMessage leaderboardT2m = messageList.ToList()[3] as IUserMessage;
                             await UpdateLeaderboardAsync(leaderboardT2m, region.Key, 1, 2);
@@ -86,12 +86,12 @@ public class TimerService
                             messageCount++;
                         IEnumerable<IMessage> messageList = await queue2Info.GetMessagesAsync(messageCount).Flatten();
 
-                        if (messageCount == 5)
+                        if (messageCount >= 5)
                         {
                             IUserMessage leaderboardT1m = messageList.ToList()[4] as IUserMessage;
                             await UpdateLeaderboardAsync(leaderboardT1m, region.Key, 2, 1);
                         }
-                        if (messageCount == 4)
+                        if (messageCount >= 4)
                         {
                             IUserMessage leaderboardT2m = messageList.ToList()[3] as IUserMessage;
                             await UpdateLeaderboardAsync(leaderboardT2m, region.Key, 2, 2);
