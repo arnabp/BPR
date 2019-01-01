@@ -422,7 +422,7 @@ namespace BPR
         public async Task ClearQueue(string region, int gameMode)
         {
             await Context.Message.DeleteAsync();
-            if (HelperFunctions.GetRoleId(region, gameMode, 1) == 0)
+            if (HelperFunctions.GetRoleId(region, gameMode, 3) == 0)
             {
                 await Context.Channel.SendMessageAsync($"Incorrect region or game mode");
                 return;
@@ -431,6 +431,51 @@ namespace BPR
             string query = $"TRUNCATE TABLE queue{region}{gameMode};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
             await Context.Channel.SendMessageAsync($"{region} {gameMode}v{gameMode} queue cleared");
+        }
+
+        [Command("ClearMatch")]
+        public async Task ClearQueue(string region, int gameMode, int matchNumber)
+        {
+            await Context.Message.DeleteAsync();
+            if (HelperFunctions.GetRoleId(region, gameMode, 3) == 0)
+            {
+                await Context.Channel.SendMessageAsync($"Incorrect region or game mode");
+                return;
+            }
+
+            ulong thisID = 0;
+            string query = $"SELECT id1 FROM matches{region}{gameMode};";
+            await HelperFunctions.CheckSQLStateAsync();
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                int k = 1;
+                while (reader.Read())
+                {
+                    if (k == matchNumber)
+                        thisID = reader.GetUInt64(0);
+                    k++;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            if (thisID == 0)
+            {
+                await Context.Channel.SendMessageAsync("Invalid match number");
+                return;
+            }
+            query = $"DELETE FROM matches{region}{gameMode} WHERE id1 = {thisID};";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+            await Context.Channel.SendMessageAsync($"{region} {gameMode}v{gameMode} match #{matchNumber} has been deleted");
         }
 
         [Command("CheckQueue")]
