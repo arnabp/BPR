@@ -3032,6 +3032,47 @@ namespace BPR
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for NA 1v1 leaderboard");
         }
+
+        [Command("toggle")]
+        [Summary("Toggles whether the region is active")]
+        public async Task ToggleRegionAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            int preStatus = 0;
+
+            string query = $"SELECT status FROM regionStatus WHERE region = 'NA';";
+            await HelperFunctions.CheckSQLStateAsync();
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    preStatus = reader.GetInt16(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            query = $"UPDATE regionStatus SET status = {1 - preStatus} WHERE region = 'NA';";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            Region thisRegion = Globals.regionList["NA"];
+            thisRegion.status = preStatus == 0;
+            Globals.regionList["NA"] = thisRegion;
+
+            string statusString = (preStatus == 1) ? "off" : "on";
+            await Context.Channel.SendMessageAsync($"NA has now been turned {statusString}");
+        }
     }
 
     [Group("leaderboardNA2")]
@@ -3158,6 +3199,47 @@ namespace BPR
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for NA 2v2 leaderboard");
+        }
+
+        [Command("toggle")]
+        [Summary("Toggles whether the region is active")]
+        public async Task ToggleRegionAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            int preStatus = 0;
+
+            string query = $"SELECT status FROM regionStatus WHERE region = 'NA';";
+            await HelperFunctions.CheckSQLStateAsync();
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    preStatus = reader.GetInt16(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            query = $"UPDATE regionStatus SET status = {1 - preStatus} WHERE region = 'NA';";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            Region thisRegion = Globals.regionList["NA"];
+            thisRegion.status = preStatus == 0;
+            Globals.regionList["NA"] = thisRegion;
+
+            string statusString = (preStatus == 1) ? "off" : "on";
+            await Context.Channel.SendMessageAsync($"NA has now been turned {statusString}");
         }
     }
 
@@ -3287,6 +3369,47 @@ namespace BPR
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for EU 1v1 leaderboard");
         }
+
+        [Command("toggle")]
+        [Summary("Toggles whether the region is active")]
+        public async Task ToggleRegionAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            int preStatus = 0;
+
+            string query = $"SELECT status FROM regionStatus WHERE region = 'EU';";
+            await HelperFunctions.CheckSQLStateAsync();
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    preStatus = reader.GetInt16(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            query = $"UPDATE regionStatus SET status = {1 - preStatus} WHERE region = 'EU';";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            Region thisRegion = Globals.regionList["EU"];
+            thisRegion.status = preStatus == 0;
+            Globals.regionList["EU"] = thisRegion;
+
+            string statusString = (preStatus == 1) ? "off" : "on";
+            await Context.Channel.SendMessageAsync($"EU has now been turned {statusString}");
+        }
     }
 
     [Group("leaderboardEU2")]
@@ -3415,6 +3538,47 @@ namespace BPR
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for EU 2v2 leaderboard");
         }
+
+        [Command("toggle")]
+        [Summary("Toggles whether the region is active")]
+        public async Task ToggleRegionAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            int preStatus = 0;
+
+            string query = $"SELECT status FROM regionStatus WHERE region = 'EU';";
+            await HelperFunctions.CheckSQLStateAsync();
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    preStatus = reader.GetInt16(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            query = $"UPDATE regionStatus SET status = {1 - preStatus} WHERE region = 'EU';";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            Region thisRegion = Globals.regionList["EU"];
+            thisRegion.status = preStatus == 0;
+            Globals.regionList["EU"] = thisRegion;
+
+            string statusString = (preStatus == 1) ? "off" : "on";
+            await Context.Channel.SendMessageAsync($"EU has now been turned {statusString}");
+        }
     }
 
     [Group("leaderboardAUS1")]
@@ -3484,6 +3648,47 @@ namespace BPR
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for AUS 1v1 leaderboard");
+        }
+
+        [Command("toggle")]
+        [Summary("Toggles whether the region is active")]
+        public async Task ToggleRegionAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            int preStatus = 0;
+
+            string query = $"SELECT status FROM regionStatus WHERE region = 'AUS';";
+            await HelperFunctions.CheckSQLStateAsync();
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    preStatus = reader.GetInt16(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            query = $"UPDATE regionStatus SET status = {1 - preStatus} WHERE region = 'AUS';";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            Region thisRegion = Globals.regionList["AUS"];
+            thisRegion.status = preStatus == 0;
+            Globals.regionList["AUS"] = thisRegion;
+
+            string statusString = (preStatus == 1) ? "off" : "on";
+            await Context.Channel.SendMessageAsync($"AUS has now been turned {statusString}");
         }
     }
 
@@ -3555,6 +3760,47 @@ namespace BPR
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for AUS 2v2 leaderboard");
         }
+
+        [Command("toggle")]
+        [Summary("Toggles whether the region is active")]
+        public async Task ToggleRegionAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            int preStatus = 0;
+
+            string query = $"SELECT status FROM regionStatus WHERE region = 'AUS';";
+            await HelperFunctions.CheckSQLStateAsync();
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    preStatus = reader.GetInt16(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            query = $"UPDATE regionStatus SET status = {1 - preStatus} WHERE region = 'AUS';";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            Region thisRegion = Globals.regionList["AUS"];
+            thisRegion.status = preStatus == 0;
+            Globals.regionList["AUS"] = thisRegion;
+
+            string statusString = (preStatus == 1) ? "off" : "on";
+            await Context.Channel.SendMessageAsync($"AUS has now been turned {statusString}");
+        }
     }
 
     [Group("leaderboardSEA1")]
@@ -3625,6 +3871,47 @@ namespace BPR
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for SEA 1v1 leaderboard");
         }
+
+        [Command("toggle")]
+        [Summary("Toggles whether the region is active")]
+        public async Task ToggleRegionAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            int preStatus = 0;
+
+            string query = $"SELECT status FROM regionStatus WHERE region = 'SEA';";
+            await HelperFunctions.CheckSQLStateAsync();
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    preStatus = reader.GetInt16(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            query = $"UPDATE regionStatus SET status = {1 - preStatus} WHERE region = 'SEA';";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            Region thisRegion = Globals.regionList["SEA"];
+            thisRegion.status = preStatus == 0;
+            Globals.regionList["SEA"] = thisRegion;
+
+            string statusString = (preStatus == 1) ? "off" : "on";
+            await Context.Channel.SendMessageAsync($"SEA has now been turned {statusString}");
+        }
     }
 
     [Group("leaderboardSEA2")]
@@ -3694,6 +3981,47 @@ namespace BPR
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             await Context.Channel.SendMessageAsync("All elo decay timers refreshed for SEA 2v2 leaderboard");
+        }
+
+        [Command("toggle")]
+        [Summary("Toggles whether the region is active")]
+        public async Task ToggleRegionAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            int preStatus = 0;
+
+            string query = $"SELECT status FROM regionStatus WHERE region = 'SEA';";
+            await HelperFunctions.CheckSQLStateAsync();
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    preStatus = reader.GetInt16(0);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                await Globals.conn.CloseAsync();
+                throw;
+            }
+            await Globals.conn.CloseAsync();
+
+            query = $"UPDATE regionStatus SET status = {1 - preStatus} WHERE region = 'SEA';";
+            await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+            Region thisRegion = Globals.regionList["SEA"];
+            thisRegion.status = preStatus == 0;
+            Globals.regionList["SEA"] = thisRegion;
+
+            string statusString = (preStatus == 1) ? "off" : "on";
+            await Context.Channel.SendMessageAsync($"SEA has now been turned {statusString}");
         }
     }
 
