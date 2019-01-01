@@ -26,7 +26,8 @@ public class TimerService
             // 3) Any code you want to periodically run goes here:
             if (Globals.timerCount % 2 == 0)
             {
-                foreach (var region in Globals.regionList)
+                var listOfRegions = Globals.regionList.ToList();
+                foreach (var region in listOfRegions)
                 {
                     // Skip any regions that are shut down
                     if (!region.Value.status)
