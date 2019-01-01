@@ -3601,6 +3601,49 @@ namespace BPR
             Console.WriteLine($"{user.Username} has been registered");
         }
 
+        [Command("auto")]
+        [Summary("Automatically adds users to the leaderboard based on their roles")]
+        public async Task AutoLeaderboardAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            foreach (var user in Context.Guild.Users)
+            {
+                int roleTier = 0;
+                foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(user.Id).Roles)
+                {
+                    try
+                    {
+                        Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                        if (thisRole.gameMode == 1 && thisRole.region == "AUS")
+                        {
+                            roleTier = thisRole.tier;
+                        }
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                        continue;
+                    }
+                }
+
+                if (roleTier == 0)
+                    continue;
+
+                double elo = 0;
+                if (roleTier == 1)
+                    elo = TierModule.SEED1ELO;
+                else if (roleTier == 2)
+                    elo = TierModule.SEED2ELO;
+                else
+                    elo = TierModule.SEED3ELO;
+
+                string query = $"INSERT INTO leaderboardAUS1(id, username, elo) VALUES({user.Id}, '{user.Username}', {elo});";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+                Console.WriteLine($"{user.Username} has been registered");
+            }
+        }
+
         [Command("delete")]
         [Summary("Allows admin to delete user from leaderboard")]
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
@@ -3710,6 +3753,49 @@ namespace BPR
 
             await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the AUS 2v2 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
+        }
+
+        [Command("auto")]
+        [Summary("Automatically adds users to the leaderboard based on their roles")]
+        public async Task AutoLeaderboardAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            foreach (var user in Context.Guild.Users)
+            {
+                int roleTier = 0;
+                foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(user.Id).Roles)
+                {
+                    try
+                    {
+                        Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                        if (thisRole.gameMode == 2 && thisRole.region == "AUS")
+                        {
+                            roleTier = thisRole.tier;
+                        }
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                        continue;
+                    }
+                }
+
+                if (roleTier == 0)
+                    continue;
+
+                double elo = 0;
+                if (roleTier == 1)
+                    elo = TierModule.SEED1ELO;
+                else if (roleTier == 2)
+                    elo = TierModule.SEED2ELO;
+                else
+                    elo = TierModule.SEED3ELO;
+
+                string query = $"INSERT INTO leaderboardAUS2(id, username, elo) VALUES({user.Id}, '{user.Username}', {elo});";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+                Console.WriteLine($"{user.Username} has been registered");
+            }
         }
 
         [Command("delete")]
@@ -3823,6 +3909,49 @@ namespace BPR
             Console.WriteLine($"{user.Username} has been registered");
         }
 
+        [Command("auto")]
+        [Summary("Automatically adds users to the leaderboard based on their roles")]
+        public async Task AutoLeaderboardAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            foreach (var user in Context.Guild.Users)
+            {
+                int roleTier = 0;
+                foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(user.Id).Roles)
+                {
+                    try
+                    {
+                        Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                        if (thisRole.gameMode == 1 && thisRole.region == "SEA")
+                        {
+                            roleTier = thisRole.tier;
+                        }
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                        continue;
+                    }
+                }
+
+                if (roleTier == 0)
+                    continue;
+
+                double elo = 0;
+                if (roleTier == 1)
+                    elo = TierModule.SEED1ELO;
+                else if (roleTier == 2)
+                    elo = TierModule.SEED2ELO;
+                else
+                    elo = TierModule.SEED3ELO;
+
+                string query = $"INSERT INTO leaderboardSEA1(id, username, elo) VALUES({user.Id}, '{user.Username}', {elo});";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+                Console.WriteLine($"{user.Username} has been registered");
+            }
+        }
+
         [Command("delete")]
         [Summary("Allows admin to delete user from leaderboard")]
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
@@ -3932,6 +4061,49 @@ namespace BPR
 
             await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the SEA 2v2 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
+        }
+
+        [Command("auto")]
+        [Summary("Automatically adds users to the leaderboard based on their roles")]
+        public async Task AutoLeaderboardAsync()
+        {
+            await Context.Message.DeleteAsync();
+
+            foreach (var user in Context.Guild.Users)
+            {
+                int roleTier = 0;
+                foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(user.Id).Roles)
+                {
+                    try
+                    {
+                        Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                        if (thisRole.gameMode == 2 && thisRole.region == "SEA")
+                        {
+                            roleTier = thisRole.tier;
+                        }
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                        continue;
+                    }
+                }
+
+                if (roleTier == 0)
+                    continue;
+
+                double elo = 0;
+                if (roleTier == 1)
+                    elo = TierModule.SEED1ELO;
+                else if (roleTier == 2)
+                    elo = TierModule.SEED2ELO;
+                else
+                    elo = TierModule.SEED3ELO;
+
+                string query = $"INSERT INTO leaderboardSEA2(id, username, elo) VALUES({user.Id}, '{user.Username}', {elo});";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+
+                Console.WriteLine($"{user.Username} has been registered");
+            }
         }
 
         [Command("delete")]
