@@ -40,7 +40,7 @@ public class TimerService
                         if (Globals.timerCount % 20 == 0)
                         {
                             await MidnightBankDecrease(general, region.Key, 1);
-                            await MidnightBankDecrease(general, region.Key, 1);
+                            await MidnightBankDecrease(general, region.Key, 2);
                         }
 
                         if (region.Value.inQueue1)
@@ -790,6 +790,8 @@ public class TimerService
                     query = $"UPDATE leaderboard{region}{gameMode} SET elo = elo - 50 WHERE id = {dictChecker.Key};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
                     await thisChannel.SendMessageAsync($"<@{dictChecker.Key}> has lost 50 elo from having an empty bank");
+                    await Task.Delay(100);
+                    
                 }
                 
                 query = $"UPDATE leaderboard{region}{gameMode} SET midnightCheck = {day} WHERE id = {dictChecker.Key};";
