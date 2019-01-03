@@ -790,7 +790,7 @@ public class TimerService
                     query = $"UPDATE leaderboard{region}{gameMode} SET elo = elo - 50 WHERE id = {dictChecker.Key};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
                     await thisChannel.SendMessageAsync($"<@{dictChecker.Key}> has lost 50 elo from having an empty bank");
-                    await Task.Delay(100);
+                    await Task.Delay(1000);
                     
                 }
                 
