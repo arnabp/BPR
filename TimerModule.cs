@@ -784,18 +784,19 @@ public class TimerService
                 {
                     query = $"UPDATE leaderboard{region}{gameMode} SET bank = bank - 1 WHERE id = {dictChecker.Key};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
+                    query = $"UPDATE leaderboard{region}{gameMode} SET midnightCheck = {day} WHERE id = {dictChecker.Key};";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
                 }
                 else
                 {
                     query = $"UPDATE leaderboard{region}{gameMode} SET elo = elo - 50 WHERE id = {dictChecker.Key};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
-                    await thisChannel.SendMessageAsync($"<@{dictChecker.Key}> has lost 50 elo from having an empty bank");
+                    query = $"UPDATE leaderboard{region}{gameMode} SET midnightCheck = {day} WHERE id = {dictChecker.Key};";
+                    await HelperFunctions.ExecuteSQLQueryAsync(query);
+
                     await Task.Delay(1000);
-                    
+                    await thisChannel.SendMessageAsync($"<@{dictChecker.Key}> has lost 50 elo from having an empty bank");
                 }
-                
-                query = $"UPDATE leaderboard{region}{gameMode} SET midnightCheck = {day} WHERE id = {dictChecker.Key};";
-                await HelperFunctions.ExecuteSQLQueryAsync(query);
             }
         }
     }
