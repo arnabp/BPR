@@ -795,7 +795,7 @@ public class TimerService
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
                     await Task.Delay(1000);
-                    await thisChannel.SendMessageAsync($"<@{dictChecker.Key}> has lost 50 elo from having an empty bank");
+                    await thisChannel.SendMessageAsync($"<@{dictChecker.Key}> has lost 50 elo from having an empty bank in {gameMode}v{gameMode}");
                 }
             }
         }

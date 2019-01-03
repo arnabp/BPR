@@ -358,6 +358,18 @@ namespace BPR
             await Context.Channel.SendMessageAsync($"Id is {Context.Message.Id}");
         }
 
+        [Command("SendMessages")]
+        [Summary("Send a specified amount of messages to test rate limit")]
+        public async Task SendXMessages(int x)
+        {
+            await Context.Message.DeleteAsync();
+            for (int i = 0; i < x; i++)
+            {
+                await Task.Delay(1000);
+                await Context.Channel.SendMessageAsync($"Message #{i} sent");
+            }
+        }
+
         [Command("Silent")]
         [Summary("Deletes the message")]
         public async Task Silent()
