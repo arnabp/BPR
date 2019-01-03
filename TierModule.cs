@@ -281,9 +281,9 @@ namespace BPR
         public static int binaryOr(int tier, int targetTier)
         {
             int bTier = binaryConvert(tier);
-            int bTargetTier = binaryConvert(tier);
+            int bTargetTier = binaryConvert(targetTier);
 
-            int queueTier = tier | targetTier;
+            int queueTier = bTier | bTargetTier;
             if (queueTier == 5)
                 return 7;
             return queueTier;
