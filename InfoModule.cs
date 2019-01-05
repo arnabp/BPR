@@ -3609,15 +3609,29 @@ namespace BPR
     {
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
-        public async Task AddLeaderbardAsync(ulong id)
+        public async Task AddLeaderbardAsync(ulong id, int tier)
         {
             var user = Context.Guild.GetUser(id);
             await Context.Message.DeleteAsync();
 
-            string query = $"INSERT INTO leaderboardAUS1(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.UtcNow.Ticks});";
+            if (tier < 1 || tier > 3)
+            {
+                await Context.Channel.SendMessageAsync($"Entered invalid tier");
+                return;
+            }
+
+            double elo = 0;
+            if (tier == 1)
+                elo = TierModule.SEED1ELO;
+            else if (tier == 2)
+                elo = TierModule.SEED2ELO;
+            else
+                elo = TierModule.SEED3ELO;
+
+            string query = $"INSERT INTO leaderboardAUS1(id, username, elo) VALUES({id}, '{user.Username}', {elo});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await user.AddRoleAsync(Context.Guild.GetRole(423095293039607809));
+            await user.AddRoleAsync(Context.Guild.GetRole(HelperFunctions.GetRoleId("AUS", 1, 3)));
 
             await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the AUS 1v1 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
@@ -3763,15 +3777,29 @@ namespace BPR
     {
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
-        public async Task AddLeaderbardAsync(ulong id)
+        public async Task AddLeaderbardAsync(ulong id, int tier)
         {
             var user = Context.Guild.GetUser(id);
             await Context.Message.DeleteAsync();
 
-            string query = $"INSERT INTO leaderboardAUS2(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.UtcNow.Ticks});";
+            if (tier < 1 || tier > 3)
+            {
+                await Context.Channel.SendMessageAsync($"Entered invalid tier");
+                return;
+            }
+
+            double elo = 0;
+            if (tier == 1)
+                elo = TierModule.SEED1ELO;
+            else if (tier == 2)
+                elo = TierModule.SEED2ELO;
+            else
+                elo = TierModule.SEED3ELO;
+
+            string query = $"INSERT INTO leaderboardAUS2(id, username, elo) VALUES({id}, '{user.Username}', {elo});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await user.AddRoleAsync(Context.Guild.GetRole(423095293039607809));
+            await user.AddRoleAsync(Context.Guild.GetRole(HelperFunctions.GetRoleId("AUS", 2, 3)));
 
             await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the AUS 2v2 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
@@ -3917,15 +3945,29 @@ namespace BPR
     {
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
-        public async Task AddLeaderbardAsync(ulong id)
+        public async Task AddLeaderbardAsync(ulong id, int tier)
         {
             var user = Context.Guild.GetUser(id);
             await Context.Message.DeleteAsync();
 
-            string query = $"INSERT INTO leaderboardSEA1(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.UtcNow.Ticks});";
+            if (tier < 1 || tier > 3)
+            {
+                await Context.Channel.SendMessageAsync($"Entered invalid tier");
+                return;
+            }
+
+            double elo = 0;
+            if (tier == 1)
+                elo = TierModule.SEED1ELO;
+            else if (tier == 2)
+                elo = TierModule.SEED2ELO;
+            else
+                elo = TierModule.SEED3ELO;
+
+            string query = $"INSERT INTO leaderboardSEA1(id, username, elo) VALUES({id}, '{user.Username}', {elo});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await user.AddRoleAsync(Context.Guild.GetRole(423095346131107853));
+            await user.AddRoleAsync(Context.Guild.GetRole(HelperFunctions.GetRoleId("SEA", 1, 3)));
 
             await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the SEA 1v1 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
@@ -4071,15 +4113,29 @@ namespace BPR
     {
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
-        public async Task AddLeaderbardAsync(ulong id)
+        public async Task AddLeaderbardAsync(ulong id, int tier)
         {
             var user = Context.Guild.GetUser(id);
             await Context.Message.DeleteAsync();
 
-            string query = $"INSERT INTO leaderboardSEA2(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.UtcNow.Ticks});";
+            if (tier < 1 || tier > 3)
+            {
+                await Context.Channel.SendMessageAsync($"Entered invalid tier");
+                return;
+            }
+
+            double elo = 0;
+            if (tier == 1)
+                elo = TierModule.SEED1ELO;
+            else if (tier == 2)
+                elo = TierModule.SEED2ELO;
+            else
+                elo = TierModule.SEED3ELO;
+
+            string query = $"INSERT INTO leaderboardSEA2(id, username, elo) VALUES({id}, '{user.Username}', {elo});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await user.AddRoleAsync(Context.Guild.GetRole(423095346131107853));
+            await user.AddRoleAsync(Context.Guild.GetRole(HelperFunctions.GetRoleId("SEA", 2, 3)));
 
             await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the SEA 2v2 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
