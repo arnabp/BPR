@@ -297,13 +297,13 @@ public class TimerService
     {
         var embed1 = new EmbedBuilder
         {
-            Title = $"{region} Banks 1/2",
+            Title = $"{region} {gameMode}v{gameMode} Banks 1/2",
             Color = HelperFunctions.GetRegionColor(region)
         };
 
         var embed2 = new EmbedBuilder
         {
-            Title = $"{region} Banks 2/2",
+            Title = $"{region} {gameMode}v{gameMode} Banks 2/2",
             Color = HelperFunctions.GetRegionColor(region)
         };
 
