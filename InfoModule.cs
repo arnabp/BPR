@@ -1440,6 +1440,8 @@ namespace BPR
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
+            // Check if server has tiers
+            bool tiersExist = Globals.regionList[region].tiers > 1;
 
             // Get users' info
             string query = $"SELECT id1, id2, username1, username2, reverted FROM matches{region}1;";
@@ -1587,12 +1589,15 @@ namespace BPR
             query = $"UPDATE leaderboard{region}1 SET {p2ResultString} = {p2ResultString} + 1 WHERE id = {p2ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            // Check for any tier changes
-            TierModule thisTierModule = TierModule.GetTierModule(region, 1);
-            thisTierModule.PlayerEloChange(p1ID, new1);
-            thisTierModule.PlayerEloChange(p2ID, new2);
-            thisTierModule.NormalizeTiers();
-            await TierModule.AnnounceTierChanges(Context);
+            if (tiersExist)
+            {
+                // Check for any tier changes
+                TierModule thisTierModule = TierModule.GetTierModule(region, 1);
+                thisTierModule.PlayerEloChange(p1ID, new1);
+                thisTierModule.PlayerEloChange(p2ID, new2);
+                thisTierModule.NormalizeTiers();
+                await TierModule.AnnounceTierChanges(Context);
+            }
 
             // Add banked game
             query = $"UPDATE leaderboard{region}1 SET bank = bank + 1 WHERE id = {p1ID} AND bank < 7;";
@@ -2143,6 +2148,8 @@ namespace BPR
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
+            // Check if server has tiers
+            bool tiersExist = Globals.regionList[region].tiers > 1;
 
             // Get user's info
             string query = $"SELECT id1, id2, id3, id4, username1, username2, username3, username4, reverted FROM matches{region}2;";
@@ -2328,14 +2335,17 @@ namespace BPR
             query = $"UPDATE leaderboard{region}2 SET {t2ResultString} = {t2ResultString} + 1 WHERE id = {p4ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            // Check for any tier changes
-            TierModule thisTierModule = TierModule.GetTierModule(region, 2);
-            thisTierModule.PlayerEloChange(p1ID, new1);
-            thisTierModule.PlayerEloChange(p2ID, new2);
-            thisTierModule.PlayerEloChange(p3ID, new3);
-            thisTierModule.PlayerEloChange(p4ID, new4);
-            thisTierModule.NormalizeTiers();
-            await TierModule.AnnounceTierChanges(Context);
+            if (tiersExist)
+            {
+                // Check for any tier changes
+                TierModule thisTierModule = TierModule.GetTierModule(region, 2);
+                thisTierModule.PlayerEloChange(p1ID, new1);
+                thisTierModule.PlayerEloChange(p2ID, new2);
+                thisTierModule.PlayerEloChange(p3ID, new3);
+                thisTierModule.PlayerEloChange(p4ID, new4);
+                thisTierModule.NormalizeTiers();
+                await TierModule.AnnounceTierChanges(Context);
+            }
 
             // Add banked game
             query = $"UPDATE leaderboard{region}2 SET bank = bank + 1 WHERE id = {p1ID} AND bank < 7;";
