@@ -38,10 +38,9 @@ public class TimerService
                         await CheckQueueTimeoutAsync(general, region.Key, 1);
                         await CheckQueueTimeoutAsync(general, region.Key, 2);
                         if (Globals.timerCount % 20 == 0)
-                        {
                             await MidnightBankDecrease(general, region.Key, 1);
+                        if (Globals.timerCount % 50 == 0)
                             await MidnightBankDecrease(general, region.Key, 2);
-                        }
 
                         if (region.Value.inQueue1)
                             await CheckQueueMatchCreate1sAsync(general, region.Key);
