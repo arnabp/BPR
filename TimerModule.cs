@@ -775,6 +775,7 @@ public class TimerService
         }
         await Globals.conn.CloseAsync();
 
+        string eloLossMessage = "";
         foreach(var dictChecker in midnightChecks)
         {
             if (dictChecker.Value)
@@ -793,11 +794,13 @@ public class TimerService
                     query = $"UPDATE leaderboard{region}{gameMode} SET midnightCheck = {day} WHERE id = {dictChecker.Key};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-                    await Task.Delay(10000);
-                    await thisChannel.SendMessageAsync($"<@{dictChecker.Key}> has lost 50 elo from having an empty bank in {gameMode}v{gameMode}");
+                    eloLossMessage += "<@{dictChecker.Key}> ";
                 }
             }
         }
+
+        if (eloLossMessage != "")
+            await thisChannel.SendMessageAsync($"{eloLossMessage} have all lost 50 elo from having an empty bank in {gameMode}v{gameMode}");
     }
 
     private async Task CheckRoomAsync(IMessageChannel thisChannel, string region, int gameMode)
