@@ -794,7 +794,7 @@ public class TimerService
                     query = $"UPDATE leaderboard{region}{gameMode} SET midnightCheck = {day} WHERE id = {dictChecker.Key};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-                    eloLossMessage += "<@{dictChecker.Key}> ";
+                    eloLossMessage += $"<@{dictChecker.Key}> ";
                 }
             }
         }
