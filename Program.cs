@@ -22,6 +22,8 @@ namespace BPR
     {
         public ulong id;
         public bool status;
+        public bool status1;
+        public bool status2;
         public bool inQueue1;
         public bool inQueue2;
         public int tiers;
@@ -44,7 +46,7 @@ namespace BPR
         public static async Task InitRegions()
         {
             regionList = new Dictionary<string, Region>();
-            string query = $"SELECT region, status, serverID, tiers FROM regionStatus;";
+            string query = $"SELECT region, status, serverID, tiers, status1s, status2s FROM regionStatus;";
             await Globals.conn.OpenAsync();
             try
             {
@@ -55,6 +57,8 @@ namespace BPR
                 {
                     regionList[reader.GetString(0)] = new Region { id = reader.GetUInt64(2),
                                                                    status = reader.GetBoolean(1),
+                                                                   status1 = reader.GetBoolean(4),
+                                                                   status2 = reader.GetBoolean(5),
                                                                    tiers = reader.GetInt16(3) };
                 }
             }

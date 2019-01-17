@@ -544,7 +544,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
-            if (!Globals.regionList[region].status)
+            if (!Globals.regionList[region].status1)
             {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
@@ -721,7 +721,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
-            if (!Globals.regionList[region].status)
+            if (!Globals.regionList[region].status1)
             {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
@@ -955,7 +955,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
-            if (!Globals.regionList[region].status)
+            if (!Globals.regionList[region].status2)
             {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
@@ -1150,7 +1150,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
-            if (!Globals.regionList[region].status)
+            if (!Globals.regionList[region].status2)
             {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
@@ -1435,7 +1435,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
-            if (!Globals.regionList[region].status)
+            if (!Globals.regionList[region].status1)
             {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
@@ -1789,7 +1789,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
-            if (!Globals.regionList[region].status)
+            if (!Globals.regionList[region].status1)
             {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
@@ -1905,7 +1905,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
-            if (!Globals.regionList[region].status)
+            if (!Globals.regionList[region].status1)
             {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
@@ -2143,7 +2143,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
-            if (!Globals.regionList[region].status)
+            if (!Globals.regionList[region].status2)
             {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
@@ -2589,7 +2589,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
-            if (!Globals.regionList[region].status)
+            if (!Globals.regionList[region].status2)
             {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
@@ -2729,7 +2729,7 @@ namespace BPR
                 await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
-            if (!Globals.regionList[region].status)
+            if (!Globals.regionList[region].status2)
             {
                 await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
@@ -3063,7 +3063,7 @@ namespace BPR
 
             int preStatus = 0;
 
-            string query = $"SELECT status FROM regionStatus WHERE region = 'NA';";
+            string query = $"SELECT status1s FROM regionStatus WHERE region = 'NA';";
             await HelperFunctions.CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
@@ -3085,15 +3085,28 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
-            query = $"UPDATE regionStatus SET status = {1 - preStatus} WHERE region = 'NA';";
+            query = $"UPDATE regionStatus SET status1s = {1 - preStatus} WHERE region = 'NA';";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             Region thisRegion = Globals.regionList["NA"];
-            thisRegion.status = preStatus == 0;
+            thisRegion.status1 = preStatus == 0;
+            if (!thisRegion.status1 && !thisRegion.status2)
+            {
+                thisRegion.status = false;
+                query = $"UPDATE regionStatus SET status = 1 WHERE region = 'NA';";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
+            if (thisRegion.status1 || thisRegion.status2)
+            {
+                thisRegion.status = true;
+                query = $"UPDATE regionStatus SET status = 1 WHERE region = 'NA';";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
             Globals.regionList["NA"] = thisRegion;
 
+
             string statusString = (preStatus == 1) ? "off" : "on";
-            await Context.Channel.SendMessageAsync($"NA has now been turned {statusString}");
+            await Context.Channel.SendMessageAsync($"NA 1v1 has now been turned {statusString}");
         }
     }
 
@@ -3231,7 +3244,7 @@ namespace BPR
 
             int preStatus = 0;
 
-            string query = $"SELECT status FROM regionStatus WHERE region = 'NA';";
+            string query = $"SELECT status2s FROM regionStatus WHERE region = 'NA';";
             await HelperFunctions.CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
@@ -3253,15 +3266,28 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
-            query = $"UPDATE regionStatus SET status = {1 - preStatus} WHERE region = 'NA';";
+            query = $"UPDATE regionStatus SET status2s = {1 - preStatus} WHERE region = 'NA';";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             Region thisRegion = Globals.regionList["NA"];
-            thisRegion.status = preStatus == 0;
+            thisRegion.status2 = preStatus == 0;
+            if (!thisRegion.status1 && !thisRegion.status2)
+            {
+                thisRegion.status = false;
+                query = $"UPDATE regionStatus SET status = 1 WHERE region = 'NA';";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
+            if (thisRegion.status1 || thisRegion.status2)
+            {
+                thisRegion.status = true;
+                query = $"UPDATE regionStatus SET status = 1 WHERE region = 'NA';";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
             Globals.regionList["NA"] = thisRegion;
 
+
             string statusString = (preStatus == 1) ? "off" : "on";
-            await Context.Channel.SendMessageAsync($"NA has now been turned {statusString}");
+            await Context.Channel.SendMessageAsync($"NA 2v2 has now been turned {statusString}");
         }
     }
 
@@ -3400,7 +3426,7 @@ namespace BPR
 
             int preStatus = 0;
 
-            string query = $"SELECT status FROM regionStatus WHERE region = 'EU';";
+            string query = $"SELECT status1s FROM regionStatus WHERE region = 'EU';";
             await HelperFunctions.CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
@@ -3422,15 +3448,28 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
-            query = $"UPDATE regionStatus SET status = {1 - preStatus} WHERE region = 'EU';";
+            query = $"UPDATE regionStatus SET status1s = {1 - preStatus} WHERE region = 'EU';";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             Region thisRegion = Globals.regionList["EU"];
-            thisRegion.status = preStatus == 0;
+            thisRegion.status1 = preStatus == 0;
+            if (!thisRegion.status1 && !thisRegion.status2)
+            {
+                thisRegion.status = false;
+                query = $"UPDATE regionStatus SET status = 1 WHERE region = 'EU';";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
+            if (thisRegion.status1 || thisRegion.status2)
+            {
+                thisRegion.status = true;
+                query = $"UPDATE regionStatus SET status = 1 WHERE region = 'EU';";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
             Globals.regionList["EU"] = thisRegion;
 
+
             string statusString = (preStatus == 1) ? "off" : "on";
-            await Context.Channel.SendMessageAsync($"EU has now been turned {statusString}");
+            await Context.Channel.SendMessageAsync($"EU 1v1 has now been turned {statusString}");
         }
     }
 
@@ -3569,7 +3608,7 @@ namespace BPR
 
             int preStatus = 0;
 
-            string query = $"SELECT status FROM regionStatus WHERE region = 'EU';";
+            string query = $"SELECT status2s FROM regionStatus WHERE region = 'EU';";
             await HelperFunctions.CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
@@ -3591,15 +3630,28 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
-            query = $"UPDATE regionStatus SET status = {1 - preStatus} WHERE region = 'EU';";
+            query = $"UPDATE regionStatus SET status2s = {1 - preStatus} WHERE region = 'EU';";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             Region thisRegion = Globals.regionList["EU"];
-            thisRegion.status = preStatus == 0;
+            thisRegion.status2 = preStatus == 0;
+            if (!thisRegion.status1 && !thisRegion.status2)
+            {
+                thisRegion.status = false;
+                query = $"UPDATE regionStatus SET status = 1 WHERE region = 'EU';";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
+            if (thisRegion.status1 || thisRegion.status2)
+            {
+                thisRegion.status = true;
+                query = $"UPDATE regionStatus SET status = 1 WHERE region = 'EU';";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
             Globals.regionList["EU"] = thisRegion;
 
+
             string statusString = (preStatus == 1) ? "off" : "on";
-            await Context.Channel.SendMessageAsync($"EU has now been turned {statusString}");
+            await Context.Channel.SendMessageAsync($"EU 2v2 has now been turned {statusString}");
         }
     }
 
@@ -3737,7 +3789,7 @@ namespace BPR
 
             int preStatus = 0;
 
-            string query = $"SELECT status FROM regionStatus WHERE region = 'AUS';";
+            string query = $"SELECT status1s FROM regionStatus WHERE region = 'AUS';";
             await HelperFunctions.CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
@@ -3759,15 +3811,28 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
-            query = $"UPDATE regionStatus SET status = {1 - preStatus} WHERE region = 'AUS';";
+            query = $"UPDATE regionStatus SET status1s = {1 - preStatus} WHERE region = 'AUS';";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             Region thisRegion = Globals.regionList["AUS"];
-            thisRegion.status = preStatus == 0;
+            thisRegion.status1 = preStatus == 0;
+            if (!thisRegion.status1 && !thisRegion.status2)
+            {
+                thisRegion.status = false;
+                query = $"UPDATE regionStatus SET status = 1 WHERE region = 'AUS';";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
+            if (thisRegion.status1 || thisRegion.status2)
+            {
+                thisRegion.status = true;
+                query = $"UPDATE regionStatus SET status = 1 WHERE region = 'AUS';";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
             Globals.regionList["AUS"] = thisRegion;
 
+
             string statusString = (preStatus == 1) ? "off" : "on";
-            await Context.Channel.SendMessageAsync($"AUS has now been turned {statusString}");
+            await Context.Channel.SendMessageAsync($"AUS 1v1 has now been turned {statusString}");
         }
     }
 
@@ -3905,7 +3970,7 @@ namespace BPR
 
             int preStatus = 0;
 
-            string query = $"SELECT status FROM regionStatus WHERE region = 'AUS';";
+            string query = $"SELECT status2s FROM regionStatus WHERE region = 'AUS';";
             await HelperFunctions.CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
@@ -3927,15 +3992,28 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
-            query = $"UPDATE regionStatus SET status = {1 - preStatus} WHERE region = 'AUS';";
+            query = $"UPDATE regionStatus SET status2s = {1 - preStatus} WHERE region = 'AUS';";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             Region thisRegion = Globals.regionList["AUS"];
-            thisRegion.status = preStatus == 0;
+            thisRegion.status2 = preStatus == 0;
+            if (!thisRegion.status1 && !thisRegion.status2)
+            {
+                thisRegion.status = false;
+                query = $"UPDATE regionStatus SET status = 1 WHERE region = 'AUS';";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
+            if (thisRegion.status1 || thisRegion.status2)
+            {
+                thisRegion.status = true;
+                query = $"UPDATE regionStatus SET status = 1 WHERE region = 'AUS';";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
             Globals.regionList["AUS"] = thisRegion;
 
+
             string statusString = (preStatus == 1) ? "off" : "on";
-            await Context.Channel.SendMessageAsync($"AUS has now been turned {statusString}");
+            await Context.Channel.SendMessageAsync($"AUS 2v2 has now been turned {statusString}");
         }
     }
 
@@ -4073,7 +4151,7 @@ namespace BPR
 
             int preStatus = 0;
 
-            string query = $"SELECT status FROM regionStatus WHERE region = 'SEA';";
+            string query = $"SELECT status1s FROM regionStatus WHERE region = 'SEA';";
             await HelperFunctions.CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
@@ -4095,15 +4173,28 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
-            query = $"UPDATE regionStatus SET status = {1 - preStatus} WHERE region = 'SEA';";
+            query = $"UPDATE regionStatus SET status1s = {1 - preStatus} WHERE region = 'SEA';";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             Region thisRegion = Globals.regionList["SEA"];
-            thisRegion.status = preStatus == 0;
+            thisRegion.status1 = preStatus == 0;
+            if (!thisRegion.status1 && !thisRegion.status2)
+            {
+                thisRegion.status = false;
+                query = $"UPDATE regionStatus SET status = 1 WHERE region = 'SEA';";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
+            if (thisRegion.status1 || thisRegion.status2)
+            {
+                thisRegion.status = true;
+                query = $"UPDATE regionStatus SET status = 1 WHERE region = 'SEA';";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
             Globals.regionList["SEA"] = thisRegion;
 
+
             string statusString = (preStatus == 1) ? "off" : "on";
-            await Context.Channel.SendMessageAsync($"SEA has now been turned {statusString}");
+            await Context.Channel.SendMessageAsync($"SEA 1v1 has now been turned {statusString}");
         }
     }
 
@@ -4241,7 +4332,7 @@ namespace BPR
 
             int preStatus = 0;
 
-            string query = $"SELECT status FROM regionStatus WHERE region = 'SEA';";
+            string query = $"SELECT status2s FROM regionStatus WHERE region = 'SEA';";
             await HelperFunctions.CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
@@ -4263,15 +4354,28 @@ namespace BPR
             }
             await Globals.conn.CloseAsync();
 
-            query = $"UPDATE regionStatus SET status = {1 - preStatus} WHERE region = 'SEA';";
+            query = $"UPDATE regionStatus SET status2s = {1 - preStatus} WHERE region = 'SEA';";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
             Region thisRegion = Globals.regionList["SEA"];
-            thisRegion.status = preStatus == 0;
+            thisRegion.status2 = preStatus == 0;
+            if (!thisRegion.status1 && !thisRegion.status2)
+            {
+                thisRegion.status = false;
+                query = $"UPDATE regionStatus SET status = 1 WHERE region = 'SEA';";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
+            if (thisRegion.status1 || thisRegion.status2)
+            {
+                thisRegion.status = true;
+                query = $"UPDATE regionStatus SET status = 1 WHERE region = 'SEA';";
+                await HelperFunctions.ExecuteSQLQueryAsync(query);
+            }
             Globals.regionList["SEA"] = thisRegion;
 
+
             string statusString = (preStatus == 1) ? "off" : "on";
-            await Context.Channel.SendMessageAsync($"SEA has now been turned {statusString}");
+            await Context.Channel.SendMessageAsync($"SEA 2v2 has now been turned {statusString}");
         }
     }
 
