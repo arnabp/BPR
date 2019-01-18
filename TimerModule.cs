@@ -37,9 +37,9 @@ public class TimerService
                     {
                         await CheckQueueTimeoutAsync(general, region.Key, 1);
                         await CheckQueueTimeoutAsync(general, region.Key, 2);
-                        if (Globals.timerCount % 20 == 0)
+                        if (Globals.timerCount % 20 == 0 && region.Value.status1)
                             await MidnightBankDecrease(general, region.Key, 1);
-                        if (Globals.timerCount % 50 == 0)
+                        if (Globals.timerCount % 50 == 0 && region.Value.status2)
                             await MidnightBankDecrease(general, region.Key, 2);
 
                         if (region.Value.inQueue1)
@@ -48,7 +48,7 @@ public class TimerService
                             await CheckQueueMatchCreate2sAsync(general, region.Key);
                     }
 
-                    if (client.GetChannel(HelperFunctions.GetChannelId(region.Key, 1)) is IMessageChannel queue1Info)
+                    if (client.GetChannel(HelperFunctions.GetChannelId(region.Key, 1)) is IMessageChannel queue1Info && region.Value.status1)
                     {
                         int messageCount = 3;
                         if (HelperFunctions.GetRoleId(region.Key, 1, 1) != 0)
@@ -77,7 +77,7 @@ public class TimerService
                         if (queueListm != null) await UpdateQueueAsync(queueListm, region.Key, 1);
                     }
 
-                    if (client.GetChannel(HelperFunctions.GetChannelId(region.Key, 2)) is IMessageChannel queue2Info)
+                    if (client.GetChannel(HelperFunctions.GetChannelId(region.Key, 2)) is IMessageChannel queue2Info && region.Value.status2)
                     {
                         int messageCount = 3;
                         if (HelperFunctions.GetRoleId(region.Key, 2, 1) != 0)
@@ -115,8 +115,8 @@ public class TimerService
                         IUserMessage bankInfo2v2m1 = messageList.ToList()[2] as IUserMessage;
                         IUserMessage bankInfo2v2m2 = messageList.ToList()[0] as IUserMessage;
 
-                        if (bankInfo1v1m1 != null && bankInfo1v1m2 != null) await UpdateBankInfoAsync(bankInfo1v1m1, bankInfo1v1m2, region.Key, 1);
-                        if (bankInfo2v2m1 != null && bankInfo2v2m2 != null) await UpdateBankInfoAsync(bankInfo2v2m1, bankInfo2v2m2, region.Key, 2);
+                        if (region.Value.status1 && bankInfo1v1m1 != null && bankInfo1v1m2 != null) await UpdateBankInfoAsync(bankInfo1v1m1, bankInfo1v1m2, region.Key, 1);
+                        if (region.Value.status2 && bankInfo2v2m1 != null && bankInfo2v2m2 != null) await UpdateBankInfoAsync(bankInfo2v2m1, bankInfo2v2m2, region.Key, 2);
 
                     }
                 }
