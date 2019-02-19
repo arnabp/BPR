@@ -1549,6 +1549,10 @@ namespace BPR
             double new1 = p1elo + results.Item1;
             double new2 = p2elo + results.Item2;
 
+            // Limit elo floor
+            new1 = (new1 > 600) ? new1 : 600;
+            new2 = (new2 > 600) ? new2 : 600;
+
             // Print results in embed
             var embed = new EmbedBuilder
             {
@@ -2272,6 +2276,12 @@ namespace BPR
             double new2 = p2elo + results.Item2;
             double new3 = p3elo + results.Item3;
             double new4 = p4elo + results.Item4;
+
+            // Limit elo floor
+            new1 = (new1 > 600) ? new1 : 600;
+            new2 = (new2 > 600) ? new2 : 600;
+            new3 = (new3 > 600) ? new3 : 600;
+            new4 = (new4 > 600) ? new4 : 600;
 
             // Print results in embed
             var embed = new EmbedBuilder
