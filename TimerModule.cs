@@ -751,7 +751,7 @@ public class TimerService
                 }
                 else
                 {
-                    query = $"UPDATE leaderboard{region}{gameMode} SET elo = CASE WHEN elo > 800 THEN elo - 50 ELSE elo END WHERE id = {dictChecker.Key};";
+                    query = $"UPDATE leaderboard{region}{gameMode} SET elo = CASE WHEN elo > {TierModule.SEED3ELO} THEN elo - 50 ELSE elo END WHERE id = {dictChecker.Key};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
                     query = $"UPDATE leaderboard{region}{gameMode} SET midnightCheck = {day} WHERE id = {dictChecker.Key};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
