@@ -9,3 +9,13 @@ D:\Users\Arnab Purkayastha\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.As
 D:\Users\Arnab Purkayastha\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.dll
 D:\Users\Arnab Purkayastha\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.pdb
 D:\Users\Arnab Purkayastha\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.csprojAssemblyReference.cache
+D:\Users\Arnab\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.csprojAssemblyReference.cache
+D:\Users\Arnab\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.AssemblyInfoInputs.cache
+D:\Users\Arnab\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.AssemblyInfo.cs
+D:\Users\Arnab\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.dll
+D:\Users\Arnab\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.pdb
+D:\Users\Arnab\source\repos\BPR\BPR\bin\Release\netcoreapp2.0\BPR.deps.json
+D:\Users\Arnab\source\repos\BPR\BPR\bin\Release\netcoreapp2.0\BPR.runtimeconfig.json
+D:\Users\Arnab\source\repos\BPR\BPR\bin\Release\netcoreapp2.0\BPR.runtimeconfig.dev.json
+D:\Users\Arnab\source\repos\BPR\BPR\bin\Release\netcoreapp2.0\BPR.dll
+D:\Users\Arnab\source\repos\BPR\BPR\bin\Release\netcoreapp2.0\BPR.pdb

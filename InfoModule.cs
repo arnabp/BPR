@@ -1602,7 +1602,6 @@ namespace BPR
                 TierModule thisTierModule = TierModule.GetTierModule(region, 1);
                 thisTierModule.PlayerEloChange(p1ID, new1);
                 thisTierModule.PlayerEloChange(p2ID, new2);
-                thisTierModule.NormalizeTiers();
                 await TierModule.AnnounceTierChanges(Context);
             }
 
@@ -1744,7 +1743,6 @@ namespace BPR
                     TierModule thisTierModule = TierModule.GetTierModule(region, 1);
                     thisTierModule.PlayerEloChange(p1ID, p1elo);
                     thisTierModule.PlayerEloChange(p2ID, p2elo);
-                    thisTierModule.NormalizeTiers();
                     await TierModule.AnnounceTierChanges(Context);
 
                     // Revert banked game
@@ -2356,7 +2354,6 @@ namespace BPR
                 thisTierModule.PlayerEloChange(p2ID, new2);
                 thisTierModule.PlayerEloChange(p3ID, new3);
                 thisTierModule.PlayerEloChange(p4ID, new4);
-                thisTierModule.NormalizeTiers();
                 await TierModule.AnnounceTierChanges(Context);
             }
 
@@ -2542,7 +2539,6 @@ namespace BPR
                     thisTierModule.PlayerEloChange(p2ID, p2elo);
                     thisTierModule.PlayerEloChange(p3ID, p3elo);
                     thisTierModule.PlayerEloChange(p4ID, p4elo);
-                    thisTierModule.NormalizeTiers();
                     await TierModule.AnnounceTierChanges(Context);
 
                     // Add banked game
