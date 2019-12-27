@@ -33,8 +33,6 @@ namespace BPR
 
         const double T1ELO = 1300;
         const double T2ELO = 1100;
-        const int T1LIMIT = 10;
-        const int T2LIMIT = 16;
 
         public const double SEED1ELO = 1150;
         public const double SEED2ELO = 1075;
@@ -64,12 +62,12 @@ namespace BPR
                 while (reader.Read())
                 {
                     double elo = reader.GetDouble(1);
-                    if (elo >= T1ELO && inTier1 < T1LIMIT)
+                    if (elo >= T1ELO)
                     {
                         inTier1++;
                         tierList[reader.GetUInt64(0)] = new MutableTuple<double, int>(elo, 1);
                     }
-                    else if (elo >= T2ELO && inTier2 < T2LIMIT)
+                    else if (elo >= T2ELO)
                     {
                         inTier2++;
                         tierList[reader.GetUInt64(0)] = new MutableTuple<double, int>(elo, 2);
@@ -122,78 +120,9 @@ namespace BPR
             }
         }
 
-        public void NormalizeTiers()
-        {
-            if (inTier1 > T1LIMIT || inTier1 == T1LIMIT - 1)
-                NormalizeTier1();
-            if (inTier2 > T2LIMIT || inTier2 == T2LIMIT - 1)
-                NormalizeTier2();
-        }
-
         public int getPlayerTier(ulong id)
         {
             return tierList[id].Item2;
-        }
-
-        private void NormalizeTier1()
-        {
-            if (inTier1 > T1LIMIT)
-            {
-                var tier1List = tierList.Where(player => player.Value.Item2 == 1).ToList();
-                tier1List.Sort((pair2, pair1) => pair1.Value.Item1.CompareTo(pair2.Value.Item1));
-
-                for (int i = T1LIMIT; i < inTier1; i++)
-                {
-                    tierList[tier1List[i].Key].Item2 = 2;
-                    if (changeAnnouncements.ContainsKey(tier1List[i].Key))
-                        changeAnnouncements.Remove(tier1List[i].Key);
-                    else
-                        changeAnnouncements[tier1List[i].Key] = -2;
-                }
-            }
-            else if (inTier1 < T1LIMIT)
-            {
-                var tier2List = tierList.Where(player => player.Value.Item2 == 2).ToList();
-                tier2List.Sort((pair2, pair1) => pair1.Value.Item1.CompareTo(pair2.Value.Item1));
-
-                for (int i = 0; i < T1LIMIT - inTier1; i++)
-                {
-                    if (tier2List[i].Value.Item1 > T1ELO)
-                    {
-                        tierList[tier2List[i].Key].Item2 = 1;
-                        if (changeAnnouncements.ContainsKey(tier2List[i].Key))
-                            changeAnnouncements.Remove(tier2List[i].Key);
-                        else
-                            changeAnnouncements[tier2List[i].Key] = 1;
-                    }
-
-                }
-            }
-        }
-
-        private void NormalizeTier2()
-        {
-            if (inTier2 > T2LIMIT)
-            {
-                var tier2List = tierList.Where(player => player.Value.Item2 == 2).ToList();
-                tier2List.Sort((pair2, pair1) => pair1.Value.Item1.CompareTo(pair2.Value.Item1));
-
-                for (int i = T2LIMIT; i < inTier2; i++)
-                {
-                    tierList[tier2List[i].Key].Item2 = 2;
-                }
-            }
-            else if (inTier2 < T2LIMIT)
-            {
-                var tier3List = tierList.Where(player => player.Value.Item2 == 3).ToList();
-                tier3List.Sort((pair2, pair1) => pair1.Value.Item1.CompareTo(pair2.Value.Item1));
-
-                for (int i = 0; i < T2LIMIT - inTier2; i++)
-                {
-                    if (tier3List[i].Value.Item1 > T1ELO)
-                        tierList[tier3List[i].Key].Item2 = 1;
-                }
-            }
         }
 
         private int GetChangeValue(int oldTier, int newTier)
