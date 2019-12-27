@@ -513,11 +513,11 @@ namespace BPR
         [Command("join")]
         [Alias("j")]
         [Summary("Joins the 1v1 queue")]
-        public async Task JoinAsync(int targetTier = 0)
+        public async Task JoinAsync()
         {
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
-            Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue with target {targetTier}");
+            Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue");
 
             // Get User's information from Role
             string region = "";
@@ -562,8 +562,9 @@ namespace BPR
                     await TierModule.ChangeRoleToTier(Context, tier);
                 }
                 // Setting all non-standard tiers to default to user's tier
-                if (targetTier < 1 || targetTier > 3)
-                    targetTier = tier;
+                int targetTier = 3;
+                if (tier == 1)
+                    targetTier = 2;
                 // Check that user can expand queue to desired tier
                 if (targetTier < tier)
                 {
@@ -924,11 +925,11 @@ namespace BPR
         [Command("join")]
         [Alias("j")]
         [Summary("Joins the 2v2 queue")]
-        public async Task JoinAsync(int targetTier = 0, int targetTeammateTier = 0)
+        public async Task JoinAsync()
         {
             var userInfo = Context.User;
             await Context.Message.DeleteAsync();
-            Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue with target {targetTier} and teammate {targetTeammateTier}");
+            Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue");
 
             // Get User's information from Role
             string region = "";
@@ -974,10 +975,12 @@ namespace BPR
                     await TierModule.ChangeRoleToTier(Context, tier);
                 }
                 // Setting all non-standard tiers to default to user's tier
-                if (targetTier < 1 || targetTier > 3)
-                    targetTier = tier;
-                if (targetTeammateTier < 1 || targetTeammateTier > 3)
-                    targetTeammateTier = tier;
+                int targetTier = 3, targetTeammateTier = 3;
+                if (tier == 1)
+                {
+                    targetTier = 2;
+                    targetTeammateTier = 2;
+                }
                 // Check that user can expand queue to desired tier
                 if (targetTier < tier)
                 {
