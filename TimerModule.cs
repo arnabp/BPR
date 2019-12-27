@@ -50,58 +50,20 @@ public class TimerService
 
                     if (client.GetChannel(HelperFunctions.GetChannelId(region.Key, 1)) is IMessageChannel queue1Info && region.Value.status1)
                     {
-                        int messageCount = 3;
-                        if (HelperFunctions.GetRoleId(region.Key, 1, 1) != 0)
-                            messageCount++;
-                        if (HelperFunctions.GetRoleId(region.Key, 1, 2) != 0)
-                            messageCount++;
-                        IEnumerable<IMessage> messageList = await queue1Info.GetMessagesAsync(messageCount).Flatten();
-
-                        if (messageCount >= 5)
-                        {
-                            IUserMessage leaderboardT1m = messageList.ToList()[4] as IUserMessage;
-                            await UpdateLeaderboardAsync(leaderboardT1m, region.Key, 1, 1);
-                        }
-                        if (messageCount >= 4)
-                        {
-                            IUserMessage leaderboardT2m = messageList.ToList()[3] as IUserMessage;
-                            await UpdateLeaderboardAsync(leaderboardT2m, region.Key, 1, 2);
-                        }
-
-                        IUserMessage leaderboardT3m = messageList.ToList()[2] as IUserMessage;
+                        IEnumerable<IMessage> messageList = await queue1Info.GetMessagesAsync(2).Flatten();
                         IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
                         IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
 
-                        if (leaderboardT3m != null) await UpdateLeaderboardAsync(leaderboardT3m, region.Key, 1, 3);
                         if (matchListm != null) await UpdateMatchesAsync(matchListm, region.Key, 1);
                         if (queueListm != null) await UpdateQueueAsync(queueListm, region.Key, 1);
                     }
 
                     if (client.GetChannel(HelperFunctions.GetChannelId(region.Key, 2)) is IMessageChannel queue2Info && region.Value.status2)
                     {
-                        int messageCount = 3;
-                        if (HelperFunctions.GetRoleId(region.Key, 2, 1) != 0)
-                            messageCount++;
-                        if (HelperFunctions.GetRoleId(region.Key, 2, 2) != 0)
-                            messageCount++;
-                        IEnumerable<IMessage> messageList = await queue2Info.GetMessagesAsync(messageCount).Flatten();
-
-                        if (messageCount >= 5)
-                        {
-                            IUserMessage leaderboardT1m = messageList.ToList()[4] as IUserMessage;
-                            await UpdateLeaderboardAsync(leaderboardT1m, region.Key, 2, 1);
-                        }
-                        if (messageCount >= 4)
-                        {
-                            IUserMessage leaderboardT2m = messageList.ToList()[3] as IUserMessage;
-                            await UpdateLeaderboardAsync(leaderboardT2m, region.Key, 2, 2);
-                        }
-
-                        IUserMessage leaderboardT3m = messageList.ToList()[2] as IUserMessage;
+                        IEnumerable<IMessage> messageList = await queue2Info.GetMessagesAsync(2).Flatten();
                         IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
                         IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
 
-                        if (leaderboardT3m != null) await UpdateLeaderboardAsync(leaderboardT3m, region.Key, 2, 3);
                         if (matchListm != null) await UpdateMatchesAsync(matchListm, region.Key, 2);
                         if (queueListm != null) await UpdateQueueAsync(queueListm, region.Key, 2);
                     }
