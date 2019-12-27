@@ -67,20 +67,6 @@ public class TimerService
                         if (matchListm != null) await UpdateMatchesAsync(matchListm, region.Key, 2);
                         if (queueListm != null) await UpdateQueueAsync(queueListm, region.Key, 2);
                     }
-
-                    if (client.GetChannel(HelperFunctions.GetChannelId(region.Key, 3)) is IMessageChannel bankStatus)
-                    {
-                        IEnumerable<IMessage> messageList = await bankStatus.GetMessagesAsync(4).Flatten();
-
-                        IUserMessage bankInfo1v1m1 = messageList.ToList()[3] as IUserMessage;
-                        IUserMessage bankInfo1v1m2 = messageList.ToList()[1] as IUserMessage;
-                        IUserMessage bankInfo2v2m1 = messageList.ToList()[2] as IUserMessage;
-                        IUserMessage bankInfo2v2m2 = messageList.ToList()[0] as IUserMessage;
-
-                        if (region.Value.status1 && bankInfo1v1m1 != null && bankInfo1v1m2 != null) await UpdateBankInfoAsync(bankInfo1v1m1, bankInfo1v1m2, region.Key, 1);
-                        if (region.Value.status2 && bankInfo2v2m1 != null && bankInfo2v2m2 != null) await UpdateBankInfoAsync(bankInfo2v2m1, bankInfo2v2m2, region.Key, 2);
-
-                    }
                 }
             }
             Globals.timerCount++;
