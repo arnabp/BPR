@@ -31,8 +31,8 @@ namespace BPR
         private static Dictionary<ulong, int> changeAnnouncements = new Dictionary<ulong, int>();
         private Dictionary<ulong, MutableTuple<double, int>> tierList;
 
-        const double T1ELO = 1200;
-        const double T2ELO = 1100;
+        const double T1ELO = 1400;
+        const double T2ELO = 1200;
 
         public const double SEED1ELO = 1150;
         public const double SEED2ELO = 1075;
