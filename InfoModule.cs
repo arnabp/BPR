@@ -9,6 +9,7 @@ using Discord;
 using MySql.Data;
 using MySql.Data.MySqlClient;
 using System.Linq;
+using Discord.WebSocket;
 
 namespace BPR
 {
@@ -36,7 +37,7 @@ namespace BPR
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                cmd.ExecuteNonQuery();
+                await cmd.ExecuteNonQueryAsync();
             }
             catch (Exception ex)
             {
@@ -69,6 +70,12 @@ namespace BPR
                 Globals.roleList.Add(GetRoleId("AUS", 2, 3), new Role { region = "AUS", gameMode = 2, tier = 3 });
                 Globals.roleList.Add(GetRoleId("SEA", 1, 3), new Role { region = "SEA", gameMode = 1, tier = 3 });
                 Globals.roleList.Add(GetRoleId("SEA", 2, 3), new Role { region = "SEA", gameMode = 2, tier = 3 });
+                Globals.roleList.Add(GetRoleId("TEST", 1, 1), new Role { region = "TEST", gameMode = 1, tier = 1 });
+                Globals.roleList.Add(GetRoleId("TEST", 1, 2), new Role { region = "TEST", gameMode = 1, tier = 2 });
+                Globals.roleList.Add(GetRoleId("TEST", 1, 3), new Role { region = "TEST", gameMode = 1, tier = 3 });
+                Globals.roleList.Add(GetRoleId("TEST", 2, 1), new Role { region = "TEST", gameMode = 2, tier = 1 });
+                Globals.roleList.Add(GetRoleId("TEST", 2, 2), new Role { region = "TEST", gameMode = 2, tier = 2 });
+                Globals.roleList.Add(GetRoleId("TEST", 2, 3), new Role { region = "TEST", gameMode = 2, tier = 3 });
             }
 
             return Globals.roleList[roleID];
@@ -152,6 +159,30 @@ namespace BPR
                         return 529047311188492288;
                 }
             }
+            else if (region == "TEST")
+            {
+                if (tier == 1)
+                {
+                    if (gameMode == 1)
+                        return 123456789000007181;
+                    else if (gameMode == 2)
+                        return 123456789000007182;
+                }
+                else if (tier == 2)
+                {
+                    if (gameMode == 1)
+                        return 123456789000007281;
+                    else if (gameMode == 2)
+                        return 123456789000007282;
+                }
+                else if (tier == 3)
+                {
+                    if (gameMode == 1)
+                        return 123456789000007381;
+                    else if (gameMode == 2)
+                        return 123456789000007382;
+                }
+            }
 
             return 0;
         }
@@ -165,6 +196,10 @@ namespace BPR
                 }
                 if (region == "AUS" || region == "SEA") {
                     return 422045385612328973;
+                }
+                if (region == "TEST")
+                {
+                    return 123456789000000000;
                 }
             }
             // 1v1 Queue Info
@@ -181,6 +216,10 @@ namespace BPR
                 if (region == "SEA") {
                     return 529011508659748872;
                 }
+                if (region == "TEST")
+                {
+                    return 123456789000000001;
+                }
             }
             // 2v2 Queue Info
             if (channelType == 2) {
@@ -195,6 +234,10 @@ namespace BPR
                 }
                 if (region == "SEA") {
                     return 529012003415654400;
+                }
+                if (region == "TEST")
+                {
+                    return 123456789000000002;
                 }
             }
             // Bank Status
@@ -507,26 +550,33 @@ namespace BPR
 
     [Group("queue1")]
     [Alias("q1")]
-    public class Queue1Module : ModuleBase<SocketCommandContext>
+    public abstract class Queue1Module : ModuleBase<SocketCommandContext>
     {
+        public abstract ICommandContext localContext { get; set; }
 
         [Command("join")]
         [Alias("j")]
         [Summary("Joins the 1v1 queue")]
         public async Task JoinAsync()
         {
-            var userInfo = Context.User;
-            await Context.Message.DeleteAsync();
+            if (localContext is null)
+            {
+                localContext = Context;
+            }
+            var userInfo = localContext.User;
+            //await localContext.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue");
 
             // Get User's information from Role
             string region = "";
             int roleTier = 0;
-            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            IGuild server = localContext.Guild as IGuild;
+            IGuildUser user = await server.GetUserAsync(userInfo.Id);
+            foreach (ulong roleId in user.RoleIds)
             {
                 try
                 {
-                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                     if (thisRole.gameMode == 1)
                     {
                         region = thisRole.region;
@@ -541,12 +591,12 @@ namespace BPR
             // Check if user is qualified to queue
             if(region == "")
             {
-                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                await localContext.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
             if (!Globals.regionList[region].status1)
             {
-                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                await localContext.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
             // Check if server has tiers
@@ -559,7 +609,7 @@ namespace BPR
                 if (tier != roleTier)
                 {
                     Console.WriteLine($"{userInfo.Username} had the wrong tier assigned to them, fixing.");
-                    await TierModule.ChangeRoleToTier(Context, tier);
+                    await TierModule.ChangeRoleToTier(localContext as SocketCommandContext, tier); // TODO: This will break
                 }
                 // Setting all non-standard tiers to default to user's tier
                 int targetTier = 3;
@@ -568,7 +618,7 @@ namespace BPR
                 // Check that user can expand queue to desired tier
                 if (targetTier < tier)
                 {
-                    await Context.Channel.SendMessageAsync("You cannot expand queue to a tier higher than you. You will be queued into your tier.");
+                    await localContext.Channel.SendMessageAsync("You cannot expand queue to a tier higher than you. You will be queued into your tier.");
                     targetTier = tier;
                 }
                 // Convert tier and targetTier to binary tier queue number
@@ -600,7 +650,7 @@ namespace BPR
             await Globals.conn.CloseAsync();
             if (inLeaderboard == 0)
             {
-                await Context.Channel.SendMessageAsync("You are not on the leaderboard for this game mode. Please contact the server admin to fix this.");
+                await localContext.Channel.SendMessageAsync("You are not on the leaderboard for this game mode. Please contact the server admin to fix this.");
                 return;
             }
 
@@ -653,7 +703,7 @@ namespace BPR
             // Return messages to restrict user from joining queue
             if (isInQueue)
             {
-                await Context.Channel.SendMessageAsync($"Player already in {region} 1v1 queue has now refreshed their queue timer");
+                await localContext.Channel.SendMessageAsync($"Player already in {region} 1v1 queue has now refreshed their queue timer");
 
                 query = $"UPDATE queue{region}1 SET time = {DateTime.UtcNow.Ticks} WHERE id = {userInfo.Id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -668,7 +718,7 @@ namespace BPR
             }
             else if (isInMatch)
             {
-                await Context.Channel.SendMessageAsync($"Player already in {region} 1v1 match tried to queue");
+                await localContext.Channel.SendMessageAsync($"Player already in {region} 1v1 match tried to queue");
                 Console.WriteLine($"{userInfo.Username} tried to join the queue while in match");
             }
             else
@@ -677,7 +727,7 @@ namespace BPR
                 query = $"INSERT INTO queue{region}1(time, username, id, tier) VALUES({DateTime.UtcNow.Ticks}, '{userInfo.Username}', {userInfo.Id}, {queueTier});";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-                await Context.Channel.SendMessageAsync($"A player has been added to {region} 1v1 queue");
+                await localContext.Channel.SendMessageAsync($"A player has been added to {region} 1v1 queue");
 
                 // Tell region that a user exists in queue
                 if (!Globals.regionList[region].inQueue1)
@@ -694,17 +744,19 @@ namespace BPR
         [Summary("Leaves the 1v1 queue")]
         public async Task QueueLeaveAsync()
         {
-            var userInfo = Context.User;
+            var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is attempting to leave 1v1 queue");
 
             // Get User's information from Role
             string region = "";
             int tier = 0;
-            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            IGuild server = localContext.Guild as IGuild;
+            IGuildUser user = await server.GetUserAsync(userInfo.Id);
+            foreach (ulong role in user.RoleIds)
             {
                 try
                 {
-                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(role);
                     if (thisRole.gameMode == 1)
                     {
                         region = thisRole.region;
@@ -719,12 +771,12 @@ namespace BPR
             // Check if user is qualified to queue
             if (region == "")
             {
-                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                await localContext.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
             if (!Globals.regionList[region].status1)
             {
-                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                await localContext.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
 
@@ -760,14 +812,14 @@ namespace BPR
             {
                 query = $"DELETE FROM queue{region}1 WHERE id = {userInfo.Id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the {region} 1v1 queue");
+                await localContext.Channel.SendMessageAsync($"A player has left the {region} 1v1 queue");
             }
             else
             {
-                await Context.Channel.SendMessageAsync($"Player not in {region} 1v1 queue tried to leave queue");
+                await localContext.Channel.SendMessageAsync($"Player not in {region} 1v1 queue tried to leave queue");
                 Console.WriteLine($"{userInfo.Username} tried to leave an empty queue");
             }
-            await Context.Message.DeleteAsync();
+            await localContext.Message.DeleteAsync();
         }
 
         private async Task NewMatch(int p1, int p2, string region)
@@ -834,14 +886,14 @@ namespace BPR
             {
                 query = $"DELETE FROM queue{region}2 WHERE id = {p1id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the {region} 2v2 queue");
+                await localContext.Channel.SendMessageAsync($"A player has left the {region} 2v2 queue");
             }
 
             if (is2InQueue)
             {
                 query = $"DELETE FROM queue{region}2 WHERE id = {p2id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the {region} 2v2 queue");
+                await localContext.Channel.SendMessageAsync($"A player has left the {region} 2v2 queue");
             }
 
             query = $"INSERT INTO matches{region}1(id1, id2, username1, username2, time, reverted) VALUES({p1id}, {p2id}, '{p1name}', '{p2name}', {DateTime.UtcNow.Ticks}, 0);";
@@ -899,11 +951,11 @@ namespace BPR
 
             if(p1elo > p2elo)
             {
-                await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}> and <@{p2id}>");
+                await localContext.Channel.SendMessageAsync($"New match has started between <@{p1id}> and <@{p2id}>");
             }
             else
             {
-                await Context.Channel.SendMessageAsync($"New match has started between <@{p2id}> and <@{p1id}>");
+                await localContext.Channel.SendMessageAsync($"New match has started between <@{p2id}> and <@{p1id}>");
             }
             
             Console.WriteLine($"{region} 1v1 Match #{matchCount} has started.");
@@ -913,7 +965,7 @@ namespace BPR
             query = $"DELETE FROM queue{region}1 WHERE id = {p2id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync($"Please remember to add your room number with match1 room 00000");
+            await localContext.Channel.SendMessageAsync($"Please remember to add your room number with match1 room 00000");
         }
     }
 

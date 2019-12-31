@@ -40,6 +40,8 @@ namespace BPR
         public static TierModule tiersNA2 = new TierModule("NA", 2);
         public static TierModule tiersEU1 = new TierModule("EU", 1);
         public static TierModule tiersEU2 = new TierModule("EU", 2);
+        public static TierModule tiersTEST1 = new TierModule("TEST", 1);
+        public static TierModule tiersTEST2 = new TierModule("TEST", 2);
 
         public static Random rnd = new Random();
 
@@ -55,11 +57,13 @@ namespace BPR
 
                 while (reader.Read())
                 {
-                    regionList[reader.GetString(0)] = new Region { id = reader.GetUInt64(2),
-                                                                   status = reader.GetBoolean(1),
-                                                                   status1 = reader.GetBoolean(4),
-                                                                   status2 = reader.GetBoolean(5),
-                                                                   tiers = reader.GetInt16(3) };
+                    regionList[reader.GetString(0)] = new Region {
+                        id = reader.GetUInt64(2),
+                        status = reader.GetBoolean(1),
+                        status1 = reader.GetBoolean(4),
+                        status2 = reader.GetBoolean(5),
+                        tiers = reader.GetInt16(3)
+                    };
                 }
             }
             catch (Exception ex)
@@ -145,6 +149,7 @@ namespace BPR
 
                 csv.Read();
                 Globals.conn = new MySqlConnection(csv.GetField<String>(0));
+                reader.Close();
             }
 
             await Globals.InitRegions();
