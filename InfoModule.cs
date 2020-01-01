@@ -563,11 +563,14 @@ namespace BPR
         [Summary("Joins the 1v1 queue")]
         public async Task JoinAsync()
         {
+            Console.WriteLine($"JoinAsync successfully called");
             if (localContext == null)
             {
                 localContext = Context;
             }
-            var userInfo = localContext.User;
+            Console.WriteLine($"localContext is {localContext.ToString()}");
+            Console.WriteLine($"Context is {Context.ToString()}");
+            var userInfo = localContext.User;                               
             await localContext.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue");
 
