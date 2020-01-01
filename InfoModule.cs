@@ -550,22 +550,24 @@ namespace BPR
 
     [Group("queue1")]
     [Alias("q1")]
-    public abstract class Queue1Module : ModuleBase<SocketCommandContext>
+    public class Queue1Module : ModuleBase<SocketCommandContext>
     {
-        public abstract ICommandContext localContext { get; set; }
+        private ICommandContext localContext;
+        public Queue1Module(ICommandContext contextParam)
+        {
+            localContext = contextParam;
+        }
+
+        public Queue1Module()
+        {
+            localContext = Context;
+        }
 
         [Command("join")]
         [Alias("j")]
         [Summary("Joins the 1v1 queue")]
         public async Task JoinAsync()
         {
-            Console.WriteLine($"Context is {Context.Message}");
-            if (Context != null)
-            {
-                localContext = Context;
-                Console.WriteLine($"Interface transfered context is {localContext.Message}");
-            }
-            Console.Write($"Context after transfer is {localContext.Message}");
             var userInfo = localContext.User;
             await localContext.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue");
