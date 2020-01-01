@@ -559,12 +559,12 @@ namespace BPR
         [Summary("Joins the 1v1 queue")]
         public async Task JoinAsync()
         {
-            if (localContext is null)
+            if (localContext == null)
             {
                 localContext = Context;
             }
             var userInfo = localContext.User;
-            //await localContext.Message.DeleteAsync();
+            await localContext.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue");
 
             // Get User's information from Role
