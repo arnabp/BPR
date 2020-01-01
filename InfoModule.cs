@@ -559,13 +559,7 @@ namespace BPR
         [Summary("Joins the 1v1 queue")]
         public async Task JoinAsync()
         {
-            Console.WriteLine($"JoinAsync successfully called");
-            if (localContext == null)
-            {
-                localContext = Context;
-            }
-            Console.WriteLine($"localContext is {localContext.ToString()}");
-            Console.WriteLine($"Context is {Context.ToString()}");
+            localContext = localContext ?? Context;
             var userInfo = localContext.User;                               
             await localContext.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to join 1v1 queue");
@@ -612,7 +606,7 @@ namespace BPR
                 if (tier != roleTier)
                 {
                     Console.WriteLine($"{userInfo.Username} had the wrong tier assigned to them, fixing.");
-                    await TierModule.ChangeRoleToTier(localContext as SocketCommandContext, tier); // TODO: This will break
+                    await TierModule.ChangeRoleToTier(localContext, tier);
                 }
                 // Setting all non-standard tiers to default to user's tier
                 int targetTier = 3;
@@ -747,6 +741,7 @@ namespace BPR
         [Summary("Leaves the 1v1 queue")]
         public async Task QueueLeaveAsync()
         {
+            localContext = localContext ?? Context;
             var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is attempting to leave 1v1 queue");
 
@@ -976,24 +971,28 @@ namespace BPR
     [Alias("q2")]
     public class Queue2Module : ModuleBase<SocketCommandContext>
     {
+        public ICommandContext localContext;
 
         [Command("join")]
         [Alias("j")]
         [Summary("Joins the 2v2 queue")]
         public async Task JoinAsync()
         {
-            var userInfo = Context.User;
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
+            await localContext.Message.DeleteAsync();
             Console.WriteLine($"{userInfo.Username} is attempting to join 2v2 queue");
 
             // Get User's information from Role
             string region = "";
             int roleTier = 0;
-            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            IGuild server = localContext.Guild as IGuild;
+            IGuildUser user = await server.GetUserAsync(userInfo.Id);
+            foreach (ulong roleId in user.RoleIds)
             {
                 try
                 {
-                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                     if (thisRole.gameMode == 2)
                     {
                         region = thisRole.region;
@@ -1008,12 +1007,12 @@ namespace BPR
             // Check if user is qualified to queue
             if (region == "")
             {
-                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                await localContext.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
             if (!Globals.regionList[region].status2)
             {
-                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                await localContext.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
             // Check if server has tiers
@@ -1027,7 +1026,7 @@ namespace BPR
                 if (tier != roleTier)
                 {
                     Console.WriteLine($"{userInfo.Username} had the wrong tier assigned to them, fixing.");
-                    await TierModule.ChangeRoleToTier(Context, tier);
+                    await TierModule.ChangeRoleToTier(localContext, tier);
                 }
                 // Setting all non-standard tiers to default to user's tier
                 int targetTier = 3, targetTeammateTier = 3;
@@ -1039,12 +1038,12 @@ namespace BPR
                 // Check that user can expand queue to desired tier
                 if (targetTier < tier)
                 {
-                    await Context.Channel.SendMessageAsync("You cannot expand queue to a tier higher than you. You will be queued into your tier.");
+                    await localContext.Channel.SendMessageAsync("You cannot expand queue to a tier higher than you. You will be queued into your tier.");
                     targetTier = tier;
                 }
                 if (targetTeammateTier < tier)
                 {
-                    await Context.Channel.SendMessageAsync("You cannot request a teammate with a tier higher than you. You will automatically get a teammate higher than you if they have requested this.");
+                    await localContext.Channel.SendMessageAsync("You cannot request a teammate with a tier higher than you. You will automatically get a teammate higher than you if they have requested this.");
                     targetTeammateTier = tier;
                 }
                 // Convert tier and targetTier to binary tier queue number
@@ -1077,7 +1076,7 @@ namespace BPR
             await Globals.conn.CloseAsync();
             if (inLeaderboard == 0)
             {
-                await Context.Channel.SendMessageAsync("You are not on the leaderboard for this game mode. Please contact the server admin to fix this.");
+                await localContext.Channel.SendMessageAsync("You are not on the leaderboard for this game mode. Please contact the server admin to fix this.");
                 return;
             }
 
@@ -1134,7 +1133,7 @@ namespace BPR
             // Return messages to restrict user from joining queue
             if (isInQueue)
             {
-                await Context.Channel.SendMessageAsync($"Player already in {region} 2v2 queue has now refreshed their queue timer");
+                await localContext.Channel.SendMessageAsync($"Player already in {region} 2v2 queue has now refreshed their queue timer");
 
                 query = $"UPDATE queue{region}2 SET time = {DateTime.UtcNow.Ticks} WHERE id = {userInfo.Id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -1155,7 +1154,7 @@ namespace BPR
             }
             else if (isInMatch)
             {
-                await Context.Channel.SendMessageAsync($"Player already in {region} 2v2 match tried to queue");
+                await localContext.Channel.SendMessageAsync($"Player already in {region} 2v2 match tried to queue");
                 Console.WriteLine($"{userInfo.Username} tried to join the queue while in match");
             }
             else
@@ -1163,7 +1162,7 @@ namespace BPR
                 query = $"INSERT INTO queue{region}2(time, username, id, tier, tierTeammate) VALUES({DateTime.UtcNow.Ticks}, '{userInfo.Username}', {userInfo.Id}, {queueTier}, {teammateTier});";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-                await Context.Channel.SendMessageAsync($"A player has been added to {region} 2v2 queue");
+                await localContext.Channel.SendMessageAsync($"A player has been added to {region} 2v2 queue");
 
                 // Tell region that a user exists in queue
                 if (!Globals.regionList[region].inQueue2)
@@ -1180,17 +1179,20 @@ namespace BPR
         [Summary("Leaves the 2v2 queue")]
         public async Task QueueLeaveAsync()
         {
-            var userInfo = Context.User;
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is attempting to leave 2v2 queue");
 
             // Get User's information from Role
             string region = "";
             int tier = 0;
-            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            IGuild server = localContext.Guild as IGuild;
+            IGuildUser user = await server.GetUserAsync(userInfo.Id);
+            foreach (ulong roleId in user.RoleIds)
             {
                 try
                 {
-                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                     if (thisRole.gameMode == 2)
                     {
                         region = thisRole.region;
@@ -1205,12 +1207,12 @@ namespace BPR
             // Check if user is qualified to queue
             if (region == "")
             {
-                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                await localContext.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
             if (!Globals.regionList[region].status2)
             {
-                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                await localContext.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
 
@@ -1246,15 +1248,15 @@ namespace BPR
             {
                 query = $"DELETE FROM queue{region}2 WHERE id = {userInfo.Id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the {region} 2v2 queue");
+                await localContext.Channel.SendMessageAsync($"A player has left the {region} 2v2 queue");
             }
             else
             {
-                await Context.Channel.SendMessageAsync($"Player not in {region} 2v2 queue tried to leave queue");
+                await localContext.Channel.SendMessageAsync($"Player not in {region} 2v2 queue tried to leave queue");
                 Console.WriteLine($"{userInfo.Username} tried to leave an empty queue");
             }
             
-            await Context.Message.DeleteAsync();
+            await localContext.Message.DeleteAsync();
         }
 
         private async Task NewMatch(int p1, int p2, int p3, int p4, string region, bool randomize)
@@ -1346,25 +1348,25 @@ namespace BPR
             {
                 query = $"DELETE FROM queue{region}1 WHERE id = {p1id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the {region} 1v1 queue");
+                await localContext.Channel.SendMessageAsync($"A player has left the {region} 1v1 queue");
             }
             if (is2InQueue)
             {
                 query = $"DELETE FROM queue{region}1 WHERE id = {p2id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the {region} 1v1 queue");
+                await localContext.Channel.SendMessageAsync($"A player has left the {region} 1v1 queue");
             }
             if (is3InQueue)
             {
                 query = $"DELETE FROM queue{region}1 WHERE id = {p3id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the {region} 1v1 queue");
+                await localContext.Channel.SendMessageAsync($"A player has left the {region} 1v1 queue");
             }
             if (is4InQueue)
             {
                 query = $"DELETE FROM queue{region}1 WHERE id = {p4id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
-                await Context.Channel.SendMessageAsync($"A player has left the {region} 1v1 queue");
+                await localContext.Channel.SendMessageAsync($"A player has left the {region} 1v1 queue");
             }
 
             query = $"INSERT INTO matches{region}2(id1, id2, id3, id4, username1, username2, username3, username4, time, reverted) " +
@@ -1431,11 +1433,11 @@ namespace BPR
 
             if(p1elo + p2elo > p3elo + p4elo)
             {
-                await Context.Channel.SendMessageAsync($"New match has started between <@{p1id}>, <@{p2id}> and <@{p3id}>, <@{p4id}>");
+                await localContext.Channel.SendMessageAsync($"New match has started between <@{p1id}>, <@{p2id}> and <@{p3id}>, <@{p4id}>");
             }
             else
             {
-                await Context.Channel.SendMessageAsync($"New match has started between <@{p3id}>, <@{p4id}> and <@{p1id}>, <@{p2id}>");
+                await localContext.Channel.SendMessageAsync($"New match has started between <@{p3id}>, <@{p4id}> and <@{p1id}>, <@{p2id}>");
             }
             
             Console.WriteLine($"{region} 2v2 Match #{matchCount} has started.");
@@ -1449,7 +1451,7 @@ namespace BPR
             query = $"DELETE FROM queue{region}2 WHERE id = {p4id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync($"Please remember to add your room number with match2 room 00000");
+            await localContext.Channel.SendMessageAsync($"Please remember to add your room number with match2 room 00000");
         }
     }
 
@@ -1457,12 +1459,15 @@ namespace BPR
     [Alias("m1")]
     public class Match1Module : ModuleBase<SocketCommandContext>
     {
+        public ICommandContext localContext;
+
         [Command("report")]
         [Summary("Allows user to report current match")]
         [Alias("score", "result", "r")]
         public async Task MatchReportAsync([Remainder] [Summary("The winner, \"Y\" or \"N\"")] string winner)
         {
-            var userInfo = Context.User;
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is reporting a result");
             bool? isP1 = null;
             ulong p1ID = 0, p2ID = 0, reverter = 0;
@@ -1472,11 +1477,13 @@ namespace BPR
 
             // Get User's information from Role
             string region = "";
-            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            IGuild server = localContext.Guild as IGuild;
+            IGuildUser user = await server.GetUserAsync(userInfo.Id);
+            foreach (ulong roleId in user.RoleIds)
             {
                 try
                 {
-                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                     if (thisRole.gameMode == 1)
                     {
                         region = thisRole.region;
@@ -1490,12 +1497,12 @@ namespace BPR
             // Check if user is qualified to queue
             if (region == "")
             {
-                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                await localContext.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
             if (!Globals.regionList[region].status1)
             {
-                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                await localContext.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
             // Check if server has tiers
@@ -1543,7 +1550,7 @@ namespace BPR
             await Globals.conn.CloseAsync();
             if (isP1 == null)
             {
-                await Context.Channel.SendMessageAsync($"You are currently not in a match against anyone");
+                await localContext.Channel.SendMessageAsync($"You are currently not in a match against anyone");
                 return;
             }
 
@@ -1556,7 +1563,7 @@ namespace BPR
             else
             {
                 Console.WriteLine($"{userInfo.Username} entered the wrong result type");
-                await Context.Channel.SendMessageAsync("Invalid results entered");
+                await localContext.Channel.SendMessageAsync("Invalid results entered");
                 return;
             }
 
@@ -1628,7 +1635,7 @@ namespace BPR
                 x.Value = $"{p2Username} now has {Convert.ToInt32(new2)} elo";
             });
 
-            await Context.Channel.SendMessageAsync("", embed: embed);
+            await localContext.Channel.SendMessageAsync("", embed: embed);
 
             string p1ResultString = "wins";
             string p2ResultString = "loss";
@@ -1657,7 +1664,7 @@ namespace BPR
                 TierModule thisTierModule = TierModule.GetTierModule(region, 1);
                 thisTierModule.PlayerEloChange(p1ID, new1);
                 thisTierModule.PlayerEloChange(p2ID, new2);
-                await TierModule.AnnounceTierChanges(Context);
+                await TierModule.AnnounceTierChanges(localContext);
             }
 
             // Add banked game
@@ -1676,7 +1683,8 @@ namespace BPR
         [Summary("Reverts the last reported match for a player")]
         public async Task RevertMatchAsync()
         {
-            var userInfo = Context.User;
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is reverting a match");
             int thisMatchNum = 1, revertRequests = 0, thisPlayerNum = 0;
             bool hasAlreadyReverted = false;
@@ -1720,16 +1728,16 @@ namespace BPR
             
             if (hasAlreadyReverted)
             {
-                await Context.Channel.SendMessageAsync("A player tried to revert the match twice.");
+                await localContext.Channel.SendMessageAsync("A player tried to revert the match twice.");
             }
             else
             {
                 if (thisPlayerNum == 0)
                 {
-                    await Context.Channel.SendMessageAsync("You have not had a match recently that can be reverted.");
+                    await localContext.Channel.SendMessageAsync("You have not had a match recently that can be reverted.");
                     return;
                 }
-                else await Context.Channel.SendMessageAsync($"{revertRequests + 1}/2 players have requested the last 1v1 match to be reverted");
+                else await localContext.Channel.SendMessageAsync($"{revertRequests + 1}/2 players have requested the last 1v1 match to be reverted");
 
                 if (revertRequests < 1)
                 {
@@ -1798,7 +1806,7 @@ namespace BPR
                     TierModule thisTierModule = TierModule.GetTierModule(region, 1);
                     thisTierModule.PlayerEloChange(p1ID, p1elo);
                     thisTierModule.PlayerEloChange(p2ID, p2elo);
-                    await TierModule.AnnounceTierChanges(Context);
+                    await TierModule.AnnounceTierChanges(localContext);
 
                     // Revert banked game
                     query = $"UPDATE leaderboard{region}1 SET bank = bank - 1 WHERE id = {p1ID} AND bank > 0;";
@@ -1812,7 +1820,7 @@ namespace BPR
                     query = $"UPDATE leaderboard{region}1 SET {p2ResultString} = {p2ResultString} - 1 WHERE id = {p2ID};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-                    await Context.Channel.SendMessageAsync("The last 1v1 match has been reverted. Please report the match correctly now.");
+                    await localContext.Channel.SendMessageAsync("The last 1v1 match has been reverted. Please report the match correctly now.");
                 }
             }
         }
@@ -1821,18 +1829,21 @@ namespace BPR
         [Summary("Cancels the match the player is currently in")]
         public async Task CancelMatchAsync()
         {
-            var userInfo = Context.User;
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is canceling a match");
             int thisMatchNum = 1, cancelRequests = 0, thisPlayerNum = 0;
             bool hasAlreadyCancelled = false;
 
             // Get User's information from Role
             string region = "";
-            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            IGuild server = localContext.Guild as IGuild;
+            IGuildUser user = await server.GetUserAsync(userInfo.Id);
+            foreach (ulong roleId in user.RoleIds)
             {
                 try
                 {
-                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                     if (thisRole.gameMode == 1)
                     {
                         region = thisRole.region;
@@ -1846,12 +1857,12 @@ namespace BPR
             // Check if user is qualified to queue
             if (region == "")
             {
-                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                await localContext.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
             if (!Globals.regionList[region].status1)
             {
-                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                await localContext.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
 
@@ -1894,16 +1905,16 @@ namespace BPR
 
             if (hasAlreadyCancelled)
             {
-                await Context.Channel.SendMessageAsync("A player tried to cancel the match twice.");
+                await localContext.Channel.SendMessageAsync("A player tried to cancel the match twice.");
             }
             else
             {
                 if (thisPlayerNum == 0)
                 {
-                    await Context.Channel.SendMessageAsync("You are not in a match that can be cancelled.");
+                    await localContext.Channel.SendMessageAsync("You are not in a match that can be cancelled.");
                     return;
                 }
-                else await Context.Channel.SendMessageAsync($"{cancelRequests + 1}/2 players have requested the last 1v1 match to be cancelled");
+                else await localContext.Channel.SendMessageAsync($"{cancelRequests + 1}/2 players have requested the last 1v1 match to be cancelled");
 
                 if (cancelRequests < 1)
                 {
@@ -1917,7 +1928,7 @@ namespace BPR
                     query = $"DELETE FROM matches{region}1 WHERE id1 = {userInfo.Id} OR id2 = {userInfo.Id};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-                    await Context.Channel.SendMessageAsync("The last 1v1 match has been cancelled. You may now queue again.");
+                    await localContext.Channel.SendMessageAsync("The last 1v1 match has been cancelled. You may now queue again.");
                 }
             }
         }
@@ -1927,28 +1938,32 @@ namespace BPR
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task ClearHistoryAsync()
         {
+            localContext = localContext ?? Context;
             string query = $"TRUNCATE TABLE matchesHistory1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync("Match history cleared.");
+            await localContext.Channel.SendMessageAsync("Match history cleared.");
         }
 
         [Command("room")]
         [Summary("Adds room number to match info")]
         public async Task AddRoomNumberAsync([Remainder] int room)
         {
-            var userInfo = Context.User;
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is adding a room number");
             int thisMatchNum = 1, idnum = 0;
             bool isInMatch = false;
 
             // Get User's information from Role
             string region = "";
-            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            IGuild server = localContext.Guild as IGuild;
+            IGuildUser user = await server.GetUserAsync(userInfo.Id);
+            foreach (ulong roleId in user.RoleIds)
             {
                 try
                 {
-                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                     if (thisRole.gameMode == 1)
                     {
                         region = thisRole.region;
@@ -1962,12 +1977,12 @@ namespace BPR
             // Check if user is qualified to queue
             if (region == "")
             {
-                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                await localContext.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
             if (!Globals.regionList[region].status1)
             {
-                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                await localContext.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
 
@@ -2010,13 +2025,13 @@ namespace BPR
                 query = $"UPDATE matches{region}1 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-                await Context.Channel.SendMessageAsync($"{region} 1v1 Match #{thisMatchNum} is in room #{room}");
+                await localContext.Channel.SendMessageAsync($"{region} 1v1 Match #{thisMatchNum} is in room #{room}");
             }
             else
             {
-                await Context.Channel.SendMessageAsync($"You are not currently in an {region} 1v1 match.");
+                await localContext.Channel.SendMessageAsync($"You are not currently in an {region} 1v1 match.");
             }
-            await Context.Message.DeleteAsync();
+            await localContext.Message.DeleteAsync();
         }
 
         [Command("superNA")]
@@ -2024,7 +2039,8 @@ namespace BPR
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task AdminMatchReportNAAsync(ulong p1ID, ulong p2ID)
         {
-            var userInfo = Context.User;
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is reporting a result");
             bool isP1 = true;
 
@@ -2080,7 +2096,7 @@ namespace BPR
             query = $"UPDATE leaderboardNA1 SET elo = {new2} WHERE id = {p2ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync($"Match hard updated");
+            await localContext.Channel.SendMessageAsync($"Match hard updated");
         }
 
         [Command("superEU")]
@@ -2088,9 +2104,8 @@ namespace BPR
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task AdminMatchReportEUAsync(ulong p1ID, ulong p2ID)
         {
-
-
-            var userInfo = Context.User;
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is reporting a result");
             bool isP1 = true;
 
@@ -2146,7 +2161,7 @@ namespace BPR
             query = $"UPDATE leaderboardEU1 SET elo = {new2} WHERE id = {p2ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync($"Match hard updated");
+            await localContext.Channel.SendMessageAsync($"Match hard updated");
         }
 
         private Tuple<double, double> EloConvert(double p1, double p2, bool isP1)
@@ -2168,12 +2183,15 @@ namespace BPR
     [Alias("m2")]
     public class Match2Module : ModuleBase<SocketCommandContext>
     {
+        public ICommandContext localContext;
+
         [Command("report")]
         [Summary("Allows user to report current match")]
         [Alias("score", "result", "r")]
         public async Task MatchReportAsync([Remainder] [Summary("The winner, \"Y\" or \"N\"")] string winner)
         {
-            var userInfo = Context.User;
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is reporting a result");
             bool? isT1 = null;
             ulong p1ID = 0, p2ID = 0, p3ID = 0, p4ID = 0, reverter = 0;
@@ -2182,11 +2200,13 @@ namespace BPR
 
             // Get User's information from Role
             string region = "";
-            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            IGuild server = localContext.Guild as IGuild;
+            IGuildUser user = await server.GetUserAsync(userInfo.Id);
+            foreach (ulong roleId in user.RoleIds)
             {
                 try
                 {
-                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                     if (thisRole.gameMode == 2)
                     {
                         region = thisRole.region;
@@ -2200,12 +2220,12 @@ namespace BPR
             // Check if user is qualified to queue
             if (region == "")
             {
-                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                await localContext.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
             if (!Globals.regionList[region].status2)
             {
-                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                await localContext.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
             // Check if server has tiers
@@ -2261,7 +2281,7 @@ namespace BPR
             await Globals.conn.CloseAsync();
             if (isT1 == null)
             {
-                await Context.Channel.SendMessageAsync($"You are currently not in a match against anyone");
+                await localContext.Channel.SendMessageAsync($"You are currently not in a match against anyone");
                 return;
             }
 
@@ -2274,7 +2294,7 @@ namespace BPR
             else
             {
                 Console.WriteLine($"{userInfo.Username} entered the wrong result type");
-                await Context.Channel.SendMessageAsync("Invalid results entered");
+                await localContext.Channel.SendMessageAsync("Invalid results entered");
                 return;
             }
 
@@ -2366,7 +2386,7 @@ namespace BPR
                 x.Value = $"{p4Username} now has {Convert.ToInt32(new4)} elo";
             });
 
-            await Context.Channel.SendMessageAsync("", embed: embed);
+            await localContext.Channel.SendMessageAsync("", embed: embed);
 
             string t1ResultString = "wins";
             string t2ResultString = "loss";
@@ -2409,7 +2429,7 @@ namespace BPR
                 thisTierModule.PlayerEloChange(p2ID, new2);
                 thisTierModule.PlayerEloChange(p3ID, new3);
                 thisTierModule.PlayerEloChange(p4ID, new4);
-                await TierModule.AnnounceTierChanges(Context);
+                await TierModule.AnnounceTierChanges(localContext);
             }
 
             // Add banked game
@@ -2432,7 +2452,8 @@ namespace BPR
         [Summary("Reverts the last reported match for a player")]
         public async Task RevertMatchAsync()
         {
-            var userInfo = Context.User;
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is reverting a match");
             int thisMatchNum = 1, revertRequests = 0, thisPlayerNum = 0;
             bool hasAlreadyReverted = false;
@@ -2500,16 +2521,16 @@ namespace BPR
 
             if (hasAlreadyReverted)
             {
-                await Context.Channel.SendMessageAsync("A player tried to revert the match twice.");
+                await localContext.Channel.SendMessageAsync("A player tried to revert the match twice.");
             }
             else
             {
                 if(thisPlayerNum == 0)
                 {
-                    await Context.Channel.SendMessageAsync("You have not had a match recently that can be reverted.");
+                    await localContext.Channel.SendMessageAsync("You have not had a match recently that can be reverted.");
                     return;
                 }
-                else await Context.Channel.SendMessageAsync($"{revertRequests + 1}/3 players have requested the last 2v2 match to be reverted");
+                else await localContext.Channel.SendMessageAsync($"{revertRequests + 1}/3 players have requested the last 2v2 match to be reverted");
 
                 if (revertRequests < 2)
                 {
@@ -2594,7 +2615,7 @@ namespace BPR
                     thisTierModule.PlayerEloChange(p2ID, p2elo);
                     thisTierModule.PlayerEloChange(p3ID, p3elo);
                     thisTierModule.PlayerEloChange(p4ID, p4elo);
-                    await TierModule.AnnounceTierChanges(Context);
+                    await TierModule.AnnounceTierChanges(localContext);
 
                     // Add banked game
                     query = $"UPDATE leaderboard{region}2 SET bank = bank - 1 WHERE id = {p1ID} AND bank > 0;";
@@ -2616,7 +2637,7 @@ namespace BPR
                     query = $"UPDATE leaderboard{region}2 SET {t2ResultString} = {t2ResultString} - 1 WHERE id = {p4ID};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-                    await Context.Channel.SendMessageAsync("The last 2v2 match has been reverted. Please report the match correctly now.");
+                    await localContext.Channel.SendMessageAsync("The last 2v2 match has been reverted. Please report the match correctly now.");
                 }
             }
         }
@@ -2625,18 +2646,21 @@ namespace BPR
         [Summary("Cancels the last match for a player")]
         public async Task CancelMatchAsync()
         {
-            var userInfo = Context.User;
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is cancelling a match");
             int thisMatchNum = 1, cancelRequests = 0, thisPlayerNum = 0;
             bool hasAlreadyCancelled = false;
 
             // Get User's information from Role
             string region = "";
-            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            IGuild server = localContext.Guild as IGuild;
+            IGuildUser user = await server.GetUserAsync(userInfo.Id);
+            foreach (ulong roleId in user.RoleIds)
             {
                 try
                 {
-                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                     if (thisRole.gameMode == 2)
                     {
                         region = thisRole.region;
@@ -2650,12 +2674,12 @@ namespace BPR
             // Check if user is qualified to queue
             if (region == "")
             {
-                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                await localContext.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
             if (!Globals.regionList[region].status2)
             {
-                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                await localContext.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
 
@@ -2722,16 +2746,16 @@ namespace BPR
 
             if (hasAlreadyCancelled)
             {
-                await Context.Channel.SendMessageAsync("A player tried to cancel a match twice.");
+                await localContext.Channel.SendMessageAsync("A player tried to cancel a match twice.");
             }
             else
             {
                 if (thisPlayerNum == 0)
                 {
-                    await Context.Channel.SendMessageAsync("You are not in a match that can be cancelled.");
+                    await localContext.Channel.SendMessageAsync("You are not in a match that can be cancelled.");
                     return;
                 }
-                else await Context.Channel.SendMessageAsync($"{cancelRequests + 1}/3 players have requested the last 2v2 match to be cancelled");
+                else await localContext.Channel.SendMessageAsync($"{cancelRequests + 1}/3 players have requested the last 2v2 match to be cancelled");
 
                 if (cancelRequests < 2)
                 {
@@ -2745,7 +2769,7 @@ namespace BPR
                     query = $"DELETE FROM matches{region}2 WHERE id1 = {userInfo.Id} OR id2 = {userInfo.Id} OR id3 = {userInfo.Id} OR id4 = {userInfo.Id};";
                     await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-                    await Context.Channel.SendMessageAsync("The last 2v2 match has been cancelled. You may now queue again.");
+                    await localContext.Channel.SendMessageAsync("The last 2v2 match has been cancelled. You may now queue again.");
                 }
             }
         }
@@ -2755,28 +2779,32 @@ namespace BPR
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task ClearHistoryAsync()
         {
+            localContext = localContext ?? Context;
             string query = $"TRUNCATE TABLE matchesHistory2;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync("Match history cleared.");
+            await localContext.Channel.SendMessageAsync("Match history cleared.");
         }
 
         [Command("room")]
         [Summary("Adds room number to match info")]
         public async Task AddRoomNumberAsync([Remainder] int room)
         {
-            var userInfo = Context.User;
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is adding a room number");
             int thisMatchNum = 1, idnum = 0;
             bool isInMatch = false;
 
             // Get User's information from Role
             string region = "";
-            foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(userInfo.Id).Roles)
+            IGuild server = localContext.Guild as IGuild;
+            IGuildUser user = await server.GetUserAsync(userInfo.Id);
+            foreach (ulong roleId in user.RoleIds)
             {
                 try
                 {
-                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                     if (thisRole.gameMode == 2)
                     {
                         region = thisRole.region;
@@ -2790,12 +2818,12 @@ namespace BPR
             // Check if user is qualified to queue
             if (region == "")
             {
-                await Context.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
+                await localContext.Channel.SendMessageAsync($"You are not currently in a region. Please check that you have been added to a leaderboard.");
                 return;
             }
             if (!Globals.regionList[region].status2)
             {
-                await Context.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
+                await localContext.Channel.SendMessageAsync("The season has ended. Please wait for the new season to begin before queueing");
                 return;
             }
 
@@ -2850,13 +2878,13 @@ namespace BPR
                 query = $"UPDATE matches{region}2 SET room = {room} WHERE id{idnum} = {userInfo.Id};";
                 await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-                await Context.Channel.SendMessageAsync($"{region} 2v2 Match #{thisMatchNum} is in room #{room}");
+                await localContext.Channel.SendMessageAsync($"{region} 2v2 Match #{thisMatchNum} is in room #{room}");
             }
             else
             {
-                await Context.Channel.SendMessageAsync($"You are not currently in an {region} 2v2 match.");
+                await localContext.Channel.SendMessageAsync($"You are not currently in an {region} 2v2 match.");
             }
-            await Context.Message.DeleteAsync();
+            await localContext.Message.DeleteAsync();
         }
 
         [Command("superNA")]
@@ -2864,7 +2892,8 @@ namespace BPR
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task AdminMatchReportNAAsync(ulong p1ID, ulong p2ID, ulong p3ID, ulong p4ID)
         {
-            var userInfo = Context.User;
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is reporting a result");
             bool isT1 = true;
 
@@ -2910,7 +2939,7 @@ namespace BPR
             query = $"UPDATE leaderboardNA2 SET elo = {new4} WHERE id = {p4ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync($"Match hard updated");
+            await localContext.Channel.SendMessageAsync($"Match hard updated");
         }
 
         [Command("superEU")]
@@ -2918,7 +2947,8 @@ namespace BPR
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task AdminMatchReportEUAsync(ulong p1ID, ulong p2ID, ulong p3ID, ulong p4ID)
         {
-            var userInfo = Context.User;
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is reporting a result");
             bool isT1 = true;
 
@@ -2964,7 +2994,7 @@ namespace BPR
             query = $"UPDATE leaderboardEU2 SET elo = {new4} WHERE id = {p4ID};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync($"Match hard updated");
+            await localContext.Channel.SendMessageAsync($"Match hard updated");
         }
 
         private Tuple<double, double, double, double> EloConvert(double p1, double p2, double p3, double p4, bool isT1)
@@ -2997,16 +3027,19 @@ namespace BPR
     [RequireUserPermission(GuildPermission.Administrator)]
     public class LeaderboardNA1Module : ModuleBase<SocketCommandContext>
     {
+        public ICommandContext localContext;
+
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
         public async Task AddLeaderbardAsync(ulong id, int tier)
         {
-            var user = Context.Guild.GetUser(id);
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
+            await localContext.Message.DeleteAsync();
 
             if (tier < 1 || tier > 3)
             {
-                await Context.Channel.SendMessageAsync($"Entered invalid tier");
+                await localContext.Channel.SendMessageAsync($"Entered invalid tier");
                 return;
             }
 
@@ -3021,9 +3054,9 @@ namespace BPR
             string query = $"INSERT INTO leaderboardNA1(id, username, elo) VALUES({id}, '{user.Username}', {elo});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await user.AddRoleAsync(Context.Guild.GetRole(HelperFunctions.GetRoleId("NA", 1, 3)));
+            await user.AddRoleAsync(localContext.Guild.GetRole(HelperFunctions.GetRoleId("NA", 1, 3)));
 
-            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the NA 1v1 leaderboard!");
+            await localContext.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the NA 1v1 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
         }
 
@@ -3031,16 +3064,20 @@ namespace BPR
         [Summary("Automatically adds users to the leaderboard based on their roles")]
         public async Task AutoLeaderboardAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
-            foreach (var user in Context.Guild.Users)
+            IReadOnlyCollection<IGuildUser> userList = await localContext.Guild.GetUsersAsync();
+            foreach (var user in userList)
             {
                 int roleTier = 0;
-                foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(user.Id).Roles)
+                IGuild server = localContext.Guild as IGuild;
+                IGuildUser guildUser = await server.GetUserAsync(user.Id);
+                foreach (ulong roleId in guildUser.RoleIds)
                 {
                     try
                     {
-                        Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                        Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                         if (thisRole.gameMode == 1 && thisRole.region == "NA")
                         {
                             roleTier = thisRole.tier;
@@ -3074,7 +3111,8 @@ namespace BPR
         [Summary("Allows admin to delete user from leaderboard")]
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
         {
-            var user = Context.Guild.GetUser(id);
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
             string username = "";
             string query = $"SELECT username FROM leaderboardNA1 WHERE id = {id};";
             await Globals.conn.OpenAsync();
@@ -3099,16 +3137,17 @@ namespace BPR
             query = $"DELETE FROM leaderboardNA1 WHERE id = {id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(419355178680975370));
+            if (user != null) await user.RemoveRoleAsync(localContext.Guild.GetRole(419355178680975370));
 
-            await Context.Channel.SendMessageAsync($"{username} has been deleted from the 1v1 leaderboards");
+            await localContext.Channel.SendMessageAsync($"{username} has been deleted from the 1v1 leaderboards");
         }
 
         [Command("refresh")]
         [Summary("Resets the elo decay for all people in this leaderboard")]
         public async Task RefreshDecayTimerAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             string query = $"UPDATE leaderboardNA1 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -3116,14 +3155,15 @@ namespace BPR
             query = $"UPDATE leaderboardNA1 SET decaytimer = {DateTime.UtcNow.Ticks};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for NA 1v1 leaderboard");
+            await localContext.Channel.SendMessageAsync("All elo decay timers refreshed for NA 1v1 leaderboard");
         }
 
         [Command("toggle")]
         [Summary("Toggles whether the region is active")]
         public async Task ToggleRegionAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             int preStatus = 0;
 
@@ -3170,7 +3210,7 @@ namespace BPR
 
 
             string statusString = (preStatus == 1) ? "off" : "on";
-            await Context.Channel.SendMessageAsync($"NA 1v1 has now been turned {statusString}");
+            await localContext.Channel.SendMessageAsync($"NA 1v1 has now been turned {statusString}");
         }
     }
 
@@ -3178,16 +3218,19 @@ namespace BPR
     [RequireUserPermission(GuildPermission.Administrator)]
     public class LeaderboardNA2Module : ModuleBase<SocketCommandContext>
     {
+        public ICommandContext localContext;
+
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
         public async Task AddLeaderbardAsync(ulong id, int tier)
         {
-            var user = Context.Guild.GetUser(id);
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
+            await localContext.Message.DeleteAsync();
 
             if (tier < 1 || tier > 3)
             {
-                await Context.Channel.SendMessageAsync($"Entered invalid tier");
+                await localContext.Channel.SendMessageAsync($"Entered invalid tier");
                 return;
             }
 
@@ -3202,9 +3245,9 @@ namespace BPR
             string query = $"INSERT INTO leaderboardNA2(id, username, elo) VALUES({id}, '{user.Username}', {elo});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await user.AddRoleAsync(Context.Guild.GetRole(HelperFunctions.GetRoleId("NA", 2, 3)));
+            await user.AddRoleAsync(localContext.Guild.GetRole(HelperFunctions.GetRoleId("NA", 2, 3)));
 
-            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the NA 2v2 leaderboard!");
+            await localContext.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the NA 2v2 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
         }
 
@@ -3212,16 +3255,20 @@ namespace BPR
         [Summary("Automatically adds users to the leaderboard based on their roles")]
         public async Task AutoLeaderboardAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
-            foreach (var user in Context.Guild.Users)
+            IReadOnlyCollection<IGuildUser> userList = await localContext.Guild.GetUsersAsync();
+            foreach (var user in userList)
             {
                 int roleTier = 0;
-                foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(user.Id).Roles)
+                IGuild server = localContext.Guild as IGuild;
+                IGuildUser guildUser = await server.GetUserAsync(user.Id);
+                foreach (ulong roleId in guildUser.RoleIds)
                 {
                     try
                     {
-                        Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                        Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                         if (thisRole.gameMode == 2 && thisRole.region == "NA")
                         {
                             roleTier = thisRole.tier;
@@ -3255,7 +3302,8 @@ namespace BPR
         [Summary("Allows admin to delete user from leaderboard")]
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
         {
-            var user = Context.Guild.GetUser(id);
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
             string username = "";
             string query = $"SELECT username FROM leaderboardNA2 WHERE id = {id};";
             await Globals.conn.OpenAsync();
@@ -3280,16 +3328,17 @@ namespace BPR
             query = $"DELETE FROM leaderboardNA2 WHERE id = {id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(419355321061081088));
+            if (user != null) await user.RemoveRoleAsync(localContext.Guild.GetRole(419355321061081088));
 
-            await Context.Channel.SendMessageAsync($"{username} has been deleted from the NA 2v2 leaderboards");
+            await localContext.Channel.SendMessageAsync($"{username} has been deleted from the NA 2v2 leaderboards");
         }
 
         [Command("refresh")]
         [Summary("Resets the elo decay for all people in this leaderboard")]
         public async Task RefreshDecayTimerAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             string query = $"UPDATE leaderboardNA2 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -3297,14 +3346,15 @@ namespace BPR
             query = $"UPDATE leaderboardNA2 SET decaytimer = {DateTime.UtcNow.Ticks};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for NA 2v2 leaderboard");
+            await localContext.Channel.SendMessageAsync("All elo decay timers refreshed for NA 2v2 leaderboard");
         }
 
         [Command("toggle")]
         [Summary("Toggles whether the region is active")]
         public async Task ToggleRegionAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             int preStatus = 0;
 
@@ -3351,7 +3401,7 @@ namespace BPR
 
 
             string statusString = (preStatus == 1) ? "off" : "on";
-            await Context.Channel.SendMessageAsync($"NA 2v2 has now been turned {statusString}");
+            await localContext.Channel.SendMessageAsync($"NA 2v2 has now been turned {statusString}");
         }
     }
 
@@ -3359,16 +3409,19 @@ namespace BPR
     [RequireUserPermission(GuildPermission.Administrator)]
     public class LeaderboardEU1Module : ModuleBase<SocketCommandContext>
     {
+        public ICommandContext localContext;
+
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
         public async Task AddLeaderbardAsync(ulong id, int tier)
         {
-            var user = Context.Guild.GetUser(id);
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
+            await localContext.Message.DeleteAsync();
 
             if (tier < 1 || tier > 3)
             {
-                await Context.Channel.SendMessageAsync($"Entered invalid tier");
+                await localContext.Channel.SendMessageAsync($"Entered invalid tier");
                 return;
             }
 
@@ -3383,9 +3436,9 @@ namespace BPR
             string query = $"INSERT INTO leaderboardEU1(id, username, elo) VALUES({id}, '{user.Username}', {elo});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await user.AddRoleAsync(Context.Guild.GetRole(HelperFunctions.GetRoleId("EU", 1, 3)));
+            await user.AddRoleAsync(localContext.Guild.GetRole(HelperFunctions.GetRoleId("EU", 1, 3)));
 
-            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the EU 1v1 leaderboard!");
+            await localContext.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the EU 1v1 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
         }
 
@@ -3393,16 +3446,20 @@ namespace BPR
         [Summary("Automatically adds users to the leaderboard based on their roles")]
         public async Task AutoLeaderboardAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
-            foreach (var user in Context.Guild.Users)
+            IReadOnlyCollection<IGuildUser> userList = await localContext.Guild.GetUsersAsync();
+            foreach (var user in userList)
             {
                 int roleTier = 0;
-                foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(user.Id).Roles)
+                IGuild server = localContext.Guild as IGuild;
+                IGuildUser guildUser = await server.GetUserAsync(user.Id);
+                foreach (ulong roleId in guildUser.RoleIds)
                 {
                     try
                     {
-                        Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                        Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                         if (thisRole.gameMode == 1 && thisRole.region == "EU")
                         {
                             roleTier = thisRole.tier;
@@ -3436,8 +3493,9 @@ namespace BPR
         [Summary("Allows admin to delete user from leaderboard")]
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
         {
-            var user = Context.Guild.GetUser(id);
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
+            await localContext.Message.DeleteAsync();
             string username = "";
             string query = $"SELECT username FROM leaderboardEU1 WHERE id = {id};";
             await Globals.conn.OpenAsync();
@@ -3462,16 +3520,17 @@ namespace BPR
             query = $"DELETE FROM leaderboardEU1 WHERE id = {id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(419355374529937408));
+            if (user != null) await user.RemoveRoleAsync(localContext.Guild.GetRole(419355374529937408));
 
-            await Context.Channel.SendMessageAsync($"{username} has been deleted from the EU 1v1 leaderboards");
+            await localContext.Channel.SendMessageAsync($"{username} has been deleted from the EU 1v1 leaderboards");
         }
 
         [Command("refresh")]
         [Summary("Resets the elo decay for all people in this leaderboard")]
         public async Task RefreshDecayTimerAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             string query = $"UPDATE leaderboardEU1 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -3479,14 +3538,15 @@ namespace BPR
             query = $"UPDATE leaderboardEU1 SET decaytimer = {DateTime.UtcNow.Ticks};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for EU 1v1 leaderboard");
+            await localContext.Channel.SendMessageAsync("All elo decay timers refreshed for EU 1v1 leaderboard");
         }
 
         [Command("toggle")]
         [Summary("Toggles whether the region is active")]
         public async Task ToggleRegionAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             int preStatus = 0;
 
@@ -3533,7 +3593,7 @@ namespace BPR
 
 
             string statusString = (preStatus == 1) ? "off" : "on";
-            await Context.Channel.SendMessageAsync($"EU 1v1 has now been turned {statusString}");
+            await localContext.Channel.SendMessageAsync($"EU 1v1 has now been turned {statusString}");
         }
     }
 
@@ -3541,16 +3601,19 @@ namespace BPR
     [RequireUserPermission(GuildPermission.Administrator)]
     public class LeaderboardEU2Module : ModuleBase<SocketCommandContext>
     {
+        public ICommandContext localContext;
+
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
         public async Task AddLeaderbardAsync(ulong id, int tier)
         {
-            var user = Context.Guild.GetUser(id);
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
+            await localContext.Message.DeleteAsync();
 
             if (tier < 1 || tier > 3)
             {
-                await Context.Channel.SendMessageAsync($"Entered invalid tier");
+                await localContext.Channel.SendMessageAsync($"Entered invalid tier");
                 return;
             }
 
@@ -3565,9 +3628,9 @@ namespace BPR
             string query = $"INSERT INTO leaderboardEU2(id, username, elo) VALUES({id}, '{user.Username}', {elo});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await user.AddRoleAsync(Context.Guild.GetRole(HelperFunctions.GetRoleId("EU", 2, 3)));
+            await user.AddRoleAsync(localContext.Guild.GetRole(HelperFunctions.GetRoleId("EU", 2, 3)));
 
-            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the EU 2v2 leaderboard!");
+            await localContext.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the EU 2v2 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
         }
 
@@ -3575,16 +3638,20 @@ namespace BPR
         [Summary("Automatically adds users to the leaderboard based on their roles")]
         public async Task AutoLeaderboardAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
-            foreach (var user in Context.Guild.Users)
+            IReadOnlyCollection<IGuildUser> userList = await localContext.Guild.GetUsersAsync();
+            foreach (var user in userList)
             {
                 int roleTier = 0;
-                foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(user.Id).Roles)
+                IGuild server = localContext.Guild as IGuild;
+                IGuildUser guildUser = await server.GetUserAsync(user.Id);
+                foreach (ulong roleId in guildUser.RoleIds)
                 {
                     try
                     {
-                        Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                        Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                         if (thisRole.gameMode == 2 && thisRole.region == "EU")
                         {
                             roleTier = thisRole.tier;
@@ -3618,8 +3685,9 @@ namespace BPR
         [Summary("Allows admin to delete user from leaderboard")]
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
         {
-            var user = Context.Guild.GetUser(id);
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
+            await localContext.Message.DeleteAsync();
             string username = "";
             string query = $"SELECT username FROM leaderboardEU2 WHERE id = {id};";
             await Globals.conn.OpenAsync();
@@ -3644,16 +3712,17 @@ namespace BPR
             query = $"DELETE FROM leaderboardEU2 WHERE id = {id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(419355453550624768));
+            if (user != null) await user.RemoveRoleAsync(localContext.Guild.GetRole(419355453550624768));
 
-            await Context.Channel.SendMessageAsync($"{username} has been deleted from the EU 2v2 leaderboards");
+            await localContext.Channel.SendMessageAsync($"{username} has been deleted from the EU 2v2 leaderboards");
         }
 
         [Command("refresh")]
         [Summary("Resets the elo decay for all people in this leaderboard")]
         public async Task RefreshDecayTimerAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             string query = $"UPDATE leaderboardEU2 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -3661,14 +3730,15 @@ namespace BPR
             query = $"UPDATE leaderboardEU2 SET decaytimer = {DateTime.UtcNow.Ticks};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for EU 2v2 leaderboard");
+            await localContext.Channel.SendMessageAsync("All elo decay timers refreshed for EU 2v2 leaderboard");
         }
 
         [Command("toggle")]
         [Summary("Toggles whether the region is active")]
         public async Task ToggleRegionAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             int preStatus = 0;
 
@@ -3715,7 +3785,7 @@ namespace BPR
 
 
             string statusString = (preStatus == 1) ? "off" : "on";
-            await Context.Channel.SendMessageAsync($"EU 2v2 has now been turned {statusString}");
+            await localContext.Channel.SendMessageAsync($"EU 2v2 has now been turned {statusString}");
         }
     }
 
@@ -3723,16 +3793,19 @@ namespace BPR
     [RequireUserPermission(GuildPermission.Administrator)]
     public class LeaderboardAUS1Module : ModuleBase<SocketCommandContext>
     {
+        public ICommandContext localContext;
+
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
         public async Task AddLeaderbardAsync(ulong id, int tier)
         {
-            var user = Context.Guild.GetUser(id);
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
+            await localContext.Message.DeleteAsync();
 
             if (tier < 1 || tier > 3)
             {
-                await Context.Channel.SendMessageAsync($"Entered invalid tier");
+                await localContext.Channel.SendMessageAsync($"Entered invalid tier");
                 return;
             }
 
@@ -3747,9 +3820,9 @@ namespace BPR
             string query = $"INSERT INTO leaderboardAUS1(id, username, elo) VALUES({id}, '{user.Username}', {elo});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await user.AddRoleAsync(Context.Guild.GetRole(HelperFunctions.GetRoleId("AUS", 1, 3)));
+            await user.AddRoleAsync(localContext.Guild.GetRole(HelperFunctions.GetRoleId("AUS", 1, 3)));
 
-            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the AUS 1v1 leaderboard!");
+            await localContext.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the AUS 1v1 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
         }
 
@@ -3757,16 +3830,20 @@ namespace BPR
         [Summary("Automatically adds users to the leaderboard based on their roles")]
         public async Task AutoLeaderboardAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
-            foreach (var user in Context.Guild.Users)
+            IReadOnlyCollection<IGuildUser> userList = await localContext.Guild.GetUsersAsync();
+            foreach (var user in userList)
             {
                 int roleTier = 0;
-                foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(user.Id).Roles)
+                IGuild server = localContext.Guild as IGuild;
+                IGuildUser guildUser = await server.GetUserAsync(user.Id);
+                foreach (ulong roleId in guildUser.RoleIds)
                 {
                     try
                     {
-                        Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                        Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                         if (thisRole.gameMode == 1 && thisRole.region == "AUS")
                         {
                             roleTier = thisRole.tier;
@@ -3800,7 +3877,8 @@ namespace BPR
         [Summary("Allows admin to delete user from leaderboard")]
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
         {
-            var user = Context.Guild.GetUser(id);
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
             string username = "";
             string query = $"SELECT username FROM leaderboardAUS1 WHERE id = {id};";
             await Globals.conn.OpenAsync();
@@ -3825,16 +3903,17 @@ namespace BPR
             query = $"DELETE FROM leaderboardAUS1 WHERE id = {id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(423095293039607809));
+            if (user != null) await user.RemoveRoleAsync(localContext.Guild.GetRole(423095293039607809));
 
-            await Context.Channel.SendMessageAsync($"{username} has been deleted from the 1v1 leaderboards");
+            await localContext.Channel.SendMessageAsync($"{username} has been deleted from the 1v1 leaderboards");
         }
 
         [Command("refresh")]
         [Summary("Resets the elo decay for all people in this leaderboard")]
         public async Task RefreshDecayTimerAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             string query = $"UPDATE leaderboardAUS1 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -3842,14 +3921,15 @@ namespace BPR
             query = $"UPDATE leaderboardAUS1 SET decaytimer = {DateTime.UtcNow.Ticks};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for AUS 1v1 leaderboard");
+            await localContext.Channel.SendMessageAsync("All elo decay timers refreshed for AUS 1v1 leaderboard");
         }
 
         [Command("toggle")]
         [Summary("Toggles whether the region is active")]
         public async Task ToggleRegionAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             int preStatus = 0;
 
@@ -3896,7 +3976,7 @@ namespace BPR
 
 
             string statusString = (preStatus == 1) ? "off" : "on";
-            await Context.Channel.SendMessageAsync($"AUS 1v1 has now been turned {statusString}");
+            await localContext.Channel.SendMessageAsync($"AUS 1v1 has now been turned {statusString}");
         }
     }
 
@@ -3904,16 +3984,19 @@ namespace BPR
     [RequireUserPermission(GuildPermission.Administrator)]
     public class LeaderboardAUS2Module : ModuleBase<SocketCommandContext>
     {
+        public ICommandContext localContext;
+
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
         public async Task AddLeaderbardAsync(ulong id, int tier)
         {
-            var user = Context.Guild.GetUser(id);
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
+            await localContext.Message.DeleteAsync();
 
             if (tier < 1 || tier > 3)
             {
-                await Context.Channel.SendMessageAsync($"Entered invalid tier");
+                await localContext.Channel.SendMessageAsync($"Entered invalid tier");
                 return;
             }
 
@@ -3928,9 +4011,9 @@ namespace BPR
             string query = $"INSERT INTO leaderboardAUS2(id, username, elo) VALUES({id}, '{user.Username}', {elo});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await user.AddRoleAsync(Context.Guild.GetRole(HelperFunctions.GetRoleId("AUS", 2, 3)));
+            await user.AddRoleAsync(localContext.Guild.GetRole(HelperFunctions.GetRoleId("AUS", 2, 3)));
 
-            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the AUS 2v2 leaderboard!");
+            await localContext.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the AUS 2v2 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
         }
 
@@ -3938,16 +4021,20 @@ namespace BPR
         [Summary("Automatically adds users to the leaderboard based on their roles")]
         public async Task AutoLeaderboardAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
-            foreach (var user in Context.Guild.Users)
+            IReadOnlyCollection<IGuildUser> userList = await localContext.Guild.GetUsersAsync();
+            foreach (var user in userList)
             {
                 int roleTier = 0;
-                foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(user.Id).Roles)
+                IGuild server = localContext.Guild as IGuild;
+                IGuildUser guildUser = await server.GetUserAsync(user.Id);
+                foreach (ulong roleId in guildUser.RoleIds)
                 {
                     try
                     {
-                        Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                        Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                         if (thisRole.gameMode == 2 && thisRole.region == "AUS")
                         {
                             roleTier = thisRole.tier;
@@ -3981,7 +4068,8 @@ namespace BPR
         [Summary("Allows admin to delete user from leaderboard")]
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
         {
-            var user = Context.Guild.GetUser(id);
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
             string username = "";
             string query = $"SELECT username FROM leaderboardAUS2 WHERE id = {id};";
             await Globals.conn.OpenAsync();
@@ -4006,16 +4094,17 @@ namespace BPR
             query = $"DELETE FROM leaderboardAUS2 WHERE id = {id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(423095293039607809));
+            if (user != null) await user.RemoveRoleAsync(localContext.Guild.GetRole(423095293039607809));
 
-            await Context.Channel.SendMessageAsync($"{username} has been deleted from the AUS 2v2 leaderboards");
+            await localContext.Channel.SendMessageAsync($"{username} has been deleted from the AUS 2v2 leaderboards");
         }
 
         [Command("refresh")]
         [Summary("Resets the elo decay for all people in this leaderboard")]
         public async Task RefreshDecayTimerAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             string query = $"UPDATE leaderboardAUS2 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -4023,14 +4112,15 @@ namespace BPR
             query = $"UPDATE leaderboardAUS2 SET decaytimer = {DateTime.UtcNow.Ticks};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for AUS 2v2 leaderboard");
+            await localContext.Channel.SendMessageAsync("All elo decay timers refreshed for AUS 2v2 leaderboard");
         }
 
         [Command("toggle")]
         [Summary("Toggles whether the region is active")]
         public async Task ToggleRegionAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             int preStatus = 0;
 
@@ -4077,7 +4167,7 @@ namespace BPR
 
 
             string statusString = (preStatus == 1) ? "off" : "on";
-            await Context.Channel.SendMessageAsync($"AUS 2v2 has now been turned {statusString}");
+            await localContext.Channel.SendMessageAsync($"AUS 2v2 has now been turned {statusString}");
         }
     }
 
@@ -4085,16 +4175,19 @@ namespace BPR
     [RequireUserPermission(GuildPermission.Administrator)]
     public class LeaderboardSEA1Module : ModuleBase<SocketCommandContext>
     {
+        public ICommandContext localContext;
+
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
         public async Task AddLeaderbardAsync(ulong id, int tier)
         {
-            var user = Context.Guild.GetUser(id);
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
+            await localContext.Message.DeleteAsync();
 
             if (tier < 1 || tier > 3)
             {
-                await Context.Channel.SendMessageAsync($"Entered invalid tier");
+                await localContext.Channel.SendMessageAsync($"Entered invalid tier");
                 return;
             }
 
@@ -4109,9 +4202,9 @@ namespace BPR
             string query = $"INSERT INTO leaderboardSEA1(id, username, elo) VALUES({id}, '{user.Username}', {elo});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await user.AddRoleAsync(Context.Guild.GetRole(HelperFunctions.GetRoleId("SEA", 1, 3)));
+            await user.AddRoleAsync(localContext.Guild.GetRole(HelperFunctions.GetRoleId("SEA", 1, 3)));
 
-            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the SEA 1v1 leaderboard!");
+            await localContext.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the SEA 1v1 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
         }
 
@@ -4119,16 +4212,20 @@ namespace BPR
         [Summary("Automatically adds users to the leaderboard based on their roles")]
         public async Task AutoLeaderboardAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
-            foreach (var user in Context.Guild.Users)
+            IReadOnlyCollection<IGuildUser> userList = await localContext.Guild.GetUsersAsync();
+            foreach (var user in userList)
             {
                 int roleTier = 0;
-                foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(user.Id).Roles)
+                IGuild server = localContext.Guild as IGuild;
+                IGuildUser guildUser = await server.GetUserAsync(user.Id);
+                foreach (ulong roleId in guildUser.RoleIds)
                 {
                     try
                     {
-                        Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                        Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                         if (thisRole.gameMode == 1 && thisRole.region == "SEA")
                         {
                             roleTier = thisRole.tier;
@@ -4162,7 +4259,8 @@ namespace BPR
         [Summary("Allows admin to delete user from leaderboard")]
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
         {
-            var user = Context.Guild.GetUser(id);
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
             string username = "";
             string query = $"SELECT username FROM leaderboardSEA1 WHERE id = {id};";
             await Globals.conn.OpenAsync();
@@ -4187,16 +4285,17 @@ namespace BPR
             query = $"DELETE FROM leaderboardSEA1 WHERE id = {id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(423095346131107853));
+            if (user != null) await user.RemoveRoleAsync(localContext.Guild.GetRole(423095346131107853));
 
-            await Context.Channel.SendMessageAsync($"{username} has been deleted from the 1v1 leaderboards");
+            await localContext.Channel.SendMessageAsync($"{username} has been deleted from the 1v1 leaderboards");
         }
 
         [Command("refresh")]
         [Summary("Resets the elo decay for all people in this leaderboard")]
         public async Task RefreshDecayTimerAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             string query = $"UPDATE leaderboardSEA1 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -4204,14 +4303,15 @@ namespace BPR
             query = $"UPDATE leaderboardSEA1 SET decaytimer = {DateTime.UtcNow.Ticks};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for SEA 1v1 leaderboard");
+            await localContext.Channel.SendMessageAsync("All elo decay timers refreshed for SEA 1v1 leaderboard");
         }
 
         [Command("toggle")]
         [Summary("Toggles whether the region is active")]
         public async Task ToggleRegionAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             int preStatus = 0;
 
@@ -4258,7 +4358,7 @@ namespace BPR
 
 
             string statusString = (preStatus == 1) ? "off" : "on";
-            await Context.Channel.SendMessageAsync($"SEA 1v1 has now been turned {statusString}");
+            await localContext.Channel.SendMessageAsync($"SEA 1v1 has now been turned {statusString}");
         }
     }
 
@@ -4266,16 +4366,19 @@ namespace BPR
     [RequireUserPermission(GuildPermission.Administrator)]
     public class LeaderboardSEA2Module : ModuleBase<SocketCommandContext>
     {
+        public ICommandContext localContext;
+
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
         public async Task AddLeaderbardAsync(ulong id, int tier)
         {
-            var user = Context.Guild.GetUser(id);
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
+            await localContext.Message.DeleteAsync();
 
             if (tier < 1 || tier > 3)
             {
-                await Context.Channel.SendMessageAsync($"Entered invalid tier");
+                await localContext.Channel.SendMessageAsync($"Entered invalid tier");
                 return;
             }
 
@@ -4290,9 +4393,9 @@ namespace BPR
             string query = $"INSERT INTO leaderboardSEA2(id, username, elo) VALUES({id}, '{user.Username}', {elo});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await user.AddRoleAsync(Context.Guild.GetRole(HelperFunctions.GetRoleId("SEA", 2, 3)));
+            await user.AddRoleAsync(localContext.Guild.GetRole(HelperFunctions.GetRoleId("SEA", 2, 3)));
 
-            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the SEA 2v2 leaderboard!");
+            await localContext.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the SEA 2v2 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
         }
 
@@ -4300,16 +4403,20 @@ namespace BPR
         [Summary("Automatically adds users to the leaderboard based on their roles")]
         public async Task AutoLeaderboardAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
-            foreach (var user in Context.Guild.Users)
+            IReadOnlyCollection<IGuildUser> userList = await localContext.Guild.GetUsersAsync();
+            foreach (var user in userList)
             {
                 int roleTier = 0;
-                foreach (Discord.WebSocket.SocketRole role in Context.Guild.GetUser(user.Id).Roles)
+                IGuild server = localContext.Guild as IGuild;
+                IGuildUser guildUser = await server.GetUserAsync(user.Id);
+                foreach (ulong roleId in guildUser.RoleIds)
                 {
                     try
                     {
-                        Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                        Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                         if (thisRole.gameMode == 2 && thisRole.region == "SEA")
                         {
                             roleTier = thisRole.tier;
@@ -4343,7 +4450,8 @@ namespace BPR
         [Summary("Allows admin to delete user from leaderboard")]
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
         {
-            var user = Context.Guild.GetUser(id);
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
             string username = "";
             string query = $"SELECT username FROM leaderboardSEA2 WHERE id = {id};";
             await Globals.conn.OpenAsync();
@@ -4368,16 +4476,17 @@ namespace BPR
             query = $"DELETE FROM leaderboardSEA2 WHERE id = {id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(423095346131107853));
+            if (user != null) await user.RemoveRoleAsync(localContext.Guild.GetRole(423095346131107853));
 
-            await Context.Channel.SendMessageAsync($"{username} has been deleted from the SEA 2v2 leaderboards");
+            await localContext.Channel.SendMessageAsync($"{username} has been deleted from the SEA 2v2 leaderboards");
         }
 
         [Command("refresh")]
         [Summary("Resets the elo decay for all people in this leaderboard")]
         public async Task RefreshDecayTimerAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             string query = $"UPDATE leaderboardSEA2 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -4385,14 +4494,15 @@ namespace BPR
             query = $"UPDATE leaderboardSEA2 SET decaytimer = {DateTime.UtcNow.Ticks};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for SEA 2v2 leaderboard");
+            await localContext.Channel.SendMessageAsync("All elo decay timers refreshed for SEA 2v2 leaderboard");
         }
 
         [Command("toggle")]
         [Summary("Toggles whether the region is active")]
         public async Task ToggleRegionAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             int preStatus = 0;
 
@@ -4439,7 +4549,7 @@ namespace BPR
 
 
             string statusString = (preStatus == 1) ? "off" : "on";
-            await Context.Channel.SendMessageAsync($"SEA 2v2 has now been turned {statusString}");
+            await localContext.Channel.SendMessageAsync($"SEA 2v2 has now been turned {statusString}");
         }
     }
 
@@ -4447,19 +4557,22 @@ namespace BPR
     [RequireUserPermission(GuildPermission.Administrator)]
     public class LeaderboardBRZ1Module : ModuleBase<SocketCommandContext>
     {
+        public ICommandContext localContext;
+
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
         public async Task AddLeaderbardAsync(ulong id)
         {
-            var user = Context.Guild.GetUser(id);
-            await Context.Message.DeleteAsync();
+            var user = await localContext.Guild.GetUserAsync(id);
+            await localContext.Message.DeleteAsync();
 
+            localContext = localContext ?? Context;
             string query = $"INSERT INTO leaderboardBRZ1(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.UtcNow.Ticks});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await user.AddRoleAsync(Context.Guild.GetRole(410986909507256320));
+            await user.AddRoleAsync(localContext.Guild.GetRole(410986909507256320));
 
-            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the BRZ 1v1 leaderboard!");
+            await localContext.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the BRZ 1v1 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
         }
 
@@ -4467,7 +4580,8 @@ namespace BPR
         [Summary("Allows admin to delete user from leaderboard")]
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
         {
-            var user = Context.Guild.GetUser(id);
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
             string username = "";
             string query = $"SELECT username FROM leaderboardBRZ1 WHERE id = {id};";
             await Globals.conn.OpenAsync();
@@ -4492,16 +4606,17 @@ namespace BPR
             query = $"DELETE FROM leaderboardBRZ1 WHERE id = {id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(410986909507256320));
+            if (user != null) await user.RemoveRoleAsync(localContext.Guild.GetRole(410986909507256320));
 
-            await Context.Channel.SendMessageAsync($"{username} has been deleted from the 1v1 leaderboards");
+            await localContext.Channel.SendMessageAsync($"{username} has been deleted from the 1v1 leaderboards");
         }
 
         [Command("refresh")]
         [Summary("Resets the elo decay for all people in this leaderboard")]
         public async Task RefreshDecayTimerAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             string query = $"UPDATE leaderboardBRZ1 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -4509,7 +4624,7 @@ namespace BPR
             query = $"UPDATE leaderboardBRZ1 SET decaytimer = {DateTime.UtcNow.Ticks};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for BRZ 1v1 leaderboard");
+            await localContext.Channel.SendMessageAsync("All elo decay timers refreshed for BRZ 1v1 leaderboard");
         }
     }
 
@@ -4517,19 +4632,22 @@ namespace BPR
     [RequireUserPermission(GuildPermission.Administrator)]
     public class LeaderboardBRZ2Module : ModuleBase<SocketCommandContext>
     {
+        public ICommandContext localContext;
+
         [Command("add")]
         [Summary("Adds new users to the leaderboard")]
         public async Task AddLeaderbardAsync(ulong id)
         {
-            var user = Context.Guild.GetUser(id);
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
+            await localContext.Message.DeleteAsync();
 
             string query = $"INSERT INTO leaderboardBRZ2(id, username, decaytimer) VALUES({id}, '{user.Username}', {DateTime.UtcNow.Ticks});";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await user.AddRoleAsync(Context.Guild.GetRole(410986909507256320));
+            await user.AddRoleAsync(localContext.Guild.GetRole(410986909507256320));
 
-            await Context.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the BRZ 2v2 leaderboard!");
+            await localContext.Channel.SendMessageAsync($"{user.Username} has been succesfully registered to the BRZ 2v2 leaderboard!");
             Console.WriteLine($"{user.Username} has been registered");
         }
 
@@ -4537,7 +4655,8 @@ namespace BPR
         [Summary("Allows admin to delete user from leaderboard")]
         public async Task DeleteLeaderboardAsync([Remainder] ulong id)
         {
-            var user = Context.Guild.GetUser(id);
+            localContext = localContext ?? Context;
+            var user = await localContext.Guild.GetUserAsync(id);
             string username = "";
             string query = $"SELECT username FROM leaderboardBRZ2 WHERE id = {id};";
             await Globals.conn.OpenAsync();
@@ -4562,16 +4681,17 @@ namespace BPR
             query = $"DELETE FROM leaderboardBRZ2 WHERE id = {id};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            if (user != null) await user.RemoveRoleAsync(Context.Guild.GetRole(410986909507256320));
+            if (user != null) await user.RemoveRoleAsync(localContext.Guild.GetRole(410986909507256320));
 
-            await Context.Channel.SendMessageAsync($"{username} has been deleted from the BRZ 2v2 leaderboards");
+            await localContext.Channel.SendMessageAsync($"{username} has been deleted from the BRZ 2v2 leaderboards");
         }
 
         [Command("refresh")]
         [Summary("Resets the elo decay for all people in this leaderboard")]
         public async Task RefreshDecayTimerAsync()
         {
-            await Context.Message.DeleteAsync();
+            localContext = localContext ?? Context;
+            await localContext.Message.DeleteAsync();
 
             string query = $"UPDATE leaderboardBRZ2 SET decayed = -1;";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
@@ -4579,7 +4699,7 @@ namespace BPR
             query = $"UPDATE leaderboardBRZ2 SET decaytimer = {DateTime.UtcNow.Ticks};";
             await HelperFunctions.ExecuteSQLQueryAsync(query);
 
-            await Context.Channel.SendMessageAsync("All elo decay timers refreshed for BRZ 2v2 leaderboard");
+            await localContext.Channel.SendMessageAsync("All elo decay timers refreshed for BRZ 2v2 leaderboard");
         }
     }
 }

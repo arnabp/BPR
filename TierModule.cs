@@ -134,7 +134,7 @@ namespace BPR
             return newTier;
         }
 
-        public static async Task AnnounceTierChanges(SocketCommandContext context)
+        public static async Task AnnounceTierChanges(ICommandContext context)
         {
             foreach (var change in changeAnnouncements.ToList())
             {
@@ -152,7 +152,7 @@ namespace BPR
             }
         }
 
-        public static async Task ChangeRoleToTier(SocketCommandContext context, int change)
+        public static async Task ChangeRoleToTier(ICommandContext context, int change)
         {
             var userInfo = context.User;
             var guildUser = (IGuildUser)userInfo;
@@ -166,14 +166,16 @@ namespace BPR
                 gameMode = (int)(context.Message.Content[5] - '0');
             }
             string region = "";
-            foreach (Discord.WebSocket.SocketRole role in context.Guild.GetUser(userInfo.Id).Roles)
+            IGuild server = context.Guild as IGuild;
+            IGuildUser user = await server.GetUserAsync(userInfo.Id);
+            foreach (ulong roleId in user.RoleIds)
             {
                 try
                 {
-                    Role thisRole = HelperFunctions.GetRoleRegion(role.Id);
+                    Role thisRole = HelperFunctions.GetRoleRegion(roleId);
                     if (thisRole.gameMode == gameMode)
                     {
-                        await guildUser.RemoveRoleAsync(role);
+                        await guildUser.RemoveRoleAsync(server.GetRole(roleId));
                         region = thisRole.region;
                     }
                 }
