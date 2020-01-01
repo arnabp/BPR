@@ -559,7 +559,7 @@ namespace BPR
         [Summary("Joins the 1v1 queue")]
         public async Task JoinAsync()
         {
-            if (localContext == null)
+            if (Context != null)
             {
                 localContext = Context;
             }
