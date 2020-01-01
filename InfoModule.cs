@@ -553,7 +553,7 @@ namespace BPR
     public class Queue1Module : ModuleBase<SocketCommandContext>
     {
         private ICommandContext localContext;
-        public Queue1Module(ICommandContext contextParam)
+        public Queue1Module(ICommandContext contextParam = null)
         {
             localContext = contextParam;
         }
