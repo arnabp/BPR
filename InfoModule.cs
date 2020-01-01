@@ -552,11 +552,7 @@ namespace BPR
     [Alias("q1")]
     public class Queue1Module : ModuleBase<SocketCommandContext>
     {
-        private ICommandContext localContext;
-        public Queue1Module(ICommandContext contextParam = null)
-        {
-            localContext = contextParam;
-        }
+        public ICommandContext localContext;
 
         [Command("join")]
         [Alias("j")]
