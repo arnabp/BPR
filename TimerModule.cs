@@ -42,7 +42,7 @@ public class TimerService
                     else
                         generalChannel = client.GetChannel(HelperFunctions.GetChannelId(region.Key, 0)) as IMessageChannel;
 
-                    if (generalChannel is IMessageChannel general)
+                    if (client.GetChannel(HelperFunctions.GetChannelId(region.Key, 0)) is IMessageChannel general)
                     {
                         await CheckQueueTimeoutAsync(general, region.Key, 1);
                         await CheckQueueTimeoutAsync(general, region.Key, 2);
