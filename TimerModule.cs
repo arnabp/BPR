@@ -40,7 +40,7 @@ public class TimerService
                     if (generalChannel == null)
                         generalChannel = channelOverride;
 
-                    if (channelOverride is IMessageChannel general)
+                    if (generalChannel is IMessageChannel general)
                     {
                         await CheckQueueTimeoutAsync(general, region.Key, 1);
                         await CheckQueueTimeoutAsync(general, region.Key, 2);
