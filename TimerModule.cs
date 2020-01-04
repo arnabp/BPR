@@ -12,6 +12,8 @@ using MySql.Data.MySqlClient;
 
 public class TimerService
 {
+    public IMessageChannel channelOverride;
+
     private readonly Timer _timer; // 2) Add a field like this
     // This example only concerns a single timer.
     // If you would like to have multiple independant timers,
@@ -33,7 +35,14 @@ public class TimerService
                     if (!region.Value.status)
                         return;
 
-                    if (client.GetChannel(HelperFunctions.GetChannelId(region.Key, 0)) is IMessageChannel general)
+                    // Add an override for general channel for unit testing
+                    IMessageChannel generalChannel;
+                    if (channelOverride == null)
+                        generalChannel = channelOverride;
+                    else
+                        generalChannel = client.GetChannel(HelperFunctions.GetChannelId(region.Key, 0)) as IMessageChannel;
+
+                    if (generalChannel is IMessageChannel general)
                     {
                         await CheckQueueTimeoutAsync(general, region.Key, 1);
                         await CheckQueueTimeoutAsync(general, region.Key, 2);
@@ -632,7 +641,7 @@ public class TimerService
 
             while (reader.Read())
             {
-                DateTime oldTime = new DateTime(reader.GetInt64(0));
+                DateTime oldTime = new DateTime(reader.GetInt64(0), DateTimeKind.Local);
                 TimeSpan timeDif = nowTime - oldTime;
                 if (timeDif.TotalMinutes > 10)
                 {

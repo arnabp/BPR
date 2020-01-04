@@ -164,6 +164,8 @@ namespace BPR
             await Globals.tiersNA2.InitTierList();
             await Globals.tiersEU1.InitTierList();
             await Globals.tiersEU2.InitTierList();
+            await Globals.tiersTEST1.InitTierList();
+            await Globals.tiersTEST2.InitTierList();
 
             _services = new ServiceCollection()
                 .AddSingleton(_client)

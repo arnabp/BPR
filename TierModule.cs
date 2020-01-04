@@ -205,6 +205,13 @@ namespace BPR
                 else if (gameMode == 2)
                     return Globals.tiersEU2;
             }
+            else if (region == "TEST")
+            {
+                if (gameMode == 1)
+                    return Globals.tiersTEST1;
+                else if (gameMode == 2)
+                    return Globals.tiersTEST2;
+            }
 
             return null;
         }
