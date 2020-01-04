@@ -57,9 +57,11 @@ namespace BPR
                 Globals.roleList.Add(GetRoleId("NA", 1, 1), new Role { region = "NA", gameMode = 1, tier = 1 });
                 Globals.roleList.Add(GetRoleId("NA", 1, 2), new Role { region = "NA", gameMode = 1, tier = 2 });
                 Globals.roleList.Add(GetRoleId("NA", 1, 3), new Role { region = "NA", gameMode = 1, tier = 3 });
+                Globals.roleList.Add(GetRoleId("NA", 1, 4), new Role { region = "NA", gameMode = 1, tier = 4 });
                 Globals.roleList.Add(GetRoleId("NA", 2, 1), new Role { region = "NA", gameMode = 2, tier = 1 });
                 Globals.roleList.Add(GetRoleId("NA", 2, 2), new Role { region = "NA", gameMode = 2, tier = 2 });
                 Globals.roleList.Add(GetRoleId("NA", 2, 3), new Role { region = "NA", gameMode = 2, tier = 3 });
+                Globals.roleList.Add(GetRoleId("NA", 2, 4), new Role { region = "NA", gameMode = 2, tier = 4 });
                 Globals.roleList.Add(GetRoleId("EU", 1, 1), new Role { region = "EU", gameMode = 1, tier = 1 });
                 Globals.roleList.Add(GetRoleId("EU", 1, 2), new Role { region = "EU", gameMode = 1, tier = 2 });
                 Globals.roleList.Add(GetRoleId("EU", 1, 3), new Role { region = "EU", gameMode = 1, tier = 3 });
@@ -73,9 +75,11 @@ namespace BPR
                 Globals.roleList.Add(GetRoleId("TEST", 1, 1), new Role { region = "TEST", gameMode = 1, tier = 1 });
                 Globals.roleList.Add(GetRoleId("TEST", 1, 2), new Role { region = "TEST", gameMode = 1, tier = 2 });
                 Globals.roleList.Add(GetRoleId("TEST", 1, 3), new Role { region = "TEST", gameMode = 1, tier = 3 });
+                Globals.roleList.Add(GetRoleId("TEST", 1, 4), new Role { region = "TEST", gameMode = 1, tier = 4 });
                 Globals.roleList.Add(GetRoleId("TEST", 2, 1), new Role { region = "TEST", gameMode = 2, tier = 1 });
                 Globals.roleList.Add(GetRoleId("TEST", 2, 2), new Role { region = "TEST", gameMode = 2, tier = 2 });
                 Globals.roleList.Add(GetRoleId("TEST", 2, 3), new Role { region = "TEST", gameMode = 2, tier = 3 });
+                Globals.roleList.Add(GetRoleId("TEST", 2, 4), new Role { region = "TEST", gameMode = 2, tier = 4 });
             }
 
             return Globals.roleList[roleID];
@@ -105,6 +109,13 @@ namespace BPR
                         return 522951569994547200;
                     else if (gameMode == 2)
                         return 522951573366767637;
+                }
+                else if (tier == 4)
+                {
+                    if (gameMode == 1)
+                        return 663122214211682325;
+                    else if (gameMode == 2)
+                        return 663122136587698206;
                 }
             }
             else if (region == "EU")
@@ -181,6 +192,13 @@ namespace BPR
                         return 123456789000007381;
                     else if (gameMode == 2)
                         return 123456789000007382;
+                }
+                else if (tier == 4)
+                {
+                    if (gameMode == 1)
+                        return 123456789000007481;
+                    else if (gameMode == 2)
+                        return 123456789000007482;
                 }
             }
 
@@ -609,9 +627,9 @@ namespace BPR
                     await TierModule.ChangeRoleToTier(localContext, tier);
                 }
                 // Setting all non-standard tiers to default to user's tier
-                int targetTier = 3;
-                if (tier == 1)
-                    targetTier = 2;
+                int targetTier = tier + 1;
+                if (tier == 4)
+                    targetTier = 4;
                 // Check that user can expand queue to desired tier
                 if (targetTier < tier)
                 {
@@ -1029,11 +1047,11 @@ namespace BPR
                     await TierModule.ChangeRoleToTier(localContext, tier);
                 }
                 // Setting all non-standard tiers to default to user's tier
-                int targetTier = 3, targetTeammateTier = 3;
-                if (tier == 1)
+                int targetTier = tier + 1, targetTeammateTier = tier + 1;
+                if (tier == 4)
                 {
-                    targetTier = 2;
-                    targetTeammateTier = 2;
+                    targetTier = 4;
+                    targetTeammateTier = 4;
                 }
                 // Check that user can expand queue to desired tier
                 if (targetTier < tier)

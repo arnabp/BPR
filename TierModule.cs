@@ -23,16 +23,18 @@ namespace BPR
 
     public class TierModule
     {
-        private string region;
-        private int gameMode;
+        private readonly string region;
+        private readonly int gameMode;
         public int inTier1;
         public int inTier2;
         public int inTier3;
+        public int inTier4;
         private static Dictionary<ulong, int> changeAnnouncements = new Dictionary<ulong, int>();
-        private Dictionary<ulong, MutableTuple<double, int>> tierList;
+        private readonly Dictionary<ulong, MutableTuple<double, int>> tierList;
 
         const double T1ELO = 1400;
         const double T2ELO = 1200;
+        const double T3ELO = 1000;
 
         public const double SEED1ELO = 1150;
         public const double SEED2ELO = 1075;
@@ -47,6 +49,7 @@ namespace BPR
             inTier1 = 0;
             inTier2 = 0;
             inTier3 = 0;
+            inTier4 = 0;
         }
 
         public async Task InitTierList()
@@ -72,10 +75,15 @@ namespace BPR
                         inTier2++;
                         tierList[reader.GetUInt64(0)] = new MutableTuple<double, int>(elo, 2);
                     }
-                    else
+                    else if (elo >= T3ELO)
                     {
                         inTier3++;
                         tierList[reader.GetUInt64(0)] = new MutableTuple<double, int>(elo, 3);
+                    }
+                    else
+                    {
+                        inTier4++;
+                        tierList[reader.GetUInt64(0)] = new MutableTuple<double, int>(elo, 4);
                     }
                 }
             }
@@ -97,8 +105,10 @@ namespace BPR
                 inTier1--;
             else if (oldTier == 2)
                 inTier2--;
-            else
+            else if (oldTier == 3)
                 inTier3--;
+            else
+                inTier4--;
 
             if (newElo >= T1ELO)
             {
@@ -112,11 +122,17 @@ namespace BPR
                 tierList[id].Item2 = 2;
                 changeAnnouncements[id] = GetChangeValue(oldTier, 2);
             }
-            else
+            else if (newElo >= T3ELO)
             {
                 inTier3++;
                 tierList[id].Item2 = 3;
                 changeAnnouncements[id] = GetChangeValue(oldTier, 3);
+            }
+            else
+            {
+                inTier4++;
+                tierList[id].Item2 = 4;
+                changeAnnouncements[id] = GetChangeValue(oldTier, 4);
             }
         }
 
@@ -222,19 +238,19 @@ namespace BPR
             int bTargetTier = binaryConvert(targetTier);
 
             int queueTier = bTier | bTargetTier;
-            if (queueTier == 5)
-                return 7;
             return queueTier;
         }
 
         public static int binaryConvert(int tier)
         {
             if (tier == 1)
-                return 0b100;
+                return 0b1000;
             if (tier == 2)
-                return 0b010;
+                return 0b0100;
             if (tier == 3)
-                return 0b001;
+                return 0b0010;
+            if (tier == 4)
+                return 0b0001;
             return 0;
         }
     }

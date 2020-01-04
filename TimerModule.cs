@@ -36,13 +36,11 @@ public class TimerService
                         return;
 
                     // Add an override for general channel for unit testing
-                    IMessageChannel generalChannel;
-                    if (channelOverride == null)
+                    IMessageChannel generalChannel = client.GetChannel(HelperFunctions.GetChannelId(region.Key, 0)) as IMessageChannel;
+                    if (generalChannel == null)
                         generalChannel = channelOverride;
-                    else
-                        generalChannel = client.GetChannel(HelperFunctions.GetChannelId(region.Key, 0)) as IMessageChannel;
 
-                    if (client.GetChannel(HelperFunctions.GetChannelId(region.Key, 0)) is IMessageChannel general)
+                    if (channelOverride is IMessageChannel general)
                     {
                         await CheckQueueTimeoutAsync(general, region.Key, 1);
                         await CheckQueueTimeoutAsync(general, region.Key, 2);
