@@ -36,8 +36,7 @@ public class TimerService
                         return;
 
                     // Add an override for general channel for unit testing
-                    IMessageChannel generalChannel = client.GetChannel(HelperFunctions.GetChannelId(region.Key, 0)) as IMessageChannel;
-                    if (generalChannel == null)
+                    if (!(client.GetChannel(HelperFunctions.GetChannelId(region.Key, 0)) is IMessageChannel generalChannel))
                         generalChannel = channelOverride;
 
                     if (generalChannel is IMessageChannel general)
@@ -58,21 +57,17 @@ public class TimerService
                     if (client.GetChannel(HelperFunctions.GetChannelId(region.Key, 1)) is IMessageChannel queue1Info && region.Value.status1)
                     {
                         IEnumerable<IMessage> messageList = await queue1Info.GetMessagesAsync(2).Flatten();
-                        IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
-                        IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
 
-                        if (matchListm != null) await UpdateMatchesAsync(matchListm, region.Key, 1);
-                        if (queueListm != null) await UpdateQueueAsync(queueListm, region.Key, 1);
+                        if (messageList.ToList()[1] is IUserMessage matchListm) await UpdateMatchesAsync(matchListm, region.Key, 1);
+                        if (messageList.ToList()[0] is IUserMessage queueListm) await UpdateQueueAsync(queueListm, region.Key, 1);
                     }
 
                     if (client.GetChannel(HelperFunctions.GetChannelId(region.Key, 2)) is IMessageChannel queue2Info && region.Value.status2)
                     {
                         IEnumerable<IMessage> messageList = await queue2Info.GetMessagesAsync(2).Flatten();
-                        IUserMessage matchListm = messageList.ToList()[1] as IUserMessage;
-                        IUserMessage queueListm = messageList.ToList()[0] as IUserMessage;
 
-                        if (matchListm != null) await UpdateMatchesAsync(matchListm, region.Key, 2);
-                        if (queueListm != null) await UpdateQueueAsync(queueListm, region.Key, 2);
+                        if (messageList.ToList()[1] is IUserMessage matchListm) await UpdateMatchesAsync(matchListm, region.Key, 2);
+                        if (messageList.ToList()[0] is IUserMessage queueListm) await UpdateQueueAsync(queueListm, region.Key, 2);
                     }
                 }
             }
@@ -86,7 +81,7 @@ public class TimerService
     private async Task CheckQueueMatchCreate1sAsync(IMessageChannel thisChannel, string region)
     {
         List<Player> playersInQueue = new List<Player>(10);
-        string query = $"SELECT id, username, tier FROM queue{region}1 ORDER BY time;";
+        string query = $"SELECT id, username, tier FROM queue{region}1 ORDER BY tier ASC;";
         await Globals.conn.OpenAsync();
         try
         {
@@ -136,7 +131,7 @@ public class TimerService
     {
         List<Player> playersInQueue = new List<Player>(20);
         List<Team> teamsInQueue = new List<Team>(10);
-        string query = $"SELECT id, username, tier, tierTeammate FROM queue{region}2 ORDER BY time;";
+        string query = $"SELECT id, username, tier, tierTeammate FROM queue{region}2 ORDER BY tier ASC;";
         await Globals.conn.OpenAsync();
         try
         {
