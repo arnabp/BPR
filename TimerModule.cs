@@ -81,7 +81,7 @@ public class TimerService
     private async Task CheckQueueMatchCreate1sAsync(IMessageChannel thisChannel, string region)
     {
         List<Player> playersInQueue = new List<Player>(10);
-        string query = $"SELECT id, username, tier FROM queue{region}1 ORDER BY tier ASC;";
+        string query = $"SELECT id, username, tier FROM queue{region}1 ORDER BY tier DESC;";
         await Globals.conn.OpenAsync();
         try
         {
@@ -131,7 +131,7 @@ public class TimerService
     {
         List<Player> playersInQueue = new List<Player>(20);
         List<Team> teamsInQueue = new List<Team>(10);
-        string query = $"SELECT id, username, tier, tierTeammate FROM queue{region}2 ORDER BY tier ASC;";
+        string query = $"SELECT id, username, tier, tierTeammate FROM queue{region}2 ORDER BY tier DESC;";
         await Globals.conn.OpenAsync();
         try
         {
