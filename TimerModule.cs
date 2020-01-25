@@ -751,6 +751,11 @@ public class TimerService
 
         if (eloLossMessage != "")
             await thisChannel.SendMessageAsync($"{eloLossMessage} have all lost 50 elo from having an empty bank in {gameMode}v{gameMode}");
+
+        if (gameMode == 2)
+        {
+            await thisChannel.SendFileAsync(@"/root/BPR/decay.gif");
+        }
     }
 
     private async Task CheckRoomAsync(IMessageChannel thisChannel, string region, int gameMode)
