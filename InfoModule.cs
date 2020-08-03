@@ -713,7 +713,7 @@ namespace BPR
 
         [Command("checkin")]
         [Summary("Allows a user to checkin when a session starts")]
-        public async Task CheckinAsync(SocketUser teammateInfo)
+        public async Task CheckinAsync(SocketUser teammateInfo = null)
         {
             localContext = localContext ?? Context;
             var userInfo = localContext.User;
@@ -733,8 +733,8 @@ namespace BPR
             {
                 await BHP.PutLeaderboardUser(userInfo.Id, userInfo.Username, teammateInfo.Id);
 
-                List<LeaderboardUser> leaderboardUsers = await BHP.GetLeaderboardUsers(new List<ulong>(1) { teammateInfo.Id });
-                if (leaderboardUsers.Count == 0)
+                LeaderboardUser? leaderboardUser = await BHP.GetLeaderboardUser(teammateInfo.Id);
+                if (!leaderboardUser.HasValue)
                 {
                     await localContext.Channel.SendMessageAsync($"{userInfo.Username} is now checked in. Their teammate must also check in for their team to properly be registered");
                 }

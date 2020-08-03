@@ -189,6 +189,46 @@ namespace BPR
             return await CountQuery($"SELECT count(*) FROM leaderboard;");
         }
 
+        public static async Task<LeaderboardUser?> GetLeaderboardUser(ulong id)
+        {
+            string query = $"SELECT * FROM leaderboard;";
+            await Globals.conn.OpenAsync();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (reader.GetUInt64(0) == id)
+                    {
+                        LeaderboardUser leaderboardUser = new LeaderboardUser
+                        {
+                            id = reader.GetUInt64(0),
+                            teammateId = reader.GetUInt64(1),
+                            username = reader.GetString(2),
+                            points = reader.GetInt16(3),
+                            streak = reader.GetInt16(4),
+                            wins = reader.GetInt16(5),
+                            loss = reader.GetInt16(6)
+                        };
+                        return leaderboardUser;
+                    }
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                throw ex;
+            }
+            finally
+            {
+                await Globals.conn.CloseAsync();
+            }
+        }
+
         public static async Task<List<LeaderboardUser>> GetLeaderboardUsers(List<ulong> ids)
         {
             List<LeaderboardUser> leaderboardUsers = new List<LeaderboardUser>(4);
@@ -222,7 +262,7 @@ namespace BPR
 
                 if (leaderboardUsers.Count != ids.Count)
                 {
-                    string message = $"GetLeaderboardUsers could not find all ids: {ids}";
+                    string message = $"GetLeaderboardUsers could not find all {ids.Count} ids";
                     Console.WriteLine(message);
                     throw new DataMisalignedException(message);
                 }
