@@ -120,7 +120,7 @@ public class TimerService
             if (!found) singles.Add(leaderboardUser.id);
         }
 
-        await BHP.DeleteLeaderboardUsers(singles);
+        if (singles.Count > 0) await BHP.DeleteLeaderboardUsers(singles);
     }
 
     private async Task GenerateMatchesAsync(IMessageChannel thisChannel)
