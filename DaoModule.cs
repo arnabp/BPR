@@ -495,7 +495,7 @@ namespace BPR
             }
             else if (Globals.config.Value.gameMode == 2)
             {
-                query = $"INSERT INTO matchesHistory(id1, id2, id3, i4) " +
+                query = $"INSERT INTO matchesHistory(id1, id2, id3, id4) " +
                 $"VALUES({match.id1}, {match.id2}, {match.id3}, {match.id4});";
             }
             else
@@ -517,7 +517,7 @@ namespace BPR
             }
             else if (Globals.config.Value.gameMode == 2)
             {
-                query = $"INSERT INTO matchesHistory(id1, id2, id3, i4) " +
+                query = $"INSERT INTO matchesHistory(id1, id2, id3, id4) " +
                 $"VALUES({matchHistory.id1}, {matchHistory.id2}, {matchHistory.id3}, {matchHistory.id4});";
             }
             else
@@ -551,7 +551,7 @@ namespace BPR
             else if (leaderboardUsers.Count == 4)
             {
                 LeaderboardUser p1 = leaderboardUsers[0], p2 = leaderboardUsers[1], p3 = leaderboardUsers[2], p4 = leaderboardUsers[3];
-                query = $"INSERT INTO matchesHistory(id1, id2, id3, i4, oldScore1, oldScore2, oldScore3, oldScore4, oldStreak1, oldStreak2, oldStreak3, oldStreak4, isReporterWinner, reporter) " +
+                query = $"INSERT INTO matchesHistory(id1, id2, id3, id4, oldScore1, oldScore2, oldScore3, oldScore4, oldStreak1, oldStreak2, oldStreak3, oldStreak4, isReporterWinner, reporter) " +
                 $"VALUES({p1.id}, {p2.id}, {p3.id}, {p4.id}, {p1.points}, {p2.points}, {p3.points}, {p4.points}, {p1.streak}, {p2.streak}, {p3.streak}, {p4.streak}, {winner}, {userId});";
             }
             else

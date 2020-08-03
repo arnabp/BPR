@@ -713,11 +713,11 @@ namespace BPR
 
         [Command("checkin")]
         [Summary("Allows a user to checkin when a session starts")]
-        public async Task CheckinAsync(SocketUser teammateInfo = null)
+        public async Task CheckinAsync()
         {
             localContext = localContext ?? Context;
             var userInfo = localContext.User;
-            Console.WriteLine($"{userInfo.Username} is checking in with {teammateInfo.Username}");
+            Console.WriteLine($"{userInfo.Username} is checking in");
 
             if (!Globals.config.HasValue)
             {
@@ -729,7 +729,28 @@ namespace BPR
             {
                 await BHP.PutLeaderboardUser(userInfo.Id, userInfo.Username);
             }
-            else if (Globals.config.Value.gameMode == 2)
+            else
+            {
+                Console.WriteLine("There was an issue with checkin. Make sure you @ your teammate if you are checking in for 2v2.");
+            }
+
+        }
+
+        [Command("checkin")]
+        [Summary("Allows a user to checkin when a session starts")]
+        public async Task CheckinAsync(SocketUser teammateInfo)
+        {
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
+            Console.WriteLine($"{userInfo.Username} is checking in with {teammateInfo.Username}");
+
+            if (!Globals.config.HasValue)
+            {
+                Console.WriteLine("There is no active session to check in to");
+                return;
+            }
+
+            if (Globals.config.Value.gameMode == 2)
             {
                 await BHP.PutLeaderboardUser(userInfo.Id, userInfo.Username, teammateInfo.Id);
 
@@ -740,13 +761,20 @@ namespace BPR
                 }
                 else
                 {
-                    await localContext.Channel.SendMessageAsync($"{userInfo.Username} is now checked in. However, {teammateInfo.Username} is checked in without them. If {teammateInfo.Username} does not check in with {userInfo.Username} then {userInfo.Username} will not be registered into the tournament");
+                    if (leaderboardUser.Value.teammateId != userInfo.Id)
+                    {
+                        await localContext.Channel.SendMessageAsync($"{userInfo.Username} is now checked in. However, {teammateInfo.Username} is checked in without them. If {teammateInfo.Username} does not check in with {userInfo.Username} then {userInfo.Username} will not be registered into the tournament");
+                    }
+                    else
+                    {
+                        await localContext.Channel.SendMessageAsync($"{userInfo.Username} and {teammateInfo.Username} are now checked in as a team");
+                    }
+                    
                 }
             }
             else
             {
-                await localContext.Channel.SendMessageAsync($"Hey <@106136559744466944>, there was an error with checking in {userInfo.Username}");
-                Console.WriteLine("Could not get gameMode for checkin");
+                Console.WriteLine("There was an issue with checkin. Make sure you @ your teammate if you are checking in for 2v2.");
             }
 
         }
