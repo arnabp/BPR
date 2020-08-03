@@ -548,7 +548,7 @@ namespace BPR
             }
 
             
-            await ExecuteSQLQueryAsync($"DELETE FROM leaderboard WHERE id IN (${allIds.Remove(allIds.Length - 1, 1)});");
+            await ExecuteSQLQueryAsync($"DELETE FROM leaderboard WHERE id IN ({allIds.Remove(allIds.Length - 1, 1)});");
         }
 
         public static async Task PutMatchHistory(List<LeaderboardUser> leaderboardUsers, ulong userId, bool winner)

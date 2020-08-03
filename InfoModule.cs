@@ -422,6 +422,14 @@ namespace BPR
             await Context.Channel.SendMessageAsync($"Message from {userInfo.Username} has been deleted.");
         }
 
+        [Command("DecayGif")]
+        [Summary("Plays the kung fu panda decay gif")]
+        public async Task DecayGif()
+        {
+            var userInfo = Context.User;
+            await Context.Message.DeleteAsync();
+        }
+
         [Command("GetUser")]
         [Summary("Gets username from ID")]
         public async Task GetUser([Remainder] ulong id)
