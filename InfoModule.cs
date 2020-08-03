@@ -426,8 +426,8 @@ namespace BPR
         [Summary("Plays the kung fu panda decay gif")]
         public async Task DecayGif()
         {
-            var userInfo = Context.User;
             await Context.Message.DeleteAsync();
+            await Context.Channel.SendFileAsync(@"/root/BPR/decay.gif");
         }
 
         [Command("GetUser")]
