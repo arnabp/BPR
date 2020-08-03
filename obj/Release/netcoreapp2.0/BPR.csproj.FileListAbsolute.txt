@@ -19,3 +19,5 @@ D:\Users\Arnab\source\repos\BPR\BPR\bin\Release\netcoreapp2.0\BPR.runtimeconfig.
 D:\Users\Arnab\source\repos\BPR\BPR\bin\Release\netcoreapp2.0\BPR.runtimeconfig.dev.json
 D:\Users\Arnab\source\repos\BPR\BPR\bin\Release\netcoreapp2.0\BPR.dll
 D:\Users\Arnab\source\repos\BPR\BPR\bin\Release\netcoreapp2.0\BPR.pdb
+D:\Users\Arnab\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.csproj.CoreCompileInputs.cache
+D:\Users\Arnab\source\repos\BPR\BPR\obj\Release\netcoreapp2.0\BPR.genruntimeconfig.cache

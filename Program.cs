@@ -36,95 +36,9 @@ namespace BPR
         public static Dictionary<ulong, Role> roleList;
         public static Dictionary<string, Region> regionList;
 
-        public static TierModule tiersNA1 = new TierModule("NA", 1);
-        public static TierModule tiersNA2 = new TierModule("NA", 2);
-        public static TierModule tiersEU1 = new TierModule("EU", 1);
-        public static TierModule tiersEU2 = new TierModule("EU", 2);
-        public static TierModule tiersTEST1 = new TierModule("TEST", 1);
-        public static TierModule tiersTEST2 = new TierModule("TEST", 2);
+        public static GameConfig? config;
 
         public static Random rnd = new Random();
-
-        public static async Task InitRegions()
-        {
-            regionList = new Dictionary<string, Region>();
-            string query = $"SELECT region, status, serverID, tiers, status1s, status2s FROM regionStatus;";
-            await Globals.conn.OpenAsync();
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    regionList[reader.GetString(0)] = new Region {
-                        id = reader.GetUInt64(2),
-                        status = reader.GetBoolean(1),
-                        status1 = reader.GetBoolean(4),
-                        status2 = reader.GetBoolean(5),
-                        tiers = reader.GetInt16(3)
-                    };
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                await Globals.conn.CloseAsync();
-                throw;
-            }
-            await Globals.conn.CloseAsync();
-
-            var listOfRegions = regionList.ToList();
-
-            foreach(var thisValue in listOfRegions)
-            {
-                Region thisRegion = regionList[thisValue.Key];
-
-                query = $"SELECT count(*) FROM queue{thisValue.Key}1;";
-                await Globals.conn.OpenAsync();
-                try
-                {
-                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                    MySqlDataReader reader = cmd.ExecuteReader();
-
-                    while (reader.Read())
-                    {
-                        thisRegion.inQueue1 = reader.GetInt16(0) > 0;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                    await Globals.conn.CloseAsync();
-                    throw;
-                }
-                await Globals.conn.CloseAsync();
-
-                query = $"SELECT count(*) FROM queue{thisValue.Key}2;";
-                await Globals.conn.OpenAsync();
-                try
-                {
-                    MySqlCommand cmd = new MySqlCommand(query, Globals.conn);
-                    MySqlDataReader reader = cmd.ExecuteReader();
-
-                    while (reader.Read())
-                    {
-                        thisRegion.inQueue2 = reader.GetInt16(0) > 0;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                    await Globals.conn.CloseAsync();
-                    throw;
-                }
-                await Globals.conn.CloseAsync();
-
-                regionList[thisValue.Key] = thisRegion;
-
-                Console.WriteLine($"{thisValue.Key} - 1v1: {thisRegion.inQueue1}, 2v2: {thisRegion.inQueue2}");
-            }
-        }
     }
 
     class Program
@@ -152,20 +66,13 @@ namespace BPR
                 reader.Close();
             }
 
-            await Globals.InitRegions();
+            await BHP.UpdateLocalConfig();
 
             _client = new DiscordSocketClient();
             _commands = new CommandService();
             _timer = new TimerService(_client);
 
             _client.Log += Log;
-            
-            await Globals.tiersNA1.InitTierList();
-            await Globals.tiersNA2.InitTierList();
-            await Globals.tiersEU1.InitTierList();
-            await Globals.tiersEU2.InitTierList();
-            await Globals.tiersTEST1.InitTierList();
-            await Globals.tiersTEST2.InitTierList();
 
             _services = new ServiceCollection()
                 .AddSingleton(_client)
@@ -199,7 +106,7 @@ namespace BPR
             // Determine if message comes from bot, to prevent rereading bot responses
             if (message.Author.IsBot) return;
             // Determine if the message is a command, based on where it's located or a mention prefix
-            if (message.Channel.Id != 392829581192855554 && message.Channel.Id != 422045385612328973) return;
+            if (message.Channel.Id != 392829581192855554) return;
             // Create a Command Context
             var context = new SocketCommandContext(_client, message);
             // Execute the command. (result does not indicate a return value, 
