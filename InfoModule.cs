@@ -542,19 +542,13 @@ namespace BPR
                     new List<ulong>() { match.id1, match.id2, (ulong)match.id3, (ulong)match.id4 };
 
                 // Get player info
-                List<LeaderboardUser> leaderboardUsers = await BHP.GetLeaderboardUsers(playerIds);
+                Dictionary<ulong, LeaderboardUser> leaderboardUsers = await BHP.GetLeaderboardUsers(playerIds);
 
                 // Get rid of old matches that could potentially be reverted for either player
                 foreach (ulong id in playerIds) await BHP.DeleteMatchHistory(id);
 
                 // Add this match to history
-                await BHP.PutMatchHistory(leaderboardUsers, userInfo.Id, (bool)isWinner);
-
-                Dictionary<ulong, LeaderboardUser> leaderboardMap = new Dictionary<ulong, LeaderboardUser>(leaderboardUsers.Count);
-                foreach (LeaderboardUser leaderboardUser in leaderboardUsers)
-                {
-                    leaderboardMap.Add(leaderboardUser.id, leaderboardUser);
-                }
+                await BHP.PutMatchHistory(playerIds, leaderboardUsers, userInfo.Id, (bool)isWinner);
 
                 Dictionary<ulong, int> scores = new Dictionary<ulong, int>(playerIds.Count);
                 for (int i = 0; i < playerIds.Count; i++)
@@ -575,7 +569,7 @@ namespace BPR
                     int playerWinner = (playerIds[i] == userInfo.Id || (Globals.config.Value.gameMode == 2 && playerIds[teammateIndex] == userInfo.Id)) ? winnerToNum : 1 - winnerToNum;
 
                     // And finally, use the winstreak to get the actual number of points the player earns
-                    int playerScoreAddition = playerWinner * Math.Min(leaderboardMap[playerIds[i]].streak + 1, 3);
+                    int playerScoreAddition = playerWinner * Math.Min(leaderboardUsers[playerIds[i]].streak + 1, 3);
 
                     scores.Add(playerIds[i], playerScoreAddition);
                 }
@@ -604,10 +598,10 @@ namespace BPR
 
 
                 // Update player's elo in leaderboard
-                foreach (LeaderboardUser leaderboardUser in leaderboardUsers)
+                foreach (var leaderboardUser in leaderboardUsers)
                 {
-                    Console.WriteLine($"Giving {leaderboardUser.username} {scores[leaderboardUser.id]} points");
-                    await BHP.UpdateLeaderboardUserScore(leaderboardUser.id, scores[leaderboardUser.id]);
+                    Console.WriteLine($"Giving {leaderboardUser.Value.username} {scores[leaderboardUser.Key]} points");
+                    await BHP.UpdateLeaderboardUserScore(leaderboardUser.Key, scores[leaderboardUser.Key]);
                 }
 
                 await BHP.DeleteMatch(match.id1);
@@ -751,6 +745,12 @@ namespace BPR
                 return;
             }
 
+            if (Globals.config.Value.state == 1)
+            {
+                await localContext.Channel.SendMessageAsync("Checkin has ended");
+                return;
+            }
+
             if (Globals.config.Value.gameMode == 1)
             {
                 await BHP.PutLeaderboardUser(userInfo.Id, userInfo.Username);
@@ -774,6 +774,12 @@ namespace BPR
             if (!Globals.config.HasValue)
             {
                 await localContext.Channel.SendMessageAsync("There is no active session to check in to");
+                return;
+            }
+
+            if (Globals.config.Value.state == 1)
+            {
+                await localContext.Channel.SendMessageAsync("Checkin has ended");
                 return;
             }
 
