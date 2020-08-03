@@ -493,107 +493,115 @@ namespace BPR
             localContext = localContext ?? Context;
             var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is reporting a result");
-            bool? isWinner = null;
-
-            // Check if a config exists
-            if (!Globals.config.HasValue)
+            try
             {
-                await localContext.Channel.SendMessageAsync($"A tournament hasn't started yet");
-                return;
-            }
+                bool? isWinner = null;
 
-            // Get users' info
-            Match? matchResult = await BHP.GetMatch(userInfo.Id);
-            if (!matchResult.HasValue)
-            {
-                await localContext.Channel.SendMessageAsync($"You are currently not in a match against anyone");
-                return;
-            }
-            Match match = matchResult.Value;
-
-            // Indicate which player won
-            if (winner == "W" || winner == "w" || winner == "Y" || winner == "y")
-            {
-                isWinner = true;
-            }
-            else if (winner == "L" || winner == "l" || winner == "N" || winner == "n")
-            {
-                isWinner = false;
-            }
-            else
-            {
-                Console.WriteLine($"{userInfo.Username} entered the wrong result type");
-                await localContext.Channel.SendMessageAsync("Invalid results entered");
-                return;
-            }
-
-            List<ulong> playerIds = Globals.config.Value.gameMode == 1 ?
-                new List<ulong>() { match.id1, match.id2 } :
-                new List<ulong>() { match.id1, match.id2, (ulong)match.id3, (ulong)match.id4 };
-
-            // Get player info
-            List<LeaderboardUser> leaderboardUsers = await BHP.GetLeaderboardUsers(playerIds);
-
-            // Get rid of old matches that could potentially be reverted for either player
-            foreach (ulong id in playerIds) await BHP.DeleteMatchHistory(id);
-
-            // Add this match to history
-            await BHP.PutMatchHistory(leaderboardUsers, userInfo.Id, (bool)isWinner);
-
-            Dictionary<ulong, int> scores = new Dictionary<ulong, int>(playerIds.Count);
-            for (int i = 0; i < playerIds.Count; i++)
-            {
-                /**
-                 * Magical formula to get this mapping
-                 * 0 -> 1
-                 * 1 -> 0
-                 * 2 -> 3
-                 * 3 -> 2
-                 */
-                int teammateIndex = 1 - (i % 2) + (i / 2 * 2);
-
-                // Instead of trying to make one conditional for the score of the player, make one conditional for the score of a winner
-                int winnerToNum = (bool)isWinner ? 1 : 0;
-
-                // then another conditional if the player is the winner
-                int playerWinner = (playerIds[i] == userInfo.Id || (Globals.config.Value.gameMode == 2 && playerIds[teammateIndex] == userInfo.Id)) ? winnerToNum : 1 - winnerToNum;
-
-                // And finally, use the winstreak to get the actual number of points the player earns
-                int playerScoreAddition = playerWinner * Math.Min(leaderboardUsers[i].streak + 1, 3);
-
-                scores.Add(playerIds[i], playerScoreAddition);
-            }
-
-
-
-            // Print results in embed
-            var embed = new EmbedBuilder
-            {
-                Title = "Match Result",
-                Color = Color.Blue
-            };
-            foreach (var score in scores)
-            {
-                if (score.Value > 0)
+                // Check if a config exists
+                if (!Globals.config.HasValue)
                 {
-                    embed.AddField(x =>
-                    {
-                        x.Value = $"<@{score.Key}> +{Convert.ToInt32(score.Value)}";
-                    });
+                    await localContext.Channel.SendMessageAsync($"A tournament hasn't started yet");
+                    return;
                 }
+
+                // Get users' info
+                Match? matchResult = await BHP.GetMatch(userInfo.Id);
+                if (!matchResult.HasValue)
+                {
+                    await localContext.Channel.SendMessageAsync($"You are currently not in a match against anyone");
+                    return;
+                }
+                Match match = matchResult.Value;
+
+                // Indicate which player won
+                if (winner == "W" || winner == "w" || winner == "Y" || winner == "y")
+                {
+                    isWinner = true;
+                }
+                else if (winner == "L" || winner == "l" || winner == "N" || winner == "n")
+                {
+                    isWinner = false;
+                }
+                else
+                {
+                    Console.WriteLine($"{userInfo.Username} entered the wrong result type");
+                    await localContext.Channel.SendMessageAsync("Invalid results entered");
+                    return;
+                }
+
+                List<ulong> playerIds = Globals.config.Value.gameMode == 1 ?
+                    new List<ulong>() { match.id1, match.id2 } :
+                    new List<ulong>() { match.id1, match.id2, (ulong)match.id3, (ulong)match.id4 };
+
+                // Get player info
+                List<LeaderboardUser> leaderboardUsers = await BHP.GetLeaderboardUsers(playerIds);
+
+                // Get rid of old matches that could potentially be reverted for either player
+                foreach (ulong id in playerIds) await BHP.DeleteMatchHistory(id);
+
+                // Add this match to history
+                await BHP.PutMatchHistory(leaderboardUsers, userInfo.Id, (bool)isWinner);
+
+                Dictionary<ulong, int> scores = new Dictionary<ulong, int>(playerIds.Count);
+                for (int i = 0; i < playerIds.Count; i++)
+                {
+                    /**
+                     * Magical formula to get this mapping
+                     * 0 -> 1
+                     * 1 -> 0
+                     * 2 -> 3
+                     * 3 -> 2
+                     */
+                    int teammateIndex = 1 - (i % 2) + (i / 2 * 2);
+
+                    // Instead of trying to make one conditional for the score of the player, make one conditional for the score of a winner
+                    int winnerToNum = (bool)isWinner ? 1 : 0;
+
+                    // then another conditional if the player is the winner
+                    int playerWinner = (playerIds[i] == userInfo.Id || (Globals.config.Value.gameMode == 2 && playerIds[teammateIndex] == userInfo.Id)) ? winnerToNum : 1 - winnerToNum;
+
+                    // And finally, use the winstreak to get the actual number of points the player earns
+                    int playerScoreAddition = playerWinner * Math.Min(leaderboardUsers[i].streak + 1, 3);
+
+                    scores.Add(playerIds[i], playerScoreAddition);
+                }
+
+
+
+                // Print results in embed
+                var embed = new EmbedBuilder
+                {
+                    Title = "Match Result",
+                    Color = Color.Blue
+                };
+                foreach (var score in scores)
+                {
+                    if (score.Value > 0)
+                    {
+                        embed.AddField(x =>
+                        {
+                            x.Value = $"<@{score.Key}> +{Convert.ToInt32(score.Value)}";
+                        });
+                    }
+                }
+                await localContext.Channel.SendMessageAsync("", embed: embed);
+
+
+                // Update player's elo in leaderboard
+                foreach (LeaderboardUser leaderboardUser in leaderboardUsers)
+                {
+                    Console.WriteLine($"Giving {leaderboardUser.username} {scores[leaderboardUser.id]} points");
+                    await BHP.UpdateLeaderboardUserScore(leaderboardUser.id, scores[leaderboardUser.id]);
+                }
+
+                await BHP.DeleteMatch(match.id1);
+                Console.WriteLine($"Match with {userInfo.Username} ended.");
             }
-            await localContext.Channel.SendMessageAsync("", embed: embed);
-
-
-            // Update player's elo in leaderboard
-            foreach (LeaderboardUser leaderboardUser in leaderboardUsers)
+            catch (Exception e)
             {
-                Console.WriteLine($"Giving {leaderboardUser.username} {scores[leaderboardUser.id]} points");
-                await BHP.UpdateLeaderboardUserScore(leaderboardUser.id, scores[leaderboardUser.id]);
+                Console.WriteLine(e);
+                await localContext.Channel.SendMessageAsync("Something went wrong <@106136559744466944>");
             }
-
-            await BHP.DeleteMatch(match.id1);
-            Console.WriteLine($"Match with {userInfo.Username} ended.");
         }
 
         [Command("revert")]
