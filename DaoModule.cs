@@ -539,6 +539,18 @@ namespace BPR
             await ExecuteSQLQueryAsync($"DELETE FROM matchesHistory WHERE id1 = {id} OR id2 = {id} OR id3 = {id} OR id4 = {id};");
         }
 
+        public static async Task DeleteLeaderboardUsers(List<ulong> ids)
+        {
+            string allIds = "";
+            foreach (ulong id in ids)
+            {
+                allIds += $"{id},";
+            }
+
+            
+            await ExecuteSQLQueryAsync($"DELETE FROM leaderboard WHERE id IN (${allIds.Remove(allIds.Length - 1, 1)});");
+        }
+
         public static async Task PutMatchHistory(List<LeaderboardUser> leaderboardUsers, ulong userId, bool winner)
         {
             string query;

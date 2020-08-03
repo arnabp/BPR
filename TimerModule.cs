@@ -40,6 +40,7 @@ public class TimerService
 
                             await BHP.UpdateConfigState();
                             await generalChannel.SendMessageAsync($"Checkin has ended. Generating matches.");
+                            if (Globals.config.Value.gameMode == 2) await CleanLeaderboardAsync();
                             await GenerateMatchesAsync(generalChannel);
                         }
                     }
@@ -98,6 +99,29 @@ public class TimerService
             x.Content = "";
             x.Embed = embed.Build();
         });
+    }
+
+    private async Task CleanLeaderboardAsync()
+    {
+        List<LeaderboardUser> leaderboard = await BHP.GetLeaderboard();
+        List<ulong> singles = new List<ulong>(leaderboard.Count);
+
+        foreach (LeaderboardUser leaderboardUser in leaderboard)
+        {
+            bool found = false;
+            foreach (LeaderboardUser teammateUser in leaderboard)
+            {
+                if (leaderboardUser.teammateId == teammateUser.id && teammateUser.teammateId == leaderboardUser.id)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) singles.Add(leaderboardUser.id);
+        }
+
+        await BHP.DeleteLeaderboardUsers(singles);
     }
 
     private async Task GenerateMatchesAsync(IMessageChannel thisChannel)
