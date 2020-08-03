@@ -703,7 +703,7 @@ namespace BPR
             Globals.config = config;
             await BHP.PutConfig(config);
 
-            await localContext.Channel.SendMessageAsync($"@here Starting a {gameMode}v{gameMode} session! Please use command \"checkin\" in the next 5 minutes to check in to the tournament.");
+            await localContext.Channel.SendMessageAsync($"<@{localContext.Guild.EveryoneRole.Id}> Starting a {gameMode}v{gameMode} session! Please use command \"checkin\" in the next 5 minutes to check in to the tournament.");
         }
     }
 
@@ -728,10 +728,11 @@ namespace BPR
             if (Globals.config.Value.gameMode == 1)
             {
                 await BHP.PutLeaderboardUser(userInfo.Id, userInfo.Username);
+                await localContext.Channel.SendMessageAsync($"{userInfo.Username} is now checked in");
             }
             else
             {
-                Console.WriteLine("There was an issue with checkin. Make sure you @ your teammate if you are checking in for 2v2.");
+                await localContext.Channel.SendMessageAsync("There was an issue with checkin. Make sure you @ your teammate if you are checking in for 2v2.");
             }
 
         }
@@ -774,7 +775,7 @@ namespace BPR
             }
             else
             {
-                Console.WriteLine("There was an issue with checkin. Make sure you @ your teammate if you are checking in for 2v2.");
+                await localContext.Channel.SendMessageAsync("There was an issue with checkin. Make sure you @ your teammate if you are checking in for 2v2.");
             }
 
         }

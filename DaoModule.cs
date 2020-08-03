@@ -482,7 +482,7 @@ namespace BPR
 
         public static async Task PutLeaderboardUser(ulong id, string username, ulong teammateId = 0)
         {
-            await ExecuteSQLQueryAsync($"INSERT INTO leaderboard(id, teammateId, username) VALUES({id}, {teammateId}, '{username}');");
+            await ExecuteSQLQueryAsync($"INSERT INTO leaderboard(id, teammateId, username) VALUES({id}, {teammateId}, '{username}') ON DUPLICATE KEY UPDATE teammateId = {teammateId};");
         }
 
         public static async Task PutMatch(Match match)

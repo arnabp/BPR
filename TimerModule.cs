@@ -56,7 +56,7 @@ public class TimerService
                         {
                             Globals.config = null;
                             await BHP.ClearConfig();
-                            await generalChannel.SendMessageAsync("@here The session has now ended, thanks for playing! Check the leaderboard channel to see your result");
+                            await generalChannel.SendMessageAsync($"\\@here The session has now ended, thanks for playing! Check the leaderboard channel to see your result");
                         }
                         else
                         {
@@ -104,7 +104,7 @@ public class TimerService
         List<LeaderboardUser> leaderboard = await BHP.GetLeaderboard();
         List<Match> matches = await BHP.GetMatches();
 
-        List<LeaderboardUser> queue = new List<LeaderboardUser>(leaderboard.Count - (matches.Count * 2));
+        List<LeaderboardUser> queue = new List<LeaderboardUser>(leaderboard.Count);
 
         foreach (LeaderboardUser leaderboardUser in leaderboard)
         {
