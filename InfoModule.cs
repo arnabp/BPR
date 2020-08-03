@@ -579,19 +579,21 @@ namespace BPR
                 // Print results in embed
                 var embed = new EmbedBuilder
                 {
-                    Title = "Match Result",
                     Color = Color.Blue
                 };
+                string scoreString = "";
                 foreach (var score in scores)
                 {
                     if (score.Value > 0)
                     {
-                        embed.AddField(x =>
-                        {
-                            x.Value = $"<@{score.Key}> +{Convert.ToInt32(score.Value)}";
-                        });
+                        scoreString += $"<@{score.Key}> +{Convert.ToInt32(score.Value)}\n";
                     }
                 }
+                embed.AddField(x =>
+                {
+                    x.Name = "Match Result";
+                    x.Value = scoreString;
+                });
                 await localContext.Channel.SendMessageAsync("", embed: embed);
 
 
@@ -765,7 +767,13 @@ namespace BPR
 
             if (!Globals.config.HasValue)
             {
-                Console.WriteLine("There is no active session to check in to");
+                await localContext.Channel.SendMessageAsync("There is no active session to check in to");
+                return;
+            }
+
+            if (userInfo.Id == teammateInfo.Id)
+            {
+                await localContext.Channel.SendMessageAsync("You cannot check in with yourself");
                 return;
             }
 
