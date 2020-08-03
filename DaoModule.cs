@@ -596,10 +596,14 @@ namespace BPR
         {
             await ExecuteSQLQueryAsync($"UPDATE config SET state = 1;");
         }
-
         public static async Task ClearConfig()
         {
             await ExecuteSQLQueryAsync("TRUNCATE TABLE config");
+        }
+
+        public static async Task ClearLeaderboard()
+        {
+            await ExecuteSQLQueryAsync("TRUNCATE TABLE leaderboard");
         }
     }
 }
