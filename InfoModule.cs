@@ -550,6 +550,12 @@ namespace BPR
                 // Add this match to history
                 await BHP.PutMatchHistory(leaderboardUsers, userInfo.Id, (bool)isWinner);
 
+                Dictionary<ulong, LeaderboardUser> leaderboardMap = new Dictionary<ulong, LeaderboardUser>(leaderboardUsers.Count);
+                foreach (LeaderboardUser leaderboardUser in leaderboardUsers)
+                {
+                    leaderboardMap.Add(leaderboardUser.id, leaderboardUser);
+                }
+
                 Dictionary<ulong, int> scores = new Dictionary<ulong, int>(playerIds.Count);
                 for (int i = 0; i < playerIds.Count; i++)
                 {
@@ -569,7 +575,7 @@ namespace BPR
                     int playerWinner = (playerIds[i] == userInfo.Id || (Globals.config.Value.gameMode == 2 && playerIds[teammateIndex] == userInfo.Id)) ? winnerToNum : 1 - winnerToNum;
 
                     // And finally, use the winstreak to get the actual number of points the player earns
-                    int playerScoreAddition = playerWinner * Math.Min(leaderboardUsers[i].streak + 1, 3);
+                    int playerScoreAddition = playerWinner * Math.Min(leaderboardMap[playerIds[i]].streak + 1, 3);
 
                     scores.Add(playerIds[i], playerScoreAddition);
                 }
