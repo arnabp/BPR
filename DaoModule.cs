@@ -463,7 +463,7 @@ namespace BPR
                         gameMode = reader.GetInt16(1),
                         startTime = reader.GetInt64(2),
                         endTime = reader.GetInt64(3),
-                        state = reader.GetInt16(3)
+                        state = reader.GetInt16(4)
                     };
 
                     Globals.config = config;
