@@ -76,7 +76,6 @@ public class TimerService
     {
         var embed = new EmbedBuilder
         {
-            Title = $"Leaderboard",
             Color = Color.Blue
         };
 
@@ -90,6 +89,7 @@ public class TimerService
 
         embed.AddField(x =>
         {
+            x.Name = $"Leaderboard";
             x.Value = leaderboardString;
         });
 
