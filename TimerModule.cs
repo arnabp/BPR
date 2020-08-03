@@ -57,7 +57,6 @@ public class TimerService
                         {
                             Globals.config = null;
                             await BHP.ClearConfig();
-                            await BHP.ClearLeaderboard();
                             await generalChannel.SendMessageAsync($"@here The session has now ended, thanks for playing! Check the leaderboard channel to see your result");
                         }
                         else

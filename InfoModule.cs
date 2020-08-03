@@ -698,6 +698,7 @@ namespace BPR
         {
             localContext = localContext ?? Context;
             Console.WriteLine($"Starting a {gameMode}v{gameMode} session for {minutes} minutes");
+            await BHP.ClearLeaderboard();
 
             GameConfig config = new GameConfig()
             {
