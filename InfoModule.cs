@@ -703,7 +703,8 @@ namespace BPR
             Globals.config = config;
             await BHP.PutConfig(config);
 
-            await localContext.Channel.SendMessageAsync($"<@{localContext.Guild.EveryoneRole.Id}> Starting a {gameMode}v{gameMode} session! Please use command \"checkin\" in the next 5 minutes to check in to the tournament.");
+            string atTeammate = gameMode == 2 ? " @teammate" : "";
+            await localContext.Channel.SendMessageAsync($"@here Starting a {gameMode}v{gameMode} session! Please use command `checkin{atTeammate}` in the next 5 minutes to check in to the tournament.");
         }
     }
 

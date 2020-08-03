@@ -56,7 +56,7 @@ public class TimerService
                         {
                             Globals.config = null;
                             await BHP.ClearConfig();
-                            await generalChannel.SendMessageAsync($"\\@here The session has now ended, thanks for playing! Check the leaderboard channel to see your result");
+                            await generalChannel.SendMessageAsync($"@here The session has now ended, thanks for playing! Check the leaderboard channel to see your result");
                         }
                         else
                         {
@@ -195,6 +195,6 @@ public class TimerService
             }
         }
 
-        await thisChannel.SendMessageAsync($"Please remember to add your room number with match2 room 00000");
+        await thisChannel.SendMessageAsync($"Please remember to add your room number with match room 00000");
     }
 }

@@ -495,7 +495,7 @@ namespace BPR
             }
             else if (Globals.config.Value.gameMode == 2)
             {
-                query = $"INSERT INTO matchesHistory(id1, id2, id3, id4) " +
+                query = $"INSERT INTO matches(id1, id2, id3, id4) " +
                 $"VALUES({match.id1}, {match.id2}, {match.id3}, {match.id4});";
             }
             else
