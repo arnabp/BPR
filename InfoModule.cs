@@ -759,7 +759,7 @@ namespace BPR
 
         [Command("leave")]
         [Summary("Allows a user to leave midsession")]
-        public async Task LeaveAsync([Remainder] string nonsense)
+        public async Task LeaveAsync()
         {
             localContext = localContext ?? Context;
             var userInfo = localContext.User;
@@ -809,7 +809,7 @@ namespace BPR
 
         [Command("cancel")]
         [Summary("Cancels the last leave")]
-        public async Task CancelLeaveAsync([Remainder] string nonsense)
+        public async Task CancelLeaveAsync()
         {
             localContext = localContext ?? Context;
             var userInfo = localContext.User;
