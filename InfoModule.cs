@@ -487,6 +487,18 @@ namespace BPR
         }
     }
 
+    [Group("q")]
+    public class QueueModule : ModuleBase<SocketCommandContext>
+    {
+        [Command("j")]
+        [Summary("DEPRACATED: Join the queue")]
+        public async Task MatchReportAsync([Remainder] string literallyAnythingElse)
+        {
+            var userInfo = Context.User;
+            await Context.Channel.SendMessageAsync($"<@{userInfo.Id}> there is no queue anymore, you don't need to use that command.");
+        }
+    }
+
     [Group("match")]
     [Alias("m")]
     public class MatchModule : ModuleBase<SocketCommandContext>
@@ -723,7 +735,7 @@ namespace BPR
             await BHP.PutConfig(config);
 
             string atTeammate = gameMode == 2 ? " @teammate" : "";
-            await localContext.Channel.SendMessageAsync($"@here Starting a {gameMode}v{gameMode} session! Please use command `checkin{atTeammate}` in the next 5 minutes to check in to the tournament.");
+            await localContext.Channel.SendMessageAsync($"@everyone Starting a {gameMode}v{gameMode} session! Please use command `checkin{atTeammate}` in the next 5 minutes to check in to the tournament.");
         }
     }
 
