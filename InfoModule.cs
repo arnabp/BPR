@@ -643,7 +643,7 @@ namespace BPR
 
         [Command("start")]
         [Summary("Starts a session")]
-        public async Task StartSessionAsync(int gameMode, int totalMinutes, int checkinMinutes)
+        public async Task StartSessionAsync(int gameMode, int checkinMinutes, int totalMinutes)
         {
             localContext = localContext ?? Context;
             Console.WriteLine($"Starting a {gameMode}v{gameMode} session for {totalMinutes} minutes with checkin {checkinMinutes} minutes");
@@ -663,7 +663,7 @@ namespace BPR
             await BHP.PutConfig(config);
 
             string atTeammate = gameMode == 2 ? " @teammate" : "";
-            await localContext.Channel.SendMessageAsync($"@everyone Starting a {gameMode}v{gameMode} session! Please use command `checkin{atTeammate}` in the next 5 minutes to check in to the tournament.");
+            await localContext.Channel.SendMessageAsync($"@here Starting a {gameMode}v{gameMode} session! Please use command `checkin{atTeammate}` in the next 5 minutes to check in to the tournament.");
         }
     }
 
