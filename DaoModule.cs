@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BPR
 {
-    public struct LeaderboardUser
+    public class LeaderboardUser : IComparable<LeaderboardUser>
     {
         public ulong id;
         public ulong teammateId;
@@ -15,6 +15,26 @@ namespace BPR
         public int streak;
         public int wins;
         public int loss;
+
+        /**
+         * Note: This CompareTo compares backwards to sort order is descending
+         */
+        public int CompareTo(LeaderboardUser other)
+        {
+            if (other == null)
+            {
+                return 0;
+            }
+            if (streak != other.streak)
+            {
+                return other.streak.CompareTo(streak);
+            }
+            if (points != other.points)
+            {
+                return other.points.CompareTo(points);
+            }
+            else return Convert.ToInt32(Globals.rnd.NextDouble() >= 0.5);
+        }
     }
 
     public struct Match
@@ -180,6 +200,25 @@ namespace BPR
             }
         }
 
+        public static async Task BackupLeaderboard()
+        {
+            GameConfig lastConfig = Globals.config.Value;
+            string date = new DateTime(lastConfig.startTime).ToString("yyyy'-'MM'-'dd");
+            int existingTableCount = await CountQuery($"SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'leaderboard_{lastConfig.gameMode}_{date}';");
+            
+            if (existingTableCount == 1)
+            {
+                await ExecuteSQLQueryAsync($"DROP TABLE leaderboard_{lastConfig.gameMode}_{date}");
+            }
+
+            await ExecuteSQLQueryAsync(
+                $"CREATE TABLE leaderboard_{lastConfig.gameMode}_{date} LIKE leaderboard;\n" +
+                $"ALTER TABLE leaderboard_{lastConfig.gameMode}_{date} DISABLE KEYS;\n" + 
+                $"INSERT INTO leaderboard_{lastConfig.gameMode}_{date} SELECT * FROM leaderboard;\n" +
+                $"TRUNCATE TABLE leaderboard;"
+            );
+        }
+
         public static async Task<int> GetMatchCount()
         {
             return await CountQuery($"SELECT count(*) FROM matches;");
@@ -190,7 +229,7 @@ namespace BPR
             return await CountQuery($"SELECT count(*) FROM leaderboard;");
         }
 
-        public static async Task<LeaderboardUser?> GetLeaderboardUser(ulong id)
+        public static async Task<LeaderboardUser> GetLeaderboardUser(ulong id)
         {
             string query = $"SELECT * FROM leaderboard;";
             await Globals.conn.OpenAsync();
