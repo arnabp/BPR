@@ -61,7 +61,7 @@ public class TimerService
                             config.state = -1;
                             Globals.config = config;
                             await BHP.UpdateConfigState(-1);
-                            await generalChannel.SendMessageAsync($"@here The session has now ended, thanks for playing! Check the leaderboard channel to see your result");
+                            await generalChannel.SendMessageAsync($"@everyone The session has now ended, thanks for playing! Check the leaderboard channel to see your result");
                         }
                         else
                         {
