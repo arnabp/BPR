@@ -444,13 +444,6 @@ namespace BPR
             {
                 bool? isWinner = null;
 
-                // Check if a config exists
-                if (!Globals.config.HasValue)
-                {
-                    await localContext.Channel.SendMessageAsync($"A tournament hasn't started yet");
-                    return;
-                }
-
                 // Get users' info
                 Match? matchResult = await BHP.GetMatch(userInfo.Id);
                 if (!matchResult.HasValue)
