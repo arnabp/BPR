@@ -617,8 +617,8 @@ namespace BPR
 
         public static async Task PutConfig(GameConfig config)
         {
-            await ExecuteSQLQueryAsync($"INSERT INTO config(serverId, gameMode, startTime, endTime, state) " +
-                $"VALUES({config.serverId}, {config.gameMode}, {config.startTime}, {config.endTime}, {config.state})");
+            await ExecuteSQLQueryAsync($"INSERT INTO config(serverId, gameMode, startTime, checkinTime, endTime, state) " +
+                $"VALUES({config.serverId}, {config.gameMode}, {config.startTime}, {config.checkinTime}, {config.endTime}, {config.state})");
         }
 
         public static async Task UpdateConfigState()
