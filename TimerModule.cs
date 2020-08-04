@@ -85,7 +85,7 @@ public class TimerService
 
         foreach (LeaderboardUser leaderboardUser in leaderboard)
         {
-            leaderboardString += $"{leaderboardUser.username}: {leaderboardUser.points}\n";
+            leaderboardString += $"`{leaderboardUser.username}`: {leaderboardUser.points}\n";
         }
 
         embed.AddField(x =>
@@ -219,6 +219,6 @@ public class TimerService
             }
         }
 
-        await thisChannel.SendMessageAsync($"Please remember to add your room number with match room 00000");
+        await thisChannel.SendMessageAsync($"Please remember to add your room number with `match room 00000`");
     }
 }
