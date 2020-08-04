@@ -203,7 +203,7 @@ namespace BPR
         public static async Task BackupLeaderboard()
         {
             GameConfig lastConfig = Globals.config.Value;
-            string date = new DateTime(lastConfig.startTime).ToString("yyyy'-'MM'-'dd");
+            string date = new DateTime(lastConfig.startTime).ToString("yyyy'_'MM'_'dd");
             int existingTableCount = await CountQuery($"SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'leaderboard_{lastConfig.gameMode}_{date}';");
             
             if (existingTableCount == 1)
