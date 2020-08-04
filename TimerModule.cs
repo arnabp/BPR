@@ -30,7 +30,7 @@ public class TimerService
             // 3) Any code you want to periodically run goes here:
             if (Globals.config.HasValue)
             {
-                if (client.GetChannel(HelperFunctions.GetChannelId("NA", 0)) is IMessageChannel generalChannel)
+                if (client.GetChannel(HelperFunctions.GetChannelId(Globals.config.Value.gameMode)) is IMessageChannel generalChannel)
                 {
                     if (Globals.config.Value.state == 0)
                     {
@@ -48,7 +48,7 @@ public class TimerService
                     }
                     else
                     {
-                        if (client.GetChannel(HelperFunctions.GetChannelId("NA", 1)) is IMessageChannel leaderboardChannel)
+                        if (client.GetChannel(HelperFunctions.GetChannelId(0)) is IMessageChannel leaderboardChannel)
                         {
                             IEnumerable<IMessage> messageList = await leaderboardChannel.GetMessagesAsync(1).Flatten();
 

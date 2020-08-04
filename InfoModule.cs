@@ -178,91 +178,18 @@ namespace BPR
             return 0;
         }
 
-        public static ulong GetChannelId(string region, int channelType)
+        public static ulong GetChannelId(int channelType)
         {
-            // General
-            if (channelType == 0)
+            switch (channelType)
             {
-                if (region == "NA" || region == "EU")
-                {
-                    return 392829581192855554;
-                }
-                if (region == "AUS" || region == "SEA")
-                {
-                    return 422045385612328973;
-                }
-                if (region == "TEST")
-                {
-                    return 123456789000000000;
-                }
-            }
-            // 1v1 Queue Info
-            if (channelType == 1)
-            {
-                if (region == "NA")
-                {
+                case 0:
                     return 401167888762929153;
-                }
-                if (region == "EU")
-                {
-                    return 525425865262104576;
-                }
-                if (region == "AUS")
-                {
-                    return 423372016922525697;
-                }
-                if (region == "SEA")
-                {
-                    return 529011508659748872;
-                }
-                if (region == "TEST")
-                {
-                    return 123456789000000001;
-                }
-            }
-            // 2v2 Queue Info
-            if (channelType == 2)
-            {
-                if (region == "NA")
-                {
-                    return 404558855771521024;
-                }
-                if (region == "EU")
-                {
-                    return 525425886195875861;
-                }
-                if (region == "AUS")
-                {
-                    return 437510787951493121;
-                }
-                if (region == "SEA")
-                {
-                    return 529012003415654400;
-                }
-                if (region == "TEST")
-                {
-                    return 123456789000000002;
-                }
-            }
-            // Bank Status
-            if (channelType == 3)
-            {
-                if (region == "NA")
-                {
-                    return 525950148581523466;
-                }
-                if (region == "EU")
-                {
-                    return 525950398297669639;
-                }
-                if (region == "AUS")
-                {
-                    return 529012722432737290;
-                }
-                if (region == "SEA")
-                {
-                    return 529012939735302144;
-                }
+                case 1:
+                    return 739957742323630082;
+                case 2:
+                    return 739957886754619442;
+                default:
+                    break;
             }
 
             return 0;
@@ -880,7 +807,8 @@ namespace BPR
             else
             {
                 await BHP.PutLeave(userInfo.Id);
-                await localContext.Channel.SendMessageAsync("Are you sure you want to leave the tournament? Type `leave` again to confirm. Type `cancel` to cancel");
+                string removeTeammateString = Globals.config.Value.gameMode == 2 ? " and remove your teammate from the tournament as well" : "";
+                await localContext.Channel.SendMessageAsync($"Are you sure you want to leave the tournament? This will remove all your points for this tournament{removeTeammateString}. Type `leave` again to confirm. Type `cancel` to cancel");
             }
         }
 

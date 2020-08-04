@@ -448,7 +448,7 @@ namespace BPR
 
         public static async Task<bool> GetLeavePlayer(ulong id)
         {
-            return (await CountQuery($"SELECT count(*) FROM leave WHERE id={id};") == 1);
+            return (await CountQuery($"SELECT count(*) FROM leaving WHERE id={id};") == 1);
         }
 
         public static async Task UpdateLocalConfig()
@@ -514,7 +514,7 @@ namespace BPR
 
         public static async Task PutLeave(ulong id)
         {
-            await ExecuteSQLQueryAsync($"INSERT INTO leave(id) VALUES({id});");
+            await ExecuteSQLQueryAsync($"INSERT INTO leaving(id) VALUES({id});");
         }
 
         public static async Task PutMatchFromHistory(MatchHistory matchHistory)
@@ -610,7 +610,7 @@ namespace BPR
 
         public static async Task DeleteLeave(ulong id)
         {
-            await ExecuteSQLQueryAsync($"DELETE FROM leave WHERE id = {id};");
+            await ExecuteSQLQueryAsync($"DELETE FROM leaving WHERE id = {id};");
         }
 
         public static async Task PutConfig(GameConfig config)
