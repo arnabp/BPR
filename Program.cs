@@ -106,7 +106,7 @@ namespace BPR
             // Determine if message comes from bot, to prevent rereading bot responses
             if (message.Author.IsBot) return;
             // Determine if the message is a command, based on where it's located or a mention prefix
-            if (message.Channel.Id != 392829581192855554) return;
+            if (message.Channel.Id != 739957742323630082 || message.Channel.Id != 739957886754619442) return;
             // Create a Command Context
             var context = new SocketCommandContext(_client, message);
             // Execute the command. (result does not indicate a return value, 
