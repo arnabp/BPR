@@ -28,7 +28,7 @@ public class TimerService
         _timer = new Timer(async _ =>
         {
             // 3) Any code you want to periodically run goes here:
-            if (Globals.config.HasValue)
+            if (Globals.config.HasValue && Globals.config.Value.state != -1)
             {
                 if (client.GetChannel(HelperFunctions.GetChannelId(Globals.config.Value.gameMode)) is IMessageChannel generalChannel)
                 {
@@ -40,7 +40,7 @@ public class TimerService
                             config.state = 1;
                             Globals.config = config;
 
-                            await BHP.UpdateConfigState();
+                            await BHP.UpdateConfigState(1);
                             await generalChannel.SendMessageAsync($"Checkin has ended. Generating matches.");
                             if (Globals.config.Value.gameMode == 2) await CleanLeaderboardAsync();
                             await GenerateMatchesAsync(generalChannel);
@@ -58,7 +58,7 @@ public class TimerService
                         if (DateTime.Now.Ticks > Globals.config.Value.endTime)
                         {
                             Globals.config = null;
-                            await BHP.ClearConfig();
+                            await BHP.UpdateConfigState(0);
                             await generalChannel.SendMessageAsync($"@here The session has now ended, thanks for playing! Check the leaderboard channel to see your result");
                         }
                         else

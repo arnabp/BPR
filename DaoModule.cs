@@ -621,9 +621,9 @@ namespace BPR
                 $"VALUES({config.serverId}, {config.gameMode}, {config.startTime}, {config.checkinTime}, {config.endTime}, {config.state})");
         }
 
-        public static async Task UpdateConfigState()
+        public static async Task UpdateConfigState(int state)
         {
-            await ExecuteSQLQueryAsync($"UPDATE config SET state = 1;");
+            await ExecuteSQLQueryAsync($"UPDATE config SET state = {state};");
         }
 
         public static async Task ClearConfig()

@@ -419,7 +419,7 @@ namespace BPR
     {
         [Command("j")]
         [Summary("DEPRACATED: Join the queue")]
-        public async Task MatchReportAsync([Remainder] string literallyAnythingElse)
+        public async Task QueueJoinAsync([Remainder] string literallyAnythingElse)
         {
             var userInfo = Context.User;
             await Context.Channel.SendMessageAsync($"<@{userInfo.Id}> there is no queue anymore, you don't need to use that command.");
@@ -641,6 +641,7 @@ namespace BPR
             localContext = localContext ?? Context;
             Console.WriteLine($"Starting a {gameMode}v{gameMode} session for {totalMinutes} minutes with checkin {checkinMinutes} minutes");
             await BHP.ClearLeaderboard();
+            await BHP.ClearConfig();
 
             GameConfig config = new GameConfig()
             {
@@ -672,7 +673,7 @@ namespace BPR
             var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is checking in");
 
-            if (!Globals.config.HasValue)
+            if (Globals.config.Value.state == -1)
             {
                 Console.WriteLine("There is no active session to check in to");
                 return;
@@ -704,7 +705,7 @@ namespace BPR
             var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is checking in with {teammateInfo.Username}");
 
-            if (!Globals.config.HasValue)
+            if (Globals.config.Value.state == -1)
             {
                 await localContext.Channel.SendMessageAsync("There is no active session to check in to");
                 return;
