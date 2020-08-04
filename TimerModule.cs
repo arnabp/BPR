@@ -14,6 +14,8 @@ public class TimerService
 {
     public IMessageChannel channelOverride;
 
+    private readonly int MIN_PLAYERS_IN_QUEUE = 6;
+
     private readonly Timer _timer; // 2) Add a field like this
     // This example only concerns a single timer.
     // If you would like to have multiple independant timers,
@@ -160,7 +162,7 @@ public class TimerService
         }
 
         int gameSize = Globals.config.Value.gameMode * 2;
-        if (queue.Count <= gameSize - 1) return;
+        if (queue.Count <= MIN_PLAYERS_IN_QUEUE) return;
 
         while (queue.Count > gameSize - 1)
         {
