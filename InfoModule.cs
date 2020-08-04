@@ -830,4 +830,73 @@ namespace BPR
 
         }
     }
+
+    public class LeaveModule : ModuleBase<SocketCommandContext>
+    {
+        public ICommandContext localContext;
+
+        [Command("leave")]
+        [Summary("Allows a user to leave midsession")]
+        public async Task LeaveAsync([Remainder] string nonsense)
+        {
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
+            Console.WriteLine($"{userInfo.Username} is attempting to leave");
+
+            if (await BHP.GetLeavePlayer(userInfo.Id))
+            {
+                LeaderboardUser? leaderboardUser = await BHP.GetLeaderboardUser(userInfo.Id);
+                if (!leaderboardUser.HasValue)
+                {
+                    await localContext.Channel.SendMessageAsync("You are not even playing, you have nothing to leave.");
+                    return;
+                }
+
+                List<ulong> playersToDelete = new List<ulong>(2)
+                {
+                    leaderboardUser.Value.id
+                };
+
+                if (leaderboardUser.Value.teammateId != 0)
+                {
+                    playersToDelete.Add(leaderboardUser.Value.teammateId);
+                }
+
+                await BHP.DeleteLeaderboardUsers(playersToDelete);
+
+                if (playersToDelete.Count == 1)
+                {
+                    await localContext.Channel.SendMessageAsync($"<@{leaderboardUser.Value.id}> has been removed from the tournament");
+                }
+                else if (playersToDelete.Count == 2)
+                {
+                    await localContext.Channel.SendMessageAsync($"<@{leaderboardUser.Value.id}> and <@{leaderboardUser.Value.teammateId}> have been removed from the tournament");
+                }
+                else
+                {
+                    await localContext.Channel.SendMessageAsync("Hey <@106136559744466944> something went wrong");
+                }
+            }
+            else
+            {
+                await BHP.PutLeave(userInfo.Id);
+                await localContext.Channel.SendMessageAsync("Are you sure you want to leave the tournament? Type `leave` again to confirm. Type `cancel` to cancel");
+            }
+        }
+
+        [Command("cancel")]
+        [Summary("Cancels the last leave")]
+        public async Task CancelLeaveAsync([Remainder] string nonsense)
+        {
+            localContext = localContext ?? Context;
+            var userInfo = localContext.User;
+            Console.WriteLine($"{userInfo.Username} is cancelling leave");
+
+            if (await BHP.GetLeavePlayer(userInfo.Id))
+            {
+                await BHP.DeleteLeave(userInfo.Id);
+                await localContext.Channel.SendMessageAsync("Leave has been cancelled");
+            }
+        }
+    }
 }

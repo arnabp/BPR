@@ -14,7 +14,7 @@ public class TimerService
 {
     public IMessageChannel channelOverride;
 
-    private readonly int MIN_PLAYERS_IN_QUEUE = 6;
+    private readonly int MIN_PLAYERS_IN_QUEUE = 16;
 
     private readonly Timer _timer; // 2) Add a field like this
     // This example only concerns a single timer.
@@ -72,7 +72,7 @@ public class TimerService
         },
         null,
         TimeSpan.FromMinutes(0),  // 4) Time that message should fire after the timer is created
-        TimeSpan.FromSeconds(30)); // 5) Time after which message should repeat (use `Timeout.Infinite` for no repeat)
+        TimeSpan.FromSeconds(15)); // 5) Time after which message should repeat (use `Timeout.Infinite` for no repeat)
     }
 
     private async Task UpdateLeaderboardAsync(IUserMessage thisMessage)

@@ -446,6 +446,11 @@ namespace BPR
             }
         }
 
+        public static async Task<bool> GetLeavePlayer(ulong id)
+        {
+            return (await CountQuery($"SELECT count(*) FROM leave WHERE id={id};") == 1);
+        }
+
         public static async Task UpdateLocalConfig()
         {
             string query = $"SELECT * FROM config;";
@@ -505,6 +510,11 @@ namespace BPR
                 throw new DataMisalignedException(message);
             }
             await ExecuteSQLQueryAsync(query);
+        }
+
+        public static async Task PutLeave(ulong id)
+        {
+            await ExecuteSQLQueryAsync($"INSERT INTO leave(id) VALUES({id});");
         }
 
         public static async Task PutMatchFromHistory(MatchHistory matchHistory)
@@ -598,6 +608,11 @@ namespace BPR
             await ExecuteSQLQueryAsync($"DELETE FROM matches WHERE id1 = {player1Id};");
         }
 
+        public static async Task DeleteLeave(ulong id)
+        {
+            await ExecuteSQLQueryAsync($"DELETE FROM leave WHERE id = {id};");
+        }
+
         public static async Task PutConfig(GameConfig config)
         {
             await ExecuteSQLQueryAsync($"INSERT INTO config(serverId, gameMode, startTime, endTime, state) " +
@@ -608,6 +623,7 @@ namespace BPR
         {
             await ExecuteSQLQueryAsync($"UPDATE config SET state = 1;");
         }
+
         public static async Task ClearConfig()
         {
             await ExecuteSQLQueryAsync("TRUNCATE TABLE config");
