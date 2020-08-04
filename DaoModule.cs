@@ -23,7 +23,7 @@ namespace BPR
         public ulong id2;
         public ulong? id3;
         public ulong? id4;
-        public int room;
+        public uint room;
 
         public int GetNum(ulong id)
         {
@@ -374,7 +374,7 @@ namespace BPR
                         id2 = reader.GetUInt64(1),
                         id3 = reader.GetUInt64(2),
                         id4 = reader.GetUInt64(3),
-                        room = reader.GetInt16(4)
+                        room = reader.GetUInt32(4)
                     };
                     matches.Add(match);
                 }
@@ -529,7 +529,7 @@ namespace BPR
             await ExecuteSQLQueryAsync(query);
         }
 
-        public static async Task PutMatchRoom(ulong id, int idNum, int roomNumber)
+        public static async Task PutMatchRoom(ulong id, int idNum, uint roomNumber)
         {
             await ExecuteSQLQueryAsync($"UPDATE matches SET room = {roomNumber} WHERE id{idNum} = {id}");
         }

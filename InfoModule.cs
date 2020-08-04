@@ -696,7 +696,7 @@ namespace BPR
             if (match.HasValue)
             {
                 // Set room in match info
-                await BHP.PutMatchRoom(userInfo.Id, match.Value.GetNum(userInfo.Id), room);
+                await BHP.PutMatchRoom(userInfo.Id, match.Value.GetNum(userInfo.Id), (uint)room);
                 await localContext.Channel.SendMessageAsync($"{userInfo.Username} set room number to {room}");
             }
             else
