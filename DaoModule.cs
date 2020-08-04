@@ -119,6 +119,7 @@ namespace BPR
         public ulong serverId;
         public int gameMode;
         public long startTime;
+        public long checkinTime;
         public long endTime;
         public int state;
     }
@@ -467,8 +468,9 @@ namespace BPR
                         serverId = reader.GetUInt64(0),
                         gameMode = reader.GetInt16(1),
                         startTime = reader.GetInt64(2),
-                        endTime = reader.GetInt64(3),
-                        state = reader.GetInt16(4)
+                        checkinTime = reader.GetInt64(3),
+                        endTime = reader.GetInt64(4),
+                        state = reader.GetInt16(5)
                     };
 
                     Globals.config = config;

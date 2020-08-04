@@ -34,7 +34,7 @@ public class TimerService
                 {
                     if (Globals.config.Value.state == 0)
                     {
-                        if (DateTime.Now.AddMinutes(-5).Ticks > Globals.config.Value.startTime)
+                        if (DateTime.Now.Ticks > Globals.config.Value.checkinTime)
                         {
                             GameConfig config = Globals.config.Value;
                             config.state = 1;

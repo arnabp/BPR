@@ -643,10 +643,10 @@ namespace BPR
 
         [Command("start")]
         [Summary("Starts a session")]
-        public async Task StartSessionAsync(int gameMode, int minutes)
+        public async Task StartSessionAsync(int gameMode, int totalMinutes, int checkinMinutes)
         {
             localContext = localContext ?? Context;
-            Console.WriteLine($"Starting a {gameMode}v{gameMode} session for {minutes} minutes");
+            Console.WriteLine($"Starting a {gameMode}v{gameMode} session for {totalMinutes} minutes with checkin {checkinMinutes} minutes");
             await BHP.ClearLeaderboard();
 
             GameConfig config = new GameConfig()
@@ -654,7 +654,8 @@ namespace BPR
                 serverId = localContext.Guild.Id,
                 gameMode = gameMode,
                 startTime = DateTime.Now.Ticks,
-                endTime = DateTime.Now.AddMinutes(minutes).Ticks,
+                checkinTime = DateTime.Now.AddMinutes(checkinMinutes).Ticks,
+                endTime = DateTime.Now.AddMinutes(checkinMinutes + totalMinutes).Ticks,
                 state = 0
             };
 
