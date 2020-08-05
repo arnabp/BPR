@@ -625,9 +625,23 @@ namespace BPR
 
             if (match.HasValue)
             {
+                List<ulong> players = new List<ulong>(4)
+                {
+                    match.Value.id1,
+                    match.Value.id2
+                };
+                if (match.Value.id3.HasValue) players.Add(match.Value.id3.Value);
+                if (match.Value.id4.HasValue) players.Add(match.Value.id4.Value);
+
+                string playersString = "";
+                foreach (ulong id in players)
+                {
+                    playersString += $"<@{id}> ";
+                }
+
                 // Set room in match info
                 await BHP.PutMatchRoom(userInfo.Id, match.Value.GetNum(userInfo.Id), (uint)room);
-                await localContext.Channel.SendMessageAsync($"{userInfo.Username} set room number to {room}");
+                await localContext.Channel.SendMessageAsync($"{userInfo.Username} set room number to {room} for match {playersString}");
             }
             else
             {
