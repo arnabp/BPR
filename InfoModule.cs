@@ -681,7 +681,7 @@ namespace BPR
             await BHP.PutConfig(config);
 
             string atTeammate = gameMode == 2 ? " @teammate" : "";
-            await localContext.Channel.SendMessageAsync($"@everyone Starting a {gameMode}v{gameMode} session! Please use command `checkin{atTeammate}` in the next 5 minutes to check in to the tournament.");
+            await localContext.Channel.SendMessageAsync($"@everyone Starting a {gameMode}v{gameMode} session! Please use command `checkin{atTeammate}` in the next {checkinMinutes} minutes to check in to the tournament.");
         }
     }
 
