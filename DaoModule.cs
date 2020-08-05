@@ -688,9 +688,9 @@ namespace BPR
 
             await ExecuteSQLQueryAsync($"DELETE FROM matches WHERE " +
                 $"id1 IN ({allIds.Remove(allIds.Length - 1, 1)}) OR " +
-                $"id1 IN ({allIds.Remove(allIds.Length - 1, 1)}) OR " +
-                $"id1 IN ({allIds.Remove(allIds.Length - 1, 1)}) OR " +
-                $"id1 IN ({allIds.Remove(allIds.Length - 1, 1)});");
+                $"id2 IN ({allIds.Remove(allIds.Length - 1, 1)}) OR " +
+                $"id3 IN ({allIds.Remove(allIds.Length - 1, 1)}) OR " +
+                $"id4 IN ({allIds.Remove(allIds.Length - 1, 1)});");
 
             return removedPlayers;
         }
