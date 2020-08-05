@@ -630,8 +630,8 @@ namespace BPR
                     match.Value.id1,
                     match.Value.id2
                 };
-                if (match.Value.id3.HasValue) players.Add(match.Value.id3.Value);
-                if (match.Value.id4.HasValue) players.Add(match.Value.id4.Value);
+                if (match.Value.id3.Value != 0) players.Add(match.Value.id3.Value);
+                if (match.Value.id4.Value != 0) players.Add(match.Value.id4.Value);
 
                 string playersString = "";
                 foreach (ulong id in players)
