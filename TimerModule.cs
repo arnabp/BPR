@@ -147,9 +147,10 @@ public class TimerService
 
         if (queue.Count % 2 == 1)
         {
+            int replacementIndex = (queue.Count / 2) + Globals.rnd.Next(2) - 1;
             LeaderboardUser tmp = queue[queue.Count - 1];
-            queue[queue.Count - 1] = queue[queue.Count / 2];
-            queue[queue.Count / 2] = tmp;
+            queue[queue.Count - 1] = queue[replacementIndex];
+            queue[replacementIndex] = tmp;
         }
 
         int gameSize = Globals.config.Value.gameMode * 2;
