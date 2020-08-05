@@ -145,6 +145,13 @@ public class TimerService
         // Sort by streak in descending order
         queue.Sort();
 
+        if (queue.Count % 2 == 1)
+        {
+            LeaderboardUser tmp = queue[queue.Count - 1];
+            queue[queue.Count - 1] = queue[queue.Count / 2];
+            queue[queue.Count / 2] = tmp;
+        }
+
         int gameSize = Globals.config.Value.gameMode * 2;
         if (queue.Count < MIN_PLAYERS_IN_QUEUE) return;
 
