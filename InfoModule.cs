@@ -595,9 +595,20 @@ namespace BPR
                         await BHP.UpdateLeaderboardRevert(id, matchHistory.GetPlayerScore(id), matchHistory.GetPlayerStreak(id), playerWinner);
                     }
 
+                    List<ulong> removedPlayers = await BHP.DeleteMatchesFromHistory(matchHistory);
                     await BHP.PutMatchFromHistory(matchHistory);
 
                     await localContext.Channel.SendMessageAsync("The last match has been reverted. Please report the match correctly now.");
+                    if (removedPlayers.Count > 0)
+                    {
+                        string removedPlayersString = "";
+                        foreach (ulong id in removedPlayers)
+                        {
+                            removedPlayersString += $"<@{id}> ";
+                        }
+                        await localContext.Channel.SendMessageAsync($"{removedPlayersString} - Due to a match revert, your most recent game has been cancelled");
+                    }
+
                 }
             }
         }

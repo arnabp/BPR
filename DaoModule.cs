@@ -649,6 +649,47 @@ namespace BPR
             await ExecuteSQLQueryAsync($"DELETE FROM matches WHERE id1 = {player1Id};");
         }
 
+        public static async Task<List<ulong>> DeleteMatchesFromHistory(MatchHistory matchHistory)
+        {
+            HashSet<ulong> players = new HashSet<ulong>(4)
+            {
+                matchHistory.id1,
+                matchHistory.id2
+            };
+            if (matchHistory.id3.HasValue) players.Add(matchHistory.id3.Value);
+            if (matchHistory.id4.HasValue) players.Add(matchHistory.id4.Value);
+
+            List<Match> matches = new List<Match>(4);
+            foreach (ulong player in players)
+            {
+                Match? potentialMatch = await GetMatch(player);
+                if (potentialMatch.HasValue) matches.Add(potentialMatch.Value);
+            }
+
+            List<ulong> removedPlayers = new List<ulong>(4);
+            foreach (Match match in matches)
+            {
+                if (!players.Contains(match.id1) && match.id1 != 0) removedPlayers.Add(match.id1);
+                if (!players.Contains(match.id2) && match.id2 != 0) removedPlayers.Add(match.id2);
+                if (match.id3.HasValue && !players.Contains(match.id3.Value) && match.id3.Value != 0) removedPlayers.Add(match.id3.Value);
+                if (match.id4.HasValue && !players.Contains(match.id4.Value) && match.id4.Value != 0) removedPlayers.Add(match.id4.Value);
+            }
+
+            string allIds = "";
+            foreach (ulong id in removedPlayers)
+            {
+                allIds += $"{id},";
+            }
+
+            await ExecuteSQLQueryAsync($"DELETE FROM matches WHERE " +
+                $"id1 IN ({allIds.Remove(allIds.Length - 1, 1)}) OR " +
+                $"id1 IN ({allIds.Remove(allIds.Length - 1, 1)}) OR " +
+                $"id1 IN ({allIds.Remove(allIds.Length - 1, 1)}) OR " +
+                $"id1 IN ({allIds.Remove(allIds.Length - 1, 1)});");
+
+            return removedPlayers;
+        }
+
         public static async Task DeleteLeave(ulong id)
         {
             await ExecuteSQLQueryAsync($"DELETE FROM leaving WHERE id = {id};");
