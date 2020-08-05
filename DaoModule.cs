@@ -358,7 +358,7 @@ namespace BPR
 
         public static async Task<Match?> GetMatch(ulong id)
         {
-            string query = $"SELECT * FROM matches;";
+            string query = $"SELECT * FROM matches WHERE id1 = ${id} OR id2 = ${id} OR id3 = ${id} or id4 = ${id};";
             await Globals.conn.OpenAsync();
             try
             {
@@ -367,20 +367,14 @@ namespace BPR
 
                 while (reader.Read())
                 {
-                    if (reader.GetUInt64(0) == id ||
-                        reader.GetUInt64(1) == id ||
-                        reader.GetUInt64(2) == id ||
-                        reader.GetUInt64(3) == id)
+                    Match match = new Match
                     {
-                        Match match = new Match
-                        {
-                            id1 = reader.GetUInt64(0),
-                            id2 = reader.GetUInt64(1),
-                            id3 = reader.GetUInt64(2),
-                            id4 = reader.GetUInt64(3)
-                        };
-                        return match;
-                    }
+                        id1 = reader.GetUInt64(0),
+                        id2 = reader.GetUInt64(1),
+                        id3 = reader.GetUInt64(2),
+                        id4 = reader.GetUInt64(3)
+                    };
+                    return match;
                 }
 
                 return null;

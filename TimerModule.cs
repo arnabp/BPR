@@ -14,7 +14,7 @@ public class TimerService
 {
     public IMessageChannel channelOverride;
 
-    private readonly int MIN_PLAYERS_IN_QUEUE = 8;
+    private readonly int MIN_PLAYERS_IN_QUEUE = 12;
 
     private readonly Timer _timer; // 2) Add a field like this
     // This example only concerns a single timer.
