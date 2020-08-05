@@ -659,6 +659,11 @@ namespace BPR
             if (matchHistory.id3.HasValue) players.Add(matchHistory.id3.Value);
             if (matchHistory.id4.HasValue) players.Add(matchHistory.id4.Value);
 
+            return await DeleteMatchesFromIds(players);
+        }
+
+        public static async Task<List<ulong>> DeleteMatchesFromIds(HashSet<ulong> players)
+        {
             List<Match> matches = new List<Match>(4);
             foreach (ulong player in players)
             {

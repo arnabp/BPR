@@ -608,7 +608,6 @@ namespace BPR
                         }
                         await localContext.Channel.SendMessageAsync($"{removedPlayersString} - Due to a match revert, your most recent game has been cancelled");
                     }
-
                 }
             }
         }
@@ -797,17 +796,34 @@ namespace BPR
 
                 await BHP.DeleteLeaderboardUsers(playersToDelete);
 
+                HashSet<ulong> players = new HashSet<ulong>(2)
+                {
+                    leaderboardUser.id
+                };
                 if (playersToDelete.Count == 1)
                 {
                     await localContext.Channel.SendMessageAsync($"<@{leaderboardUser.id}> has been removed from the tournament");
                 }
                 else if (playersToDelete.Count == 2)
                 {
+                    players.Add(leaderboardUser.teammateId);
                     await localContext.Channel.SendMessageAsync($"<@{leaderboardUser.id}> and <@{leaderboardUser.teammateId}> have been removed from the tournament");
                 }
                 else
                 {
                     await localContext.Channel.SendMessageAsync("Hey <@106136559744466944> something went wrong");
+                    return;
+                }
+
+                List<ulong> removedPlayers = await BHP.DeleteMatchesFromIds(players);
+                if (removedPlayers.Count > 0)
+                {
+                    string removedPlayersString = "";
+                    foreach (ulong id in removedPlayers)
+                    {
+                        removedPlayersString += $"<@{id}> ";
+                    }
+                    await localContext.Channel.SendMessageAsync($"{removedPlayersString} - Due to a leaving opponent, your most recent game has been cancelled");
                 }
             }
             else
