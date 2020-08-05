@@ -680,17 +680,20 @@ namespace BPR
                 if (match.id4.HasValue && !players.Contains(match.id4.Value) && match.id4.Value != 0) removedPlayers.Add(match.id4.Value);
             }
 
-            string allIds = "";
-            foreach (ulong id in removedPlayers)
+            if (removedPlayers.Count > 0)
             {
-                allIds += $"{id},";
-            }
+                string allIds = "";
+                foreach (ulong id in removedPlayers)
+                {
+                    allIds += $"{id},";
+                }
 
-            await ExecuteSQLQueryAsync($"DELETE FROM matches WHERE " +
-                $"id1 IN ({allIds.Remove(allIds.Length - 1, 1)}) OR " +
-                $"id2 IN ({allIds.Remove(allIds.Length - 1, 1)}) OR " +
-                $"id3 IN ({allIds.Remove(allIds.Length - 1, 1)}) OR " +
-                $"id4 IN ({allIds.Remove(allIds.Length - 1, 1)});");
+                await ExecuteSQLQueryAsync($"DELETE FROM matches WHERE " +
+                    $"id1 IN ({allIds.Remove(allIds.Length - 1, 1)}) OR " +
+                    $"id2 IN ({allIds.Remove(allIds.Length - 1, 1)}) OR " +
+                    $"id3 IN ({allIds.Remove(allIds.Length - 1, 1)}) OR " +
+                    $"id4 IN ({allIds.Remove(allIds.Length - 1, 1)});");
+            }
 
             return removedPlayers;
         }
