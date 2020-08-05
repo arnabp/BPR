@@ -52,7 +52,7 @@ public class TimerService
                         {
                             IEnumerable<IMessage> messageList = await leaderboardChannel.GetMessagesAsync(1).Flatten();
 
-                            if (messageList.ToList()[0] is IUserMessage leaderboard) await UpdateLeaderboardAsync(leaderboard);
+                            //if (messageList.ToList()[0] is IUserMessage leaderboard) await UpdateLeaderboardAsync(leaderboard);
                         }
 
                         if (DateTime.Now.Ticks > Globals.config.Value.endTime)
