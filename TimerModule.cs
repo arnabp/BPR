@@ -79,7 +79,7 @@ public class TimerService
 
     private async Task UpdateLeaderboardAsync(IUserMessage thisMessage)
     {
-        string leaderboardString = "*LEADERBOARD*";
+        string leaderboardString = "**LEADERBOARD**\n";
         List<LeaderboardUser> leaderboard = await BHP.GetLeaderboard();
 
         foreach (LeaderboardUser leaderboardUser in leaderboard)
