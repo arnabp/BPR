@@ -146,7 +146,7 @@ public class TimerService
         queue.Sort();
 
         int gameSize = Globals.config.Value.gameMode * 2;
-        if (queue.Count <= MIN_PLAYERS_IN_QUEUE) return;
+        if (queue.Count < MIN_PLAYERS_IN_QUEUE) return;
 
         while (queue.Count > gameSize - 1)
         {
