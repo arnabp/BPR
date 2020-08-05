@@ -52,7 +52,7 @@ public class TimerService
                         {
                             IEnumerable<IMessage> messageList = await leaderboardChannel.GetMessagesAsync(1).Flatten();
 
-                            //if (messageList.ToList()[0] is IUserMessage leaderboard) await UpdateLeaderboardAsync(leaderboard);
+                            if (messageList.ToList()[0] is IUserMessage leaderboard) await UpdateLeaderboardAsync(leaderboard);
                         }
 
                         if (DateTime.Now.Ticks > Globals.config.Value.endTime)
@@ -79,12 +79,7 @@ public class TimerService
 
     private async Task UpdateLeaderboardAsync(IUserMessage thisMessage)
     {
-        var embed = new EmbedBuilder
-        {
-            Color = Color.Blue
-        };
-
-        string leaderboardString = "";
+        string leaderboardString = "*LEADERBOARD*";
         List<LeaderboardUser> leaderboard = await BHP.GetLeaderboard();
 
         foreach (LeaderboardUser leaderboardUser in leaderboard)
@@ -92,15 +87,8 @@ public class TimerService
             leaderboardString += $"`{leaderboardUser.username}`: {leaderboardUser.points}\n";
         }
 
-        embed.AddField(x =>
-        {
-            x.Name = $"Leaderboard";
-            x.Value = leaderboardString;
-        });
-
         await thisMessage.ModifyAsync(x => {
-            x.Content = "";
-            x.Embed = embed.Build();
+            x.Content = leaderboardString;
         });
     }
 
