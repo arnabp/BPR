@@ -358,7 +358,7 @@ namespace BPR
 
         public static async Task<Match?> GetMatch(ulong id)
         {
-            string query = $"SELECT * FROM matches WHERE id1 = ${id} OR id2 = ${id} OR id3 = ${id} or id4 = ${id};";
+            string query = $"SELECT * FROM matches WHERE id1 = {id} OR id2 = {id} OR id3 = {id} or id4 = {id};";
             await Globals.conn.OpenAsync();
             try
             {
