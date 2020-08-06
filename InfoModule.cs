@@ -10,6 +10,7 @@ using MySql.Data;
 using MySql.Data.MySqlClient;
 using System.Linq;
 using Discord.WebSocket;
+using System.Security.Policy;
 
 namespace BPR
 {
@@ -595,7 +596,7 @@ namespace BPR
                         await BHP.UpdateLeaderboardRevert(id, matchHistory.GetPlayerScore(id), matchHistory.GetPlayerStreak(id), playerWinner);
                     }
 
-                    List<ulong> removedPlayers = await BHP.DeleteMatchesFromHistory(matchHistory);
+                    HashSet<ulong> removedPlayers = await BHP.DeleteMatchesFromHistory(matchHistory);
                     await BHP.PutMatchFromHistory(matchHistory);
 
                     await localContext.Channel.SendMessageAsync("The last match has been reverted. Please report the match correctly now.");
@@ -829,7 +830,7 @@ namespace BPR
                     return;
                 }
 
-                List<ulong> removedPlayers = await BHP.DeleteMatchesFromIds(players);
+                HashSet<ulong> removedPlayers = await BHP.DeleteMatchesFromIds(players);
                 if (removedPlayers.Count > 0)
                 {
                     string removedPlayersString = "";

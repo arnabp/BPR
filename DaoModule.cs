@@ -643,7 +643,7 @@ namespace BPR
             await ExecuteSQLQueryAsync($"DELETE FROM matches WHERE id1 = {player1Id};");
         }
 
-        public static async Task<List<ulong>> DeleteMatchesFromHistory(MatchHistory matchHistory)
+        public static async Task<HashSet<ulong>> DeleteMatchesFromHistory(MatchHistory matchHistory)
         {
             HashSet<ulong> players = new HashSet<ulong>(4)
             {
@@ -656,7 +656,7 @@ namespace BPR
             return await DeleteMatchesFromIds(players);
         }
 
-        public static async Task<List<ulong>> DeleteMatchesFromIds(HashSet<ulong> players)
+        public static async Task<HashSet<ulong>> DeleteMatchesFromIds(HashSet<ulong> players)
         {
             List<Match> matches = new List<Match>(4);
             foreach (ulong player in players)
@@ -665,7 +665,7 @@ namespace BPR
                 if (potentialMatch.HasValue) matches.Add(potentialMatch.Value);
             }
 
-            List<ulong> removedPlayers = new List<ulong>(4);
+            HashSet<ulong> removedPlayers = new HashSet<ulong>(4);
             foreach (Match match in matches)
             {
                 if (!players.Contains(match.id1) && match.id1 != 0) removedPlayers.Add(match.id1);
