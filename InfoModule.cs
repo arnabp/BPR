@@ -654,13 +654,13 @@ namespace BPR
 
     [Group("session")]
     [Alias("s")]
-    [RequireUserPermission(GuildPermission.Administrator)]
     public class SessionModule : ModuleBase<SocketCommandContext>
     {
         public ICommandContext localContext;
 
         [Command("start")]
         [Summary("Starts a session")]
+        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task StartSessionAsync(int gameMode, int checkinMinutes, int totalMinutes)
         {
             localContext = localContext ?? Context;
@@ -683,6 +683,21 @@ namespace BPR
 
             string atTeammate = gameMode == 2 ? " @teammate" : "";
             await localContext.Channel.SendMessageAsync($"@everyone Starting a {gameMode}v{gameMode} session! Please use command `checkin{atTeammate}` in the next {checkinMinutes} minutes to check in to the tournament.");
+        }
+
+        [Command("update")]
+        [Summary("Updates the leaderboard manually")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task ManualUpdateLeaderboardAsync()
+        {
+            localContext = localContext ?? Context;
+            Console.WriteLine($"{localContext.User.Username} is manually updating leaderboard");
+
+            if (await localContext.Guild.GetChannelAsync(HelperFunctions.GetChannelId(0)) is IMessageChannel leaderboardChannel)
+            {
+                IUserMessage message = await TimerService.GetMessageFromChannel(leaderboardChannel);
+                if (message != null) await TimerService.UpdateLeaderboardAsync(message);
+            }
         }
     }
 

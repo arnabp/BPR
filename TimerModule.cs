@@ -12,8 +12,6 @@ using MySql.Data.MySqlClient;
 
 public class TimerService
 {
-    public IMessageChannel channelOverride;
-
     private readonly int MIN_PLAYERS_IN_QUEUE = 12;
 
     private readonly Timer _timer; // 2) Add a field like this
@@ -50,9 +48,8 @@ public class TimerService
                     {
                         if (client.GetChannel(HelperFunctions.GetChannelId(0)) is IMessageChannel leaderboardChannel)
                         {
-                            IEnumerable<IMessage> messageList = await leaderboardChannel.GetMessagesAsync(1).Flatten();
-
-                            if (messageList.ToList()[0] is IUserMessage leaderboard) await UpdateLeaderboardAsync(leaderboard);
+                            IUserMessage message = await GetMessageFromChannel(leaderboardChannel);
+                            if (message != null) await UpdateLeaderboardAsync(message);
                         }
 
                         if (DateTime.Now.Ticks > Globals.config.Value.endTime)
@@ -77,7 +74,15 @@ public class TimerService
         TimeSpan.FromSeconds(15)); // 5) Time after which message should repeat (use `Timeout.Infinite` for no repeat)
     }
 
-    private async Task UpdateLeaderboardAsync(IUserMessage thisMessage)
+    public static async Task<IUserMessage> GetMessageFromChannel(IMessageChannel channel)
+    {
+        IEnumerable<IMessage> messageList = await channel.GetMessagesAsync(1).Flatten();
+
+        if (messageList.ToList()[0] is IUserMessage leaderboard) return leaderboard;
+        else return null;
+    }
+
+    public static async Task UpdateLeaderboardAsync(IUserMessage thisMessage)
     {
         string leaderboardString = "**LEADERBOARD**\n";
         List<LeaderboardUser> leaderboard = await BHP.GetLeaderboard();
