@@ -461,7 +461,9 @@ namespace BPR
                 }
                 else if (winner == "L" || winner == "l" || winner == "N" || winner == "n")
                 {
-                    isWinner = false;
+                    Console.WriteLine($"{userInfo.Username} reported a loss");
+                    await localContext.Channel.SendMessageAsync("Only the winner may report the match");
+                    return;
                 }
                 else
                 {
