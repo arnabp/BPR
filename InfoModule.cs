@@ -827,6 +827,7 @@ namespace BPR
                 }
 
                 await BHP.DeleteLeaderboardUsers(playersToDelete);
+                foreach (ulong playerId in playersToDelete) await BHP.DeleteLeave(playerId);
 
                 HashSet<ulong> players = new HashSet<ulong>(2)
                 {
