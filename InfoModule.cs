@@ -826,9 +826,6 @@ namespace BPR
                     playersToDelete.Add(leaderboardUser.teammateId);
                 }
 
-                await BHP.DeleteLeaderboardUsers(playersToDelete);
-                foreach (ulong playerId in playersToDelete) await BHP.DeleteLeave(playerId);
-
                 HashSet<ulong> players = new HashSet<ulong>(2)
                 {
                     leaderboardUser.id
@@ -859,6 +856,9 @@ namespace BPR
                     }
                     await localContext.Channel.SendMessageAsync($"{removedPlayersString} - Due to a leaving opponent, your most recent game have been reported as wins");
                 }
+
+                await BHP.DeleteLeaderboardUsers(playersToDelete);
+                foreach (ulong playerId in playersToDelete) await BHP.DeleteLeave(playerId);
             }
             else
             {
