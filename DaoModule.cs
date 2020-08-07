@@ -358,6 +358,7 @@ namespace BPR
 
         public static async Task<Match?> GetMatch(ulong id)
         {
+            if (id == 0) return null;
             string query = $"SELECT * FROM matches WHERE id1 = {id} OR id2 = {id} OR id3 = {id} or id4 = {id};";
             await Globals.conn.OpenAsync();
             try
@@ -424,6 +425,27 @@ namespace BPR
             }
 
             return matches;
+        }
+
+        public static async Task<HashSet<ulong>> GetIdsOfOpponentsInMatches(HashSet<ulong> players)
+        {
+            List<Match> matches = new List<Match>(4);
+            foreach (ulong player in players)
+            {
+                Match? potentialMatch = await GetMatch(player);
+                if (potentialMatch.HasValue) matches.Add(potentialMatch.Value);
+            }
+
+            HashSet<ulong> removedPlayers = new HashSet<ulong>(4);
+            foreach (Match match in matches)
+            {
+                if (!players.Contains(match.id1) && match.id1 != 0) removedPlayers.Add(match.id1);
+                if (!players.Contains(match.id2) && match.id2 != 0) removedPlayers.Add(match.id2);
+                if (match.id3.HasValue && !players.Contains(match.id3.Value) && match.id3.Value != 0) removedPlayers.Add(match.id3.Value);
+                if (match.id4.HasValue && !players.Contains(match.id4.Value) && match.id4.Value != 0) removedPlayers.Add(match.id4.Value);
+            }
+
+            return removedPlayers;
         }
 
         public static async Task<MatchHistory?> GetMatchHistory(ulong id)
@@ -658,21 +680,7 @@ namespace BPR
 
         public static async Task<HashSet<ulong>> DeleteMatchesFromIds(HashSet<ulong> players)
         {
-            List<Match> matches = new List<Match>(4);
-            foreach (ulong player in players)
-            {
-                Match? potentialMatch = await GetMatch(player);
-                if (potentialMatch.HasValue) matches.Add(potentialMatch.Value);
-            }
-
-            HashSet<ulong> removedPlayers = new HashSet<ulong>(4);
-            foreach (Match match in matches)
-            {
-                if (!players.Contains(match.id1) && match.id1 != 0) removedPlayers.Add(match.id1);
-                if (!players.Contains(match.id2) && match.id2 != 0) removedPlayers.Add(match.id2);
-                if (match.id3.HasValue && !players.Contains(match.id3.Value) && match.id3.Value != 0) removedPlayers.Add(match.id3.Value);
-                if (match.id4.HasValue && !players.Contains(match.id4.Value) && match.id4.Value != 0) removedPlayers.Add(match.id4.Value);
-            }
+            HashSet<ulong> removedPlayers = await GetIdsOfOpponentsInMatches(players);
 
             if (removedPlayers.Count > 0)
             {
