@@ -11,6 +11,7 @@ namespace BPR
         public ulong id;
         public ulong teammateId;
         public string username;
+        public bool active;
         public int points;
         public int streak;
         public int wins;
@@ -177,6 +178,7 @@ namespace BPR
 
         private static async Task<int> CountQuery(string query)
         {
+            await CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
             {
@@ -232,6 +234,7 @@ namespace BPR
         public static async Task<LeaderboardUser> GetLeaderboardUser(ulong id)
         {
             string query = $"SELECT * FROM leaderboard;";
+            await CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
             {
@@ -247,10 +250,11 @@ namespace BPR
                             id = reader.GetUInt64(0),
                             teammateId = reader.GetUInt64(1),
                             username = reader.GetString(2),
-                            points = reader.GetInt16(3),
-                            streak = reader.GetInt16(4),
-                            wins = reader.GetInt16(5),
-                            loss = reader.GetInt16(6)
+                            active = reader.GetBoolean(3),
+                            points = reader.GetInt16(4),
+                            streak = reader.GetInt16(5),
+                            wins = reader.GetInt16(6),
+                            loss = reader.GetInt16(7)
                         };
                         return leaderboardUser;
                     }
@@ -273,6 +277,7 @@ namespace BPR
         {
             Dictionary<ulong, LeaderboardUser> leaderboardUsers = new Dictionary<ulong, LeaderboardUser>(4);
             string query = $"SELECT * FROM leaderboard;";
+            await CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
             {
@@ -290,10 +295,11 @@ namespace BPR
                                 id = reader.GetUInt64(0),
                                 teammateId = reader.GetUInt64(1),
                                 username = reader.GetString(2),
-                                points = reader.GetInt16(3),
-                                streak = reader.GetInt16(4),
-                                wins = reader.GetInt16(5),
-                                loss = reader.GetInt16(6)
+                                active = reader.GetBoolean(3),
+                                points = reader.GetInt16(4),
+                                streak = reader.GetInt16(5),
+                                wins = reader.GetInt16(6),
+                                loss = reader.GetInt16(7)
                             };
                             leaderboardUsers.Add(leaderboardUser.id, leaderboardUser);
                         }
@@ -323,6 +329,7 @@ namespace BPR
         {
             List<LeaderboardUser> leaderboardUsers = new List<LeaderboardUser>();
             string query = $"SELECT * FROM leaderboard ORDER BY points DESC;";
+            await CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
             {
@@ -336,10 +343,11 @@ namespace BPR
                         id = reader.GetUInt64(0),
                         teammateId = reader.GetUInt64(1),
                         username = reader.GetString(2),
-                        points = reader.GetInt16(3),
-                        streak = reader.GetInt16(4),
-                        wins = reader.GetInt16(5),
-                        loss = reader.GetInt16(6)
+                        active = reader.GetBoolean(3),
+                        points = reader.GetInt16(4),
+                        streak = reader.GetInt16(5),
+                        wins = reader.GetInt16(6),
+                        loss = reader.GetInt16(7)
                     };
                     leaderboardUsers.Add(leaderboardUser);
                 }
@@ -360,6 +368,7 @@ namespace BPR
         {
             if (id == 0) return null;
             string query = $"SELECT * FROM matches WHERE id1 = {id} OR id2 = {id} OR id3 = {id} or id4 = {id};";
+            await CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
             {
@@ -395,6 +404,7 @@ namespace BPR
         {
             List<Match> matches = new List<Match>();
             string query = $"SELECT * FROM matches;";
+            await CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
             {
@@ -451,6 +461,7 @@ namespace BPR
         public static async Task<MatchHistory?> GetMatchHistory(ulong id)
         {
             string query = $"SELECT * FROM matchesHistory;";
+            await CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
             {
@@ -510,6 +521,7 @@ namespace BPR
         public static async Task UpdateLocalConfig()
         {
             string query = $"SELECT * FROM config;";
+            await CheckSQLStateAsync();
             await Globals.conn.OpenAsync();
             try
             {
