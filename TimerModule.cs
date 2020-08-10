@@ -118,7 +118,7 @@ public class TimerService
                 }
             }
 
-            if (!userFound)
+            if (!userFound && leaderboardUser.active)
             {
                 if (Globals.config.Value.gameMode == 2)
                 {
