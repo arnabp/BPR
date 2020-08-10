@@ -735,52 +735,62 @@ namespace BPR
             var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is checking in with {teammateInfo.Username}");
 
-            if (Globals.config.Value.state == -1)
+            try
             {
-                await localContext.Channel.SendMessageAsync("There is no active tournament to join");
-                return;
-            }
 
-            if (userInfo.Id == teammateInfo.Id)
-            {
-                await localContext.Channel.SendMessageAsync("You cannot join with yourself");
-                return;
-            }
-
-            if (Globals.config.Value.gameMode == 2)
-            {
-                LeaderboardUser oldUser = await BHP.GetLeaderboardUser(userInfo.Id);
-                await BHP.PutLeaderboardUser(userInfo.Id, userInfo.Username, teammateInfo.Id, false);
-
-                LeaderboardUser teammateUser = await BHP.GetLeaderboardUser(teammateInfo.Id);
-                if (teammateUser == null)
+                if (Globals.config.Value.state == -1)
                 {
-                    await localContext.Channel.SendMessageAsync($"{userInfo.Username} joined the tournament. Their teammate must also join for their team to properly be registered");
+                    await localContext.Channel.SendMessageAsync("There is no active tournament to join");
+                    return;
                 }
-                else
-                {
-                    if (oldUser.active)
-                    {
-                        await BHP.PutLeaderboardActivate(false, oldUser.teammateId);
-                        await localContext.Channel.SendMessageAsync($"<@{oldUser.teammateId}> has been removed from the tournament due to their teammate switching teams, please rejoin with a new teammate to join back in to the tournament");
-                    }
 
-                    if (teammateUser.teammateId != userInfo.Id)
+                if (userInfo.Id == teammateInfo.Id)
+                {
+                    await localContext.Channel.SendMessageAsync("You cannot join with yourself");
+                    return;
+                }
+
+                if (Globals.config.Value.gameMode == 2)
+                {
+                    LeaderboardUser oldUser = await BHP.GetLeaderboardUser(userInfo.Id);
+                    await BHP.PutLeaderboardUser(userInfo.Id, userInfo.Username, teammateInfo.Id, false);
+
+                    LeaderboardUser teammateUser = await BHP.GetLeaderboardUser(teammateInfo.Id);
+                    if (teammateUser == null)
                     {
-                        await localContext.Channel.SendMessageAsync($"{userInfo.Username} joined the tournament. However, {teammateInfo.Username} joined without them. If {teammateInfo.Username} does not join with {userInfo.Username} then {userInfo.Username} will not be registered into the tournament");
+                        await localContext.Channel.SendMessageAsync($"{userInfo.Username} joined the tournament. Their teammate must also join for their team to properly be registered");
                     }
                     else
                     {
-                        await BHP.PutLeaderboardActivate(true, userInfo.Id, teammateInfo.Id);
-                        await localContext.Channel.SendMessageAsync($"{userInfo.Username} and {teammateInfo.Username} are now checked in as a team");
-                    }
+                        if (oldUser.active)
+                        {
+                            await BHP.PutLeaderboardActivate(false, oldUser.teammateId);
+                            await localContext.Channel.SendMessageAsync($"<@{oldUser.teammateId}> has been removed from the tournament due to their teammate switching teams, please rejoin with a new teammate to join back in to the tournament");
+                        }
 
+                        if (teammateUser.teammateId != userInfo.Id)
+                        {
+                            await localContext.Channel.SendMessageAsync($"{userInfo.Username} joined the tournament. However, {teammateInfo.Username} joined without them. If {teammateInfo.Username} does not join with {userInfo.Username} then {userInfo.Username} will not be registered into the tournament");
+                        }
+                        else
+                        {
+                            await BHP.PutLeaderboardActivate(true, userInfo.Id, teammateInfo.Id);
+                            await localContext.Channel.SendMessageAsync($"{userInfo.Username} and {teammateInfo.Username} are now checked in as a team");
+                        }
+
+                    }
+                }
+                else
+                {
+                    await localContext.Channel.SendMessageAsync("There was an issue with checkin. Make sure you @ your teammate if you are checking in for 2v2.");
                 }
             }
-            else
+            catch (Exception e)
             {
-                await localContext.Channel.SendMessageAsync("There was an issue with checkin. Make sure you @ your teammate if you are checking in for 2v2.");
+                Console.WriteLine(e);
+                await localContext.Channel.SendMessageAsync("Something went wrong <@106136559744466944>");
             }
+
         }
 
         [Command("leave")]
