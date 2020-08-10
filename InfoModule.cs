@@ -762,7 +762,7 @@ namespace BPR
                     }
                     else
                     {
-                        if (oldUser.active)
+                        if (oldUser != null && oldUser.active)
                         {
                             await BHP.PutLeaderboardActivate(false, oldUser.teammateId);
                             await localContext.Channel.SendMessageAsync($"<@{oldUser.teammateId}> has been removed from the tournament due to their teammate switching teams, please rejoin with a new teammate to join back in to the tournament");
