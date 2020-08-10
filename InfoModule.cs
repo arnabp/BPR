@@ -701,15 +701,10 @@ namespace BPR
                 if (message != null) await TimerService.UpdateLeaderboardAsync(message);
             }
         }
-    }
 
-    public class CheckinModule : ModuleBase<SocketCommandContext>
-    {
-        public ICommandContext localContext;
-
-        [Command("checkin")]
-        [Summary("Allows a user to checkin when a session starts")]
-        public async Task CheckinAsync()
+        [Command("join")]
+        [Summary("Join the leaderboard for this session")]
+        public async Task JoinAsync()
         {
             localContext = localContext ?? Context;
             var userInfo = localContext.User;
@@ -717,31 +712,24 @@ namespace BPR
 
             if (Globals.config.Value.state == -1)
             {
-                Console.WriteLine("There is no active session to check in to");
-                return;
-            }
-
-            if (Globals.config.Value.state == 1)
-            {
-                await localContext.Channel.SendMessageAsync("Checkin has ended");
+                Console.WriteLine("There is no active session to join");
                 return;
             }
 
             if (Globals.config.Value.gameMode == 1)
             {
                 await BHP.PutLeaderboardUser(userInfo.Id, userInfo.Username);
-                await localContext.Channel.SendMessageAsync($"{userInfo.Username} is now checked in");
+                await localContext.Channel.SendMessageAsync($"{userInfo.Username} joined the tournament");
             }
             else
             {
-                await localContext.Channel.SendMessageAsync("There was an issue with checkin. Make sure you @ your teammate if you are checking in for 2v2.");
+                await localContext.Channel.SendMessageAsync("There was an issue joining the tournament. Make sure you @ your teammate if you are checking in for 2v2.");
             }
-
         }
 
-        [Command("checkin")]
-        [Summary("Allows a user to checkin when a session starts")]
-        public async Task CheckinAsync(SocketUser teammateInfo)
+        [Command("join")]
+        [Summary("Join the leaderboard for this session")]
+        public async Task JoinAsync(SocketUser teammateInfo)
         {
             localContext = localContext ?? Context;
             var userInfo = localContext.User;
@@ -749,55 +737,51 @@ namespace BPR
 
             if (Globals.config.Value.state == -1)
             {
-                await localContext.Channel.SendMessageAsync("There is no active session to check in to");
-                return;
-            }
-
-            if (Globals.config.Value.state == 1)
-            {
-                await localContext.Channel.SendMessageAsync("Checkin has ended");
+                await localContext.Channel.SendMessageAsync("There is no active tournament to join");
                 return;
             }
 
             if (userInfo.Id == teammateInfo.Id)
             {
-                await localContext.Channel.SendMessageAsync("You cannot check in with yourself");
+                await localContext.Channel.SendMessageAsync("You cannot join with yourself");
                 return;
             }
 
             if (Globals.config.Value.gameMode == 2)
             {
-                await BHP.PutLeaderboardUser(userInfo.Id, userInfo.Username, teammateInfo.Id);
+                LeaderboardUser oldUser = await BHP.GetLeaderboardUser(userInfo.Id);
+                await BHP.PutLeaderboardUser(userInfo.Id, userInfo.Username, teammateInfo.Id, false);
 
-                LeaderboardUser leaderboardUser = await BHP.GetLeaderboardUser(teammateInfo.Id);
-                if (leaderboardUser == null)
+                LeaderboardUser teammateUser = await BHP.GetLeaderboardUser(teammateInfo.Id);
+                if (teammateUser == null)
                 {
-                    await localContext.Channel.SendMessageAsync($"{userInfo.Username} is now checked in. Their teammate must also check in for their team to properly be registered");
+                    await localContext.Channel.SendMessageAsync($"{userInfo.Username} joined the tournament. Their teammate must also join for their team to properly be registered");
                 }
                 else
                 {
-                    if (leaderboardUser.teammateId != userInfo.Id)
+                    if (oldUser.active)
                     {
-                        await localContext.Channel.SendMessageAsync($"{userInfo.Username} is now checked in. However, {teammateInfo.Username} is checked in without them. If {teammateInfo.Username} does not check in with {userInfo.Username} then {userInfo.Username} will not be registered into the tournament");
+                        await BHP.PutLeaderboardActivate(false, oldUser.teammateId);
+                        await localContext.Channel.SendMessageAsync($"<@{oldUser.teammateId}> has been removed from the tournament due to their teammate switching teams, please rejoin with a new teammate to join back in to the tournament");
+                    }
+
+                    if (teammateUser.teammateId != userInfo.Id)
+                    {
+                        await localContext.Channel.SendMessageAsync($"{userInfo.Username} joined the tournament. However, {teammateInfo.Username} joined without them. If {teammateInfo.Username} does not join with {userInfo.Username} then {userInfo.Username} will not be registered into the tournament");
                     }
                     else
                     {
+                        await BHP.PutLeaderboardActivate(true, userInfo.Id, teammateInfo.Id);
                         await localContext.Channel.SendMessageAsync($"{userInfo.Username} and {teammateInfo.Username} are now checked in as a team");
                     }
-                    
+
                 }
             }
             else
             {
                 await localContext.Channel.SendMessageAsync("There was an issue with checkin. Make sure you @ your teammate if you are checking in for 2v2.");
             }
-
         }
-    }
-
-    public class LeaveModule : ModuleBase<SocketCommandContext>
-    {
-        public ICommandContext localContext;
 
         [Command("leave")]
         [Summary("Allows a user to leave midsession")]
@@ -807,80 +791,64 @@ namespace BPR
             var userInfo = localContext.User;
             Console.WriteLine($"{userInfo.Username} is attempting to leave");
 
-            if (await BHP.GetLeavePlayer(userInfo.Id))
+            LeaderboardUser leaderboardUser = await BHP.GetLeaderboardUser(userInfo.Id);
+            if (leaderboardUser == null)
             {
-                LeaderboardUser leaderboardUser = await BHP.GetLeaderboardUser(userInfo.Id);
-                if (leaderboardUser == null)
-                {
-                    await localContext.Channel.SendMessageAsync("You are not even playing, you have nothing to leave.");
-                    return;
-                }
+                await localContext.Channel.SendMessageAsync("You are not even playing, you have nothing to leave.");
+                return;
+            }
 
-                List<ulong> playersToDelete = new List<ulong>(2)
-                {
-                    leaderboardUser.id
-                };
+            List<ulong> playersToDelete = new List<ulong>(2)
+            {
+                leaderboardUser.id
+            };
 
-                if (leaderboardUser.teammateId != 0)
-                {
-                    playersToDelete.Add(leaderboardUser.teammateId);
-                }
+            if (leaderboardUser.teammateId != 0)
+            {
+                playersToDelete.Add(leaderboardUser.teammateId);
+            }
 
-                HashSet<ulong> players = new HashSet<ulong>(2)
-                {
-                    leaderboardUser.id
-                };
-                if (playersToDelete.Count == 1)
-                {
-                    await localContext.Channel.SendMessageAsync($"<@{leaderboardUser.id}> has been removed from the tournament");
-                }
-                else if (playersToDelete.Count == 2)
-                {
-                    players.Add(leaderboardUser.teammateId);
-                    await localContext.Channel.SendMessageAsync($"<@{leaderboardUser.id}> and <@{leaderboardUser.teammateId}> have been removed from the tournament");
-                }
-                else
-                {
-                    await localContext.Channel.SendMessageAsync("Hey <@106136559744466944> something went wrong");
-                    return;
-                }
-
-                HashSet<ulong> removedPlayers = await BHP.GetIdsOfOpponentsInMatches(players);
-                if (removedPlayers.Count > 0)
-                {
-                    string removedPlayersString = "";
-                    foreach (ulong id in removedPlayers)
-                    {
-                        await MatchModule.ResolveMatchAsync(id, localContext.Channel);
-                        removedPlayersString += $"<@{id}> ";
-                    }
-                    await localContext.Channel.SendMessageAsync($"{removedPlayersString} - Due to a leaving opponent, your most recent game have been reported as wins");
-                }
-
-                await BHP.DeleteLeaderboardUsers(playersToDelete);
-                foreach (ulong playerId in playersToDelete) await BHP.DeleteLeave(playerId);
+            HashSet<ulong> players = new HashSet<ulong>(2)
+            {
+                leaderboardUser.id
+            };
+            if (playersToDelete.Count == 1)
+            {
+                await localContext.Channel.SendMessageAsync($"<@{leaderboardUser.id}> has been removed from the tournament");
+            }
+            else if (playersToDelete.Count == 2)
+            {
+                players.Add(leaderboardUser.teammateId);
+                await localContext.Channel.SendMessageAsync($"<@{leaderboardUser.id}> and <@{leaderboardUser.teammateId}> have been removed from the tournament");
             }
             else
             {
-                await BHP.PutLeave(userInfo.Id);
-                string removeTeammateString = Globals.config.Value.gameMode == 2 ? " and remove your teammate from the tournament as well" : "";
-                await localContext.Channel.SendMessageAsync($"Are you sure you want to leave the tournament? This will remove all your points for this tournament{removeTeammateString}. Type `leave` again to confirm. Type `cancel` to cancel");
+                await localContext.Channel.SendMessageAsync("Hey <@106136559744466944> something went wrong");
+                Console.WriteLine("Found wrong number of players to delete from a leave");
+                return;
             }
-        }
 
-        [Command("cancel")]
-        [Summary("Cancels the last leave")]
-        public async Task CancelLeaveAsync()
-        {
-            localContext = localContext ?? Context;
-            var userInfo = localContext.User;
-            Console.WriteLine($"{userInfo.Username} is cancelling leave");
-
-            if (await BHP.GetLeavePlayer(userInfo.Id))
+            HashSet<ulong> removedPlayers = await BHP.GetIdsOfOpponentsInMatches(players);
+            if (removedPlayers.Count > 0)
             {
-                await BHP.DeleteLeave(userInfo.Id);
-                await localContext.Channel.SendMessageAsync("Leave has been cancelled");
+                string removedPlayersString = "";
+                foreach (ulong id in removedPlayers)
+                {
+                    await MatchModule.ResolveMatchAsync(id, localContext.Channel);
+                    removedPlayersString += $"<@{id}> ";
+                }
+                await localContext.Channel.SendMessageAsync($"{removedPlayersString} - Due to a leaving opponent, your most recent game have been reported as wins");
             }
+
+            if (playersToDelete.Count > 1)
+            {
+                await BHP.PutLeaderboardActivate(false, playersToDelete[0], playersToDelete[1]);
+            }
+            else
+            {
+                await BHP.PutLeaderboardActivate(false, playersToDelete[0]);
+            }
+            foreach (ulong playerId in playersToDelete) await BHP.DeleteLeave(playerId);
         }
     }
 }

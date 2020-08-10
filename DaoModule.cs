@@ -554,9 +554,17 @@ namespace BPR
             }
         }
 
-        public static async Task PutLeaderboardUser(ulong id, string username, ulong teammateId = 0)
+        public static async Task PutLeaderboardUser(ulong id, string username, ulong teammateId = 0, bool active = true)
         {
-            await ExecuteSQLQueryAsync($"INSERT INTO leaderboard(id, teammateId, username) VALUES({id}, {teammateId}, '{username}') ON DUPLICATE KEY UPDATE teammateId = {teammateId};");
+            await ExecuteSQLQueryAsync($"INSERT INTO leaderboard(id, teammateId, username, active) VALUES({id}, {teammateId}, '{username}', {active}) ON DUPLICATE KEY UPDATE teammateId = {teammateId}, active = {active};");
+        }
+
+        public static async Task PutLeaderboardActivate(bool active, ulong playerId, ulong? teammateId = null)
+        {
+            string query = teammateId.HasValue ?
+                $"UPDATE leaderboard SET active = {active} WHERE id = {playerId} OR id = {teammateId.Value};" :
+                $"UPDATE leaderboard SET active = {active} WHERE id = {playerId};";
+            await ExecuteSQLQueryAsync(query);
         }
 
         public static async Task PutMatch(Match match)
@@ -616,18 +624,6 @@ namespace BPR
         public static async Task DeleteMatchHistory(ulong id)
         {
             await ExecuteSQLQueryAsync($"DELETE FROM matchesHistory WHERE id1 = {id} OR id2 = {id} OR id3 = {id} OR id4 = {id};");
-        }
-
-        public static async Task DeleteLeaderboardUsers(List<ulong> ids)
-        {
-            string allIds = "";
-            foreach (ulong id in ids)
-            {
-                allIds += $"{id},";
-            }
-
-            
-            await ExecuteSQLQueryAsync($"DELETE FROM leaderboard WHERE id IN ({allIds.Remove(allIds.Length - 1, 1)});");
         }
 
         public static async Task PutMatchHistory(List<ulong> playerIds, Dictionary<ulong, LeaderboardUser> leaderboardUsers, ulong userId, bool winner)

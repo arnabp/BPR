@@ -40,7 +40,6 @@ public class TimerService
 
                             await BHP.UpdateConfigState(1);
                             await generalChannel.SendMessageAsync($"Checkin has ended. Generating matches.");
-                            if (Globals.config.Value.gameMode == 2) await CleanLeaderboardAsync();
                             await GenerateMatchesAsync(generalChannel);
                         }
                     }
@@ -97,29 +96,6 @@ public class TimerService
         });
     }
 
-    private async Task CleanLeaderboardAsync()
-    {
-        List<LeaderboardUser> leaderboard = await BHP.GetLeaderboard();
-        List<ulong> singles = new List<ulong>(leaderboard.Count);
-
-        foreach (LeaderboardUser leaderboardUser in leaderboard)
-        {
-            bool found = false;
-            foreach (LeaderboardUser teammateUser in leaderboard)
-            {
-                if (leaderboardUser.teammateId == teammateUser.id && teammateUser.teammateId == leaderboardUser.id)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) singles.Add(leaderboardUser.id);
-        }
-
-        if (singles.Count > 0) await BHP.DeleteLeaderboardUsers(singles);
-    }
-
     private async Task GenerateMatchesAsync(IMessageChannel thisChannel)
     {
         List<LeaderboardUser> leaderboard = await BHP.GetLeaderboard();
@@ -142,7 +118,21 @@ public class TimerService
                 }
             }
 
-            if (!userFound) queue.Add(leaderboardUser);
+            if (!userFound)
+            {
+                if (Globals.config.Value.gameMode == 2)
+                {
+                    LeaderboardUser teammateUser = leaderboard.Find(user => leaderboardUser.teammateId == user.id);
+                    if (teammateUser != null && teammateUser.teammateId == leaderboardUser.id)
+                    {
+                        queue.Add(leaderboardUser);
+                    }
+                }
+                else
+                {
+                    queue.Add(leaderboardUser);
+                }
+            }
         }
 
         int n = queue.Count;
