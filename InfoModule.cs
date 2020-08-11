@@ -684,7 +684,7 @@ namespace BPR
             await BHP.PutConfig(config);
 
             string atTeammate = gameMode == 2 ? " @teammate" : "";
-            await localContext.Channel.SendMessageAsync($"@everyone Starting a {gameMode}v{gameMode} session! Please use command `checkin{atTeammate}` in the next {checkinMinutes} minutes to check in to the tournament.");
+            await localContext.Channel.SendMessageAsync($"@everyone Starting a {gameMode}v{gameMode} session! Please use command `session join{atTeammate}` in the next {checkinMinutes} minutes to check in to the tournament.");
         }
 
         [Command("update")]
@@ -782,7 +782,7 @@ namespace BPR
                 }
                 else
                 {
-                    await localContext.Channel.SendMessageAsync("There was an issue with checkin. Make sure you @ your teammate if you are checking in for 2v2.");
+                    await localContext.Channel.SendMessageAsync("There was an issue with joining. Make sure you @ your teammate if you are joining for 2v2.");
                 }
             }
             catch (Exception e)

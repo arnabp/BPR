@@ -12,7 +12,7 @@ using MySql.Data.MySqlClient;
 
 public class TimerService
 {
-    private readonly int MIN_PLAYERS_IN_QUEUE = 12;
+    private readonly int MIN_PLAYERS_IN_QUEUE = 6;
 
     private readonly Timer _timer; // 2) Add a field like this
     // This example only concerns a single timer.
