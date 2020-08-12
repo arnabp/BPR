@@ -12,7 +12,7 @@ using MySql.Data.MySqlClient;
 
 public class TimerService
 {
-    private readonly int MIN_PLAYERS_IN_QUEUE = 12;
+    private readonly int MIN_ENTRANTS_IN_QUEUE = 6;
 
     private readonly Timer _timer; // 2) Add a field like this
     // This example only concerns a single timer.
@@ -149,7 +149,7 @@ public class TimerService
         }
 
         int gameSize = Globals.config.Value.gameMode * 2;
-        if (queue.Count < MIN_PLAYERS_IN_QUEUE) return;
+        if (queue.Count < (MIN_ENTRANTS_IN_QUEUE * Globals.config.Value.gameMode)) return;
 
         while (queue.Count > gameSize - 1)
         {
