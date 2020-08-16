@@ -11,6 +11,7 @@ using MySql.Data.MySqlClient;
 using System.Linq;
 using Discord.WebSocket;
 using System.Security.Policy;
+using System.Threading;
 
 namespace BPR
 {
@@ -666,25 +667,7 @@ namespace BPR
         public async Task StartSessionAsync(int gameMode, int checkinMinutes, int totalMinutes)
         {
             localContext = localContext ?? Context;
-            Console.WriteLine($"Starting a {gameMode}v{gameMode} session for {totalMinutes} minutes with checkin {checkinMinutes} minutes");
-            await BHP.BackupLeaderboard();
-            await BHP.ClearConfig();
-
-            GameConfig config = new GameConfig()
-            {
-                serverId = localContext.Guild.Id,
-                gameMode = gameMode,
-                startTime = DateTime.Now.Ticks,
-                checkinTime = DateTime.Now.AddMinutes(checkinMinutes).Ticks,
-                endTime = DateTime.Now.AddMinutes(checkinMinutes + totalMinutes).Ticks,
-                state = 0
-            };
-
-            Globals.config = config;
-            await BHP.PutConfig(config);
-
-            string atTeammate = gameMode == 2 ? " @teammate" : "";
-            await localContext.Channel.SendMessageAsync($"@everyone Starting a {gameMode}v{gameMode} session! Please use command `session join{atTeammate}` in the next {checkinMinutes} minutes to check in to the tournament.");
+            await TimerService.StartSessionAsync(localContext.Channel, localContext.Guild.Id, gameMode, checkinMinutes, totalMinutes);
         }
 
         [Command("update")]

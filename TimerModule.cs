@@ -13,6 +13,8 @@ using MySql.Data.MySqlClient;
 public class TimerService
 {
     private readonly int MIN_ENTRANTS_IN_QUEUE = 6;
+    private readonly int START_HOUR_1 = 19;
+    private readonly int START_HOUR_2 = 23;
 
     private readonly Timer _timer; // 2) Add a field like this
     // This example only concerns a single timer.
@@ -62,6 +64,27 @@ public class TimerService
                         else
                         {
                             await GenerateMatchesAsync(generalChannel);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                DateTime now = DateTime.Now;
+                if (now.DayOfWeek != DayOfWeek.Saturday && now.DayOfWeek!= DayOfWeek.Sunday)
+                {
+                    if (now.Hour == START_HOUR_1 && now.Minute >= 40)
+                    {
+                        if (client.GetChannel(HelperFunctions.GetChannelId(1)) is IMessageChannel generalChannel1)
+                        {
+                            await StartSessionAsync(generalChannel1, 392829581192855552, 1, 20, 120);
+                        }
+                    }
+                    else if (now.Hour == START_HOUR_2 && now.Minute >= 40)
+                    {
+                        if (client.GetChannel(HelperFunctions.GetChannelId(2)) is IMessageChannel generalChannel2)
+                        {
+                            await StartSessionAsync(generalChannel2, 392829581192855552, 2, 20, 120);
                         }
                     }
                 }
@@ -203,5 +226,28 @@ public class TimerService
         await BHP.UpdateLeaderboardSkipped(queue);
 
         await thisChannel.SendMessageAsync($"Please remember to add your room number with `match room 00000`");
+    }
+
+    public static async Task StartSessionAsync(IMessageChannel channel, ulong guildId, int gameMode, int checkinMinutes, int totalMinutes)
+    {
+        Console.WriteLine($"Starting a {gameMode}v{gameMode} session for {totalMinutes} minutes with checkin {checkinMinutes} minutes");
+        await BHP.BackupLeaderboard();
+        await BHP.ClearConfig();
+
+        GameConfig config = new GameConfig()
+        {
+            serverId = guildId,
+            gameMode = gameMode,
+            startTime = DateTime.Now.Ticks,
+            checkinTime = DateTime.Now.AddMinutes(checkinMinutes).Ticks,
+            endTime = DateTime.Now.AddMinutes(checkinMinutes + totalMinutes).Ticks,
+            state = 0
+        };
+
+        Globals.config = config;
+        await BHP.PutConfig(config);
+
+        string atTeammate = gameMode == 2 ? " @teammate" : "";
+        await channel.SendMessageAsync($"@everyone Starting a {gameMode}v{gameMode} session! Please use command `session join{atTeammate}` in the next {checkinMinutes} minutes to check in to the tournament.");
     }
 }
