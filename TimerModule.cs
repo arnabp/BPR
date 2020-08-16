@@ -140,14 +140,6 @@ public class TimerService
         // Sort by streak in descending order
         queue.Sort();
 
-        if (queue.Count % 2 == 1)
-        {
-            int replacementIndex = (queue.Count / 2) + Globals.rnd.Next(2) - 1;
-            LeaderboardUser tmp = queue[queue.Count - 1];
-            queue[queue.Count - 1] = queue[replacementIndex];
-            queue[replacementIndex] = tmp;
-        }
-
         int gameSize = Globals.config.Value.gameMode * 2;
         if (queue.Count < (MIN_ENTRANTS_IN_QUEUE * Globals.config.Value.gameMode)) return;
 
@@ -207,6 +199,8 @@ public class TimerService
                 }
             }
         }
+
+        await BHP.UpdateLeaderboardSkipped(queue);
 
         await thisChannel.SendMessageAsync($"Please remember to add your room number with `match room 00000`");
     }

@@ -16,6 +16,7 @@ namespace BPR
         public int streak;
         public int wins;
         public int loss;
+        public bool skipped;
 
         /**
          * Note: This CompareTo compares backwards to sort order is descending
@@ -25,6 +26,10 @@ namespace BPR
             if (other == null)
             {
                 return 0;
+            }
+            if (skipped != other.skipped)
+            {
+                return other.skipped.CompareTo(skipped);
             }
             if (streak != other.streak)
             {
@@ -347,7 +352,8 @@ namespace BPR
                         points = reader.GetInt16(4),
                         streak = reader.GetInt16(5),
                         wins = reader.GetInt16(6),
-                        loss = reader.GetInt16(7)
+                        loss = reader.GetInt16(7),
+                        skipped = reader.GetBoolean(8)
                     };
                     leaderboardUsers.Add(leaderboardUser);
                 }
@@ -655,6 +661,17 @@ namespace BPR
             string recordString = score == 0 ? "loss" : "wins";
             string streakString = score == 0 ? "0" : "streak + 1";
             await ExecuteSQLQueryAsync($"UPDATE leaderboard SET points = points + {score}, {recordString} = {recordString} + 1, streak = {streakString} WHERE id = {id};");
+        }
+
+        public static async Task UpdateLeaderboardSkipped(List<LeaderboardUser> users)
+        {
+            string query = "UPDATE leaderboard SET skipped=1 WHERE";
+            foreach (LeaderboardUser user in users)
+            {
+                query += $" id={user.id} OR";
+            }
+            query = query.Remove(query.Length - 2) + ";";
+            await ExecuteSQLQueryAsync(query);
         }
 
         public static async Task UpdateLeaderboardRevert(ulong id, int points, int streak, bool winner)

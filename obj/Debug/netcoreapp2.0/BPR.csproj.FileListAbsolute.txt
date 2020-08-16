@@ -19,3 +19,4 @@ D:\Users\Arnab\source\repos\BPR\BPR\obj\Debug\netcoreapp2.0\BPR.AssemblyInfoInpu
 D:\Users\Arnab\source\repos\BPR\BPR\obj\Debug\netcoreapp2.0\BPR.AssemblyInfo.cs
 D:\Users\Arnab\source\repos\BPR\BPR\obj\Debug\netcoreapp2.0\BPR.dll
 D:\Users\Arnab\source\repos\BPR\BPR\obj\Debug\netcoreapp2.0\BPR.pdb
+D:\Users\Arnab\source\repos\BPR\BPR\obj\Debug\netcoreapp2.0\BPR.csproj.CoreCompileInputs.cache
