@@ -13,7 +13,7 @@ using MySql.Data.MySqlClient;
 public class TimerService
 {
     private readonly int MIN_ENTRANTS_IN_QUEUE = 6;
-    private readonly int START_HOUR_1 = 19;
+    private readonly int START_HOUR_1 = 23;
     private readonly int START_HOUR_2 = 22;
 
     private readonly Timer _timer; // 2) Add a field like this
@@ -70,7 +70,7 @@ public class TimerService
             }
             else
             {
-                DateTime now = DateTime.Now;
+                DateTime now = DateTime.Now.ToUniversalTime();
                 if (now.DayOfWeek != DayOfWeek.Saturday && now.DayOfWeek!= DayOfWeek.Sunday)
                 {
                     if (now.Hour == START_HOUR_1 && now.Minute >= 40)
