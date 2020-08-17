@@ -682,6 +682,7 @@ namespace BPR
             {
                 IUserMessage message = await TimerService.GetMessageFromChannel(leaderboardChannel);
                 if (message != null) await TimerService.UpdateLeaderboardAsync(message);
+                await localContext.Channel.SendMessageAsync("Leaderboard has been updated");
             }
         }
 
