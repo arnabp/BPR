@@ -660,7 +660,7 @@ namespace BPR
         {
             string recordString = score == 0 ? "loss" : "wins";
             string streakString = score == 0 ? "0" : "streak + 1";
-            await ExecuteSQLQueryAsync($"UPDATE leaderboard SET points = points + {score}, {recordString} = {recordString} + 1, streak = {streakString} WHERE id = {id};");
+            await ExecuteSQLQueryAsync($"UPDATE leaderboard SET points = points + {score}, {recordString} = {recordString} + 1, streak = {streakString}, skipped = 0 WHERE id = {id};");
         }
 
         public static async Task UpdateLeaderboardSkipped(List<LeaderboardUser> users)
