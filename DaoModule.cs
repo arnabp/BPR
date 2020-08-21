@@ -670,7 +670,14 @@ namespace BPR
             {
                 query += $" id={user.id} OR";
             }
-            query = query.Remove(query.Length - 2) + ";";
+            if (users.Count > 0)
+            {
+                query = query.Remove(query.Length - 2) + ";";
+            }
+            else
+            {
+                query = query.Remove(query.Length - 5) + ";";
+            }
             await ExecuteSQLQueryAsync(query);
         }
 
