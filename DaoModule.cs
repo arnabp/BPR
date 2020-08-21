@@ -665,19 +665,13 @@ namespace BPR
 
         public static async Task UpdateLeaderboardSkipped(List<LeaderboardUser> users)
         {
+            if (users.Count == 0) return;
             string query = "UPDATE leaderboard SET skipped=1 WHERE";
             foreach (LeaderboardUser user in users)
             {
                 query += $" id={user.id} OR";
             }
-            if (users.Count > 0)
-            {
-                query = query.Remove(query.Length - 2) + ";";
-            }
-            else
-            {
-                query = query.Remove(query.Length - 5) + ";";
-            }
+            query = query.Remove(query.Length - 2) + ";";
             await ExecuteSQLQueryAsync(query);
         }
 
