@@ -14,7 +14,7 @@ public class TimerService
 {
     private readonly int MIN_ENTRANTS_IN_QUEUE = 6;
     private readonly int START_HOUR_1 = 23;
-    private readonly int START_HOUR_2 = 22;
+    private readonly int START_HOUR_2 = 19;
 
     private readonly Timer _timer; // 2) Add a field like this
     // This example only concerns a single timer.
@@ -80,13 +80,13 @@ public class TimerService
                             await StartSessionAsync(generalChannel1, 392829581192855552, 1, 20, 120);
                         }
                     }
-                    //else if (now.Hour == START_HOUR_2 && now.Minute >= 40)
-                    //{
-                    //    if (client.GetChannel(HelperFunctions.GetChannelId(2)) is IMessageChannel generalChannel2)
-                    //    {
-                    //        await StartSessionAsync(generalChannel2, 392829581192855552, 2, 20, 120);
-                    //    }
-                    //}
+                    else if (now.Hour == START_HOUR_2 && now.Minute >= 40)
+                    {
+                        if (client.GetChannel(HelperFunctions.GetChannelId(2)) is IMessageChannel generalChannel2)
+                        {
+                            await StartSessionAsync(generalChannel2, 392829581192855552, 2, 20, 120);
+                        }
+                    }
                 }
             }
             Globals.timerCount++;
