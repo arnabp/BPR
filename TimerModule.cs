@@ -13,8 +13,8 @@ using MySql.Data.MySqlClient;
 public class TimerService
 {
     private readonly int MIN_ENTRANTS_IN_QUEUE = 6;
-    private readonly int START_HOUR_1 = 23;
-    private readonly int START_HOUR_2 = 19;
+    private readonly int START_HOUR_1 = 19;
+    private readonly int START_HOUR_2 = 23;
 
     private readonly Timer _timer; // 2) Add a field like this
     // This example only concerns a single timer.
